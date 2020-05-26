@@ -244,11 +244,10 @@ class _MyHomePageState extends State<MyHomePage> {
         width: MediaQuery.of(context).size.width,
         bottom:45,
         child:
-        StreamBuilder<List<Produto_cesta>>(
-              stream: bloc.check,
-              initialData: [],
+        StreamBuilder<List<dynamic>>(
+            stream: bloc.check,
               builder: (context,value) {
-                if (value.connectionState==ConnectionState.active)
+                if (value.connectionState==ConnectionState.active) {
                 if (value.data.length>0){
                   distanciaLoja d;
                   for (var i=0;i<listaDist.length;i++){
@@ -258,16 +257,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     }
                   }
                   return
-                    barCesta(value.data, d,(value){return showhide_bg(value);});
+                    barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
                 }else{
                     v_bg=false;
                     return Container();
                 }
-                else {
+                } else {
                   return Container();
                 }
             })),
-
 
         Visibility( visible:view_dialogGps , child:
 
@@ -333,14 +331,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
 @override
 void initState() {
-  listaProdutos = listaprod();
-
-
-  bloc.getCesta();
-
-
-    checkPermission();
-    super.initState();
+  bloc.initBloc();
+  listaProdutos = Container();
+  checkPermission();
+  super.initState();
 }
 
 
@@ -423,6 +417,7 @@ void getUser(var data,var documentID){
     print("getdados data read user");
     Usuario = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
 
+
     print("user recuperado "+Usuario.email);
 
 
@@ -470,13 +465,10 @@ void getEnderecoUser() async {
 
   }
 
-  void setUiEndereco_Temp(var data){
-
+  void setUiEndereco_Temp(var data) {
     getDistanciaLoja();
     setState(() {
-
       if (data.exists) {
-
         enderecoUser    endereco = new enderecoUser(
             data['rua'], data['bairro'], data['numero'], data['complemento'],
             data['localizacao'],data['temp']);
@@ -490,7 +482,6 @@ void getEnderecoUser() async {
         _getLocation();
       }
     });
-
   }
 
   startViewList(){
@@ -577,7 +568,7 @@ void getEnderecoUser() async {
               // TODO: Handle this case.
               break;
             case ConnectionState.active:
-              return  listViewProdutos =   listaviewProd(snapshot);
+              return  listaProdutos =  listaviewProd(snapshot);
               // TODO: Handle this case.
               break;
             case ConnectionState.done:
@@ -599,9 +590,11 @@ void getEnderecoUser() async {
         scrollDirection: Axis.vertical,
         itemCount: snapshot.data.documents.length,
         itemBuilder: (context, index) {
-          if (index == snapshot.data.documents.length-1)
+
+        if (index == snapshot.data.documents.length-1)
             v_bg=false;
 
+          print ("CRIAR LISTA -");
           Produto_cesta produto =  new Produto_cesta(snapshot.data.documents[index]);
           var ctrl=false;
           double di = 0.0;
@@ -630,7 +623,6 @@ void getEnderecoUser() async {
               } else {
 
                 print("CRIAR LISTA - USER OK - distancia OFF - lista [] ");
-
                 if (local_user_cancel == false) {
                   print("CRIAR LISTA - USER OK - distancia off - GET DISTANCE");
                   checkDistanceAtual(produto);
@@ -734,15 +726,6 @@ void getEnderecoUser() async {
     return 10.0;
   }
 
-  void incrementItemCesta_on(Produto_cesta item) async{
-    Produto_cesta  p =item;
-    p.id="002";
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if (user!=null)
-      await Firestore.instance.collection("Produtos_On")
-         .document(item.id).setData(p.getproduto());
-  }
-
   checkPermission() async {
     if (await Permission.location
         .request()
@@ -771,6 +754,8 @@ void getEnderecoUser() async {
           setllocal  (data.documents)
       });
     }
+
+    listaProdutos = listaprod();
 
   }
 

@@ -64,10 +64,8 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-
     if (widget.produto.quantidade==null)
           widget.produto.quantidade=total;
-
      if (itemOn==true){
              _itemOn();
         }
@@ -88,86 +86,40 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
                   });
                 },
                 child:
-                StreamBuilder<List<Produto_cesta>>(
+                StreamBuilder<List<dynamic>>(
                 stream: bloc.check,
-                  builder: (context,value) {
-                    print("state connect "+value.connectionState.toString());
-
-                    if (value.connectionState == ConnectionState.active) {
-                        print("---------------------------"+value.connectionState.toString());
-                        checkOn=false;
-                          if (value.connectionState==ConnectionState.active) {
-                          print("prod 00");
-                          if (value.hasData) {
-                          print("prod 0");
-                          if (value.data!= []) {
-                          print("prod 1");
-                          widget.listaCesta.clear();
-                          widget.listaCesta.addAll(value.data);
-                          for (int i = 0; i < widget.listaCesta.length; i++) {
-                          print("prod 2-");
-                          if (widget.listaCesta[i].id == widget.produto.id) {
-                          print("prod 3");
-
-                          total = value.data[i].quantidade;
-                          if (total == 1) {
-                          vbtnremoveitem = true;
-                          vbtnRemoveqntd = false;
-                          }
-                          if (total > 1) {
-                          vbtnremoveitem = false;
-                          vbtnRemoveqntd = true;
-                          }
-
-                          print("prod 4");
-
-                          checkOn = true;
-                          itemOn = true;
-                          print("return 0");
-                          _itemOn();
+                builder: (context,value) {
+                if (value.connectionState==ConnectionState.active) {
+                      print("BLOC ITEM CESTA ATIVO");
+                      if (value.data.isNotEmpty) {
+                        if (value.data[0].id==widget.produto.id){
+                          widget.produto.quantidade=value.data[0].quantidade;
+                          print("BLOC CONTEM ITEM NA CESTA "+value.data.toString());
+                          itemOn=true;
                           return _item_();
-
-                          }
-                          }
-
-                          if (checkOn == false) {
-                          _itemOff();
-                          itemOn = false;
+                        }else {
+                          itemOn=false;
                           return _item_();
-                          }else
-                          {
-                          _itemOn();
-                          itemOn = true;
-                          return _item_();
-                          }
-
-                          } else {
-                          _itemOff();
-                          itemOn = false;
-                          _item_();
-                          }
-                          } else {
-                          _itemOff();
-                          itemOn = false;
-                          return _item_();
-                          }
-                          return _item_();
-                          }else{
-                          _itemOff();
-                          itemOn = false;
-                          return _item_();}
-
-                    }else
-                      return Container();
-                  })
+                        }
+                      }else{
+                        print("BLOC SEM ITEM");
+                        itemOn=false;
+                        return _item_();
+                      }
+                }else
+                  {
+                    //CASO AGUARDANDO DADOS
+                    itemOn=false;
+                    return _item_();
+                  }
+             })
            ), new Duration(milliseconds: 500));
   }
 
 
-//
-
   _item_(){
-  return  Container(
+   return
+    Container(
         margin: EdgeInsets.fromLTRB(10, 5, 10, 0),
         alignment: Alignment.topCenter,
         decoration: BoxDecoration(
@@ -401,9 +353,7 @@ formatFrete(){
     }else{
       opc=1.0;
       vbtnRemoveqntd=true;
-
         setState(() {
-
           totalPreco += widget.produto.preco;
           totalPrecotxt = totalPreco;
           total+=1;
@@ -473,7 +423,7 @@ _addLista() async{
             .document(user.uid).collection("cesta").document(widget.produto.id).delete();
 
       setState(() {
-//        itemOn=false;
+        itemOn=false;
         widget.produto.cesta=false;
       });
 
@@ -573,6 +523,7 @@ _addLista() async{
   void initState() {
 
 
+    bloc.getCesta();
     _controllerIcon = AnimationController(duration: Duration(milliseconds: 10000),vsync: this);
     setState(() {
       _controllerIcon.forward(from: 0.0);

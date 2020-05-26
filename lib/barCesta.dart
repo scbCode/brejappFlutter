@@ -16,11 +16,9 @@ import 'BlocAll.dart';
 import 'dart:ui';
 import 'dart:async';
 
-
 import 'Loja.dart';
 import 'Produto_cesta.dart';
 import 'item_cesta.dart';
-
 
 
 typedef show_blur_bg =  Function(bool);
@@ -31,7 +29,7 @@ class barCesta extends StatefulWidget  {
   distanciaLoja listaDistancia_ ;
   show_blur_bg call_back_show_bg;
   User user;
-  barCesta (this.listaCesta,this.listaDistancia_,this.call_back_show_bg);
+  barCesta (this.user,this.listaCesta,this.listaDistancia_,this.call_back_show_bg);
 
   @override
   barCestaState createState() => barCestaState();
@@ -99,20 +97,20 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
       Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          Container(decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
-        BoxShadow(
+        Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
+         BoxShadow(
           color: Colors.black12,
           blurRadius: 0.0,
           offset: Offset(
             0.0, // horizontal, move right 10
             0.0, // vertical, move down 10
           ),
-        )
-      ],),height: 45,
-        margin: EdgeInsets.fromLTRB(0, 0, 0, alturaBarra),
-        child:
-        barraView()
-     ,),
+          )
+        ]),height: 45,
+          margin: EdgeInsets.fromLTRB(0, 0, 0, alturaBarra),
+          child:
+          barraView()
+       ),
  //////////////////////////////////////////////////////////
           LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
               SingleChildScrollView(child:
@@ -139,7 +137,8 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
                      mainAxisSize: MainAxisSize.max,
                      children: <Widget>[
                        Container(margin: EdgeInsets.fromLTRB(0, 0, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                       Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 0, 0, 0), child:Text(widget.listaCesta[0].loja.toString().toUpperCase()+" ",textAlign: TextAlign.right, style: TextStyle(color: Colors.black ,fontSize:14,fontFamily: 'BreeSerif'))),
+                       Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                           child:Text(widget.listaCesta[0].loja.toString().toUpperCase()+" ",textAlign: TextAlign.right, style: TextStyle(color: Colors.black ,fontSize:14,fontFamily: 'BreeSerif'))),
                        Container(margin: EdgeInsets.fromLTRB(5, 0, 0, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
 //                       Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Frete: R\u0024 3,00 ",style: TextStyle(color: Colors.black54,fontSize: 14,fontFamily: 'BreeSerif')),),
 //                       Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
@@ -156,6 +155,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
                    Visibility(visible: !view_cestadetalhes,child:
                    GestureDetector(onTap: (){
                      setState(() {
+
                        if (view_cestadetalhes)
                          view_cestadetalhes=false;
                        else
@@ -297,7 +297,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
     getUseruid();
 
     bloc.getEnderecoUser();
-
+    listaCesta_=listaCesta();
     if (widget.listaCesta.length==0)
     widget.call_back_show_bg(false);
 
@@ -763,38 +763,38 @@ barraView(){
 
       if (widget.listaCesta[i].loja == widget.listaDistancia_.loja){
 
-    distKm = double.parse(widget.listaDistancia_.distancia)/1000;
+          distKm = double.parse(widget.listaDistancia_.distancia)/1000;
 
-    if ( widget.listaCesta[0].distanciaGratisKm>=distKm){
-      return "R\u0024 "+total.toStringAsFixed(2).replaceAll(".", ",");
-    }else {
-      if (distKm != 0.0) {
-        var frete = (coef * distKm).round();
-        var fretef = (total+frete).toStringAsFixed(2).toString();
-        return fretef;
-      } else
-        return "...";
-    }
-      }else
-        return "...";
-    }
+          if ( widget.listaCesta[0].distanciaGratisKm>=distKm){
+            return "R\u0024 "+total.toStringAsFixed(2).replaceAll(".", ",");
+          }else {
+            if (distKm != 0.0) {
+              var frete = (coef * distKm).round();
+              var fretef = (total+frete).toStringAsFixed(2).toString();
+              return fretef;
+            } else
+              return "...";
+          }
+            }else
+              return "...";
+     }
   }
 
 
-listaCesta() {
+listaCesta()  {
 
-
+  print("ITEM LISTA CESTA "+widget.user.uid.toString());
 
   return
-  Container(
-    height: 125,
-      child:
-    StreamBuilder(
+    Container(
+        height: 125,
+        child:
+     StreamBuilder(
         stream: Firestore.instance
-          .collection("Usuarios").document().collection("cesta")
+          .collection("Usuarios").document("Pi08gunUSvZtH9Ix88Pf1CkAAgA3").collection("cesta")
           .snapshots(),
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
+         builder: (context, snapshot) {
+         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return new Text("AGUARDE....");
           case ConnectionState.none:
@@ -808,6 +808,7 @@ listaCesta() {
                 scrollDirection: Axis.horizontal,
                 itemCount: snapshot.data.documents.length,
                 itemBuilder: (context, index) {
+                  print("ITEM CESTA LISTA"+index .toString());
                   return item_cesta(snapshot.data.documents[index],null,(value){return selectItemCestaList(value);});
                 }
             );

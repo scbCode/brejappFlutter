@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:rxdart/rxdart.dart';
 import 'Loja.dart';
 import 'Produto_cesta.dart';
 import 'enderecoUser.dart';
@@ -19,27 +19,28 @@ class BlocAll {
   int get total => _total;
 
   List<Produto_cesta> listaCesta= new List<Produto_cesta> ();
-
   final control_check = StreamController< List<Produto_cesta> >.broadcast();
   final  control_get_loja  = StreamController< Loja>.broadcast();
   final  control_get_endereco_rua  = StreamController< String>.broadcast();
   final  control_get_endereco_salvo  = StreamController< enderecoUserSnapShot>.broadcast();
   final  control_get_endereco_temp  = StreamController< enderecoUserSnapShot>.broadcast();
   Stream <List<Produto_cesta>> get check => control_check.stream;
+  Stream <List>  check2 ;
   Stream <Loja> get get_loja => control_get_loja.stream;
   Stream <String> get get_rua_end => control_get_endereco_rua.stream;
   Stream <enderecoUserSnapShot> get get_endereco_temp => control_get_endereco_temp.stream;
   Stream <enderecoUserSnapShot> get get_endereco_salvo=> control_get_endereco_temp.stream;
 
-  getCesta() async{
+  Future getCesta() async{
+
+
     print ("BLOC - getCesta ");
     listaCesta=[];
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     if (user!=null){
-    var doc = await Firestore.instance
-      .collection('Usuarios').document(user.uid);
-       doc.collection("cesta").orderBy('preco').snapshots()
-      .listen((data) =>_checkreresult(data) );
+         Firestore.instance      .collection('Usuarios').document(user.uid)
+         .collection("cesta").orderBy('preco').snapshots()
+        .listen((data) =>  _checkreresult(data))   ;
         }else
         {
           control_check.sink.add([]);
@@ -48,9 +49,9 @@ class BlocAll {
   }
 
 
+
   _checkreresult(QuerySnapshot data) async{
     listaCesta=[];
-
     var loja="";
     if (data.documents.isEmpty==false) {
         print ("BLOC - getCesta EXIXST");
@@ -64,9 +65,7 @@ class BlocAll {
           print ("BLOC - _checkreresult "+produto.quantidade.toString());
       });
       getLojaCesta(loja);
-
-    }
-    else
+    }else
       control_check.sink.add(listaCesta);
   }
 

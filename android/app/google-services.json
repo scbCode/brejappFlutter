@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "262478331481",
+    "firebase_url": "https://brejapp-flutter.firebaseio.com",
+    "project_id": "brejapp-flutter",
+    "storage_bucket": "brejapp-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262478331481:android:59cabcdcbcac2c2297bb48",
+        "android_client_info": {
+          "package_name": "brejapp.flutter_firestore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "262478331481-j0pqo9ttoocsqqresf6mb1os9ssri8ik.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgf9lejkT4bi4ZxVLMOypUWiiqA36Qn30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "262478331481-j0pqo9ttoocsqqresf6mb1os9ssri8ik.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262478331481:android:9aa71a27e813838a97bb48",
+        "android_client_info": {
+          "package_name": "com.brejapp.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "262478331481-j0pqo9ttoocsqqresf6mb1os9ssri8ik.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgf9lejkT4bi4ZxVLMOypUWiiqA36Qn30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "262478331481-j0pqo9ttoocsqqresf6mb1os9ssri8ik.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

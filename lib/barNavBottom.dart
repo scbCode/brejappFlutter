@@ -63,8 +63,8 @@ class barNavBottomState extends State<barNavBottom> {
     child:  Container(
     decoration:  BoxDecoration(color: Colors.transparent),
     child:
-      Container(height: 45, decoration: BoxDecoration(color: Colors.white.withOpacity(0.5),
-       boxShadow: [BoxShadow(color: Colors.black12,offset:  Offset(0.0,-2),blurRadius: 3 ,)]),
+      Container(height: 45, decoration: BoxDecoration(color: Colors.white.withOpacity(0.3),
+       boxShadow: [BoxShadow(color: Colors.black12,offset:  Offset(0.0,-44),blurRadius: 5 ,)]),
         child:
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
 

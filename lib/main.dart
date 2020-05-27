@@ -257,6 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     }
                   }
                   return
+
                     barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
                 }else{
                     v_bg=false;
@@ -414,12 +415,11 @@ checkStateUser() async {
 }
 
 void getUser(var data,var documentID){
+
     print("getdados data read user");
     Usuario = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
 
-
     print("user recuperado "+Usuario.email);
-
 
     getEnderecoUser();
 }
@@ -433,6 +433,7 @@ void getEnderecoUser() async {
           .listen((data) => {
         setUiEndereco(data)
       });
+
   }
 
  void setUiEndereco(var data){
@@ -552,7 +553,7 @@ void getEnderecoUser() async {
 
 
   listaprod()  {
-    return Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 100),child:
+    return Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
     StreamBuilder(
         stream: Firestore.instance
             .collection("Produtos_On").orderBy("preco",descending: false).orderBy("marca")
@@ -584,7 +585,10 @@ void getEnderecoUser() async {
   listaviewProd(snapshot){
 
 
-    return new ListView.builder(
+    return new
+
+    Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 100),child:
+    ListView.builder(
         primary: false,
         shrinkWrap: true,
         scrollDirection: Axis.vertical,
@@ -650,7 +654,7 @@ void getEnderecoUser() async {
             }
           }
         }
-    );
+    ));
   }
 
 

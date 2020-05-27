@@ -56,6 +56,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var listaCesta_;
   var ctrolControls=false;
   var alturaBarra=0.0;
+  var barra_;
   var cor_endereco=Colors.white;
   var ctrol_view_btnEnd=true;
   var confirmarEndereco=false;
@@ -93,7 +94,6 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
         alignment: Alignment.bottomCenter,
         children: <Widget>[
 
-
       Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
@@ -109,7 +109,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
         ]),height: 45,
           margin: EdgeInsets.fromLTRB(0, 0, 0, alturaBarra),
           child:
-          barraView()
+          barra()
        ),
  //////////////////////////////////////////////////////////
           LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
@@ -651,7 +651,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   }
 
   barra(){
-  return  Container(decoration: BoxDecoration(color: Colors.orange,boxShadow: [
+  return  Container(decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
       BoxShadow(
         color: Colors.black12,
         blurRadius: 2.0,
@@ -683,13 +683,13 @@ barraView(){
      }
    });
  }, child: Container(
-     margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child: ClipRect(
+     margin: EdgeInsets.fromLTRB(0, 0, 0,0),   child: ClipRect(
        child:  BackdropFilter(
          filter:  ImageFilter.blur(sigmaX:3, sigmaY:3),
          child:  Container(
            width: double.infinity,
            height:  double.infinity,
-           decoration:  BoxDecoration(color: Colors.orange[500].withOpacity(.7)),
+           decoration:  BoxDecoration(color: Colors.orange[400].withOpacity(.7)),
            child:
    Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
 
@@ -759,24 +759,23 @@ barraView(){
     var coef = widget.listaCesta[0].coefKm;
     var distKm=0.0;
 
-    for(int i = 0; i < widget.listaCesta.length;i++){
-
+    for (int i = 0; i < widget.listaCesta.length;i++){
       if (widget.listaCesta[i].loja == widget.listaDistancia_.loja){
 
           distKm = double.parse(widget.listaDistancia_.distancia)/1000;
-
           if ( widget.listaCesta[0].distanciaGratisKm>=distKm){
             return "R\u0024 "+total.toStringAsFixed(2).replaceAll(".", ",");
-          }else {
+          }
+          else {
             if (distKm != 0.0) {
               var frete = (coef * distKm).round();
               var fretef = (total+frete).toStringAsFixed(2).toString();
               return fretef;
             } else
-              return "...";
+                  return "...";
           }
-            }else
-              return "...";
+        } else
+            return "...";
      }
   }
 

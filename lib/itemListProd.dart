@@ -27,6 +27,7 @@ class itemListProd extends StatefulWidget {
   var  listaCesta = [];
   var refresh=false;
   var itemOncheck=false;
+  var uid;
 
   itemListProd (this.produto,this.local_user, this.distancias,@required this.callback_login);
 
@@ -55,6 +56,7 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
   var isLocationEnabled=false;
   var gelada=false;
   var   qntd = 1;
+  var uid;
   final bloc = BlocAll();
   var styleTextFreteGratis = TextStyle(color: Colors.red,fontSize: 10,fontStyle: FontStyle.italic,fontFamily: 'RobotoBold');
   var styleTextFrete =TextStyle(color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
@@ -66,8 +68,9 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     if (widget.produto.quantidade==null)
           widget.produto.quantidade=total;
+
      if (itemOn==true){
-             _itemOn();
+          _itemOn();
         }
         else{
        _itemOff();
@@ -87,26 +90,41 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
                 },
                 child:
                 StreamBuilder<List<dynamic>>(
-                stream: bloc.check,
-                builder: (context,value) {
-                if (value.connectionState==ConnectionState.active) {
-                      print("BLOC ITEM CESTA ATIVO");
+                  stream: bloc.check,
+                  builder: (context,value) {
+                  if (value.connectionState==ConnectionState.active) {
+//                      print("BLOC ITEM CESTA ATIVO");
                       if (value.data.isNotEmpty) {
-                        if (value.data[0].id==widget.produto.id){
-                          widget.produto.quantidade=value.data[0].quantidade;
-                          print("BLOC CONTEM ITEM NA CESTA "+value.data.toString());
-                          itemOn=true;
-                          return _item_();
+                          var ct5rl=false;
+                          for ( int i = 0;i< value.data.length;i++ ){
+//                              print("BLOC CONTEM ITEM NA CESTA "+value.data[i].quantidade.toString());
+                              if (value.data[i].id==widget.produto.id){
+                                  print("BLOC ITEM == ITEM "+value.data[i].quantidade.toString());
+                                  widget.produto.quantidade=value.data[i].quantidade;
+                                  total=widget.produto.quantidade;
+                                  ct5rl=true;
+                              }
+                          }
+                          if (ct5rl){
+                            print("BLOC ITEM TRUE");
+                            itemOn=true;
+                            return _item_();
+                          }
+                          else {
+                            print("BLOC ITEM FALSE");
+                            itemOn=false;
+                            return _item_();
+                          }
                         }else {
+                          print("BLOC ITEM FALSE");
                           itemOn=false;
                           return _item_();
                         }
                       }else{
-                        print("BLOC SEM ITEM");
+                        print("BLOC ITEM FALSE");
                         itemOn=false;
                         return _item_();
-                      }
-                }else
+                }
                   {
                     //CASO AGUARDANDO DADOS
                     itemOn=false;
@@ -158,14 +176,6 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
                                 Row(children: <Widget>[
                                   Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.nome,textAlign: TextAlign.left, style: TextStyle(fontSize:18,fontFamily: 'BreeSerif'))),
 
-//                            GestureDetector(
-//                              onTap: (){ if (gelada==false)gelada=true;else gelada=false; },
-//                                child:
-//                            Container(margin:EdgeInsets.fromLTRB(5, 2, 0, 0),height: 20,child:
-//                            Visibility(visible: widget.produto.gelada,child:
-//                            RotationTransition(
-//                                turns: Tween(begin: 0.0, end: 1.0).animate(_controllerIcon),
-//                                child: Image.asset("gelada.png"))),)),
                                   Visibility(visible: widget.produto.gelada,child:
                                   Container(
                                       decoration: BoxDecoration(border: Border.all(color: Colors.lightBlue[400]),borderRadius: BorderRadius.all(Radius.circular(3))),
@@ -302,16 +312,19 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
   }
 
   _decrementQntdItem(){
-    if (itemOn==true){
-      if (total>1) {
-          decrementItemCesta_on(widget.produto);
+    setState(() {
+      if (itemOn==true){
+        if (total>1) {
+            decrementItemCesta_on(widget.produto);
+        }
+      }else {
+        if (total>1){
+            total-=1;
+            totalPreco-=widget.produto.preco;
+            totalPrecotxt = totalPreco;}
       }
-    }else {
-      if (total>1){
-          total-=1;
-          totalPreco-=widget.produto.preco;
-          totalPrecotxt = totalPreco;}
-    }
+   });
+
   }
 
 formatFrete(){
@@ -343,13 +356,15 @@ formatFrete(){
       return "...";
 }
 
-  _incrementQntdItem(){
+
+_incrementQntdItem(){
+
     if (itemOn==true){
-      opc=1.0;
-      vbtnRemoveqntd=true;
-      if (widget.produto.quantidade<99) {
-        incrementItemCesta_on(widget.produto);
-      }
+        opc=1.0;
+        vbtnRemoveqntd=true;
+        if (widget.produto.quantidade<99) {
+            incrementItemCesta_on(widget.produto);
+        }
     }else{
       opc=1.0;
       vbtnRemoveqntd=true;
@@ -363,11 +378,16 @@ formatFrete(){
     }
 }
 
+
 _itemOff(){
   print("item off");
-  vbtnremoveitem=false;
+  setState(() {
+
+    vbtnremoveitem=false;
   textBtnadd="ADICIONAR";
   colorBtnAdd=Colors.orange;
+  });
+
 }
 _itemOn(){
     setState(() {
@@ -388,11 +408,6 @@ _itemOn(){
     });
 }
 
-
- bloc_check(){
-
-
-}
 
 
 _addLista() async{
@@ -417,10 +432,9 @@ _addLista() async{
 
 
   _removeItemCesta() async{
-      FirebaseUser user = await FirebaseAuth.instance.currentUser();
-      if (user!=null)
+
         await Firestore.instance.collection("Usuarios")
-            .document(user.uid).collection("cesta").document(widget.produto.id).delete();
+            .document(uid).collection("cesta").document(widget.produto.id).delete();
 
       setState(() {
         itemOn=false;
@@ -444,6 +458,7 @@ _addLista() async{
         return false;
       }
       else{
+
         return true;
       }
   }
@@ -464,13 +479,15 @@ _addLista() async{
   }
 
   void decrementItemCesta_on(Produto_cesta item) async{
+
     Produto_cesta  p =item;
     total-=1;
     item.quantidade=total;
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if (user!=null)
+
+    if (uid!=null)
       await Firestore.instance.collection("Usuarios")
-          .document(user.uid).collection("cesta").document(item.id).updateData(p.getproduto());
+          .document(uid).collection("cesta").document(item.id).updateData(p.getproduto());
+
   }
 
 
@@ -479,28 +496,24 @@ _addLista() async{
     Produto_cesta  p =item;
     total+=1;
     item.quantidade=total;
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if (user!=null)
+    if (uid!=null)
       await Firestore.instance.collection("Usuarios")
-          .document(user.uid).collection("cesta").document(item.id).updateData(p.getproduto());
+          .document(uid).collection("cesta").document(item.id).updateData(p.getproduto());
   }
 
 
   void addItemCesta(Produto_cesta item) async{
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
     var ctrol = false;
     if(widget.listaCesta!=null)
     if(widget.listaCesta.length>0)
     if(widget.listaCesta[0].loja!=item.loja){
         ctrol=true;
     }
-//
     item.quantidade=total;
-//
     if (ctrol==false){
-        if (user!=null)
+        if (uid!=null)
           await Firestore.instance.collection("Usuarios")
-              .document(user.uid).collection("cesta").document(item.id).setData(item.getproduto());
+              .document(uid).collection("cesta").document(item.id).setData(item.getproduto());
         setState(() {
           print("add item lista pos load");
           itemOn = true;
@@ -523,6 +536,16 @@ _addLista() async{
   void initState() {
 
 
+    getUser();
+
+      super.initState();
+  }
+
+  getUser () async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    uid =  user.uid;
+    print(uid);
+
     bloc.getCesta();
     _controllerIcon = AnimationController(duration: Duration(milliseconds: 10000),vsync: this);
     setState(() {
@@ -531,11 +554,13 @@ _addLista() async{
 
     });
     if ( widget.distancias!=null) {
-        view_dist=true;
+      view_dist=true;
     }else{
     }
-      super.initState();
   }
+
+
+
   @override
 
   void dispose() {

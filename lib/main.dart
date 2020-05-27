@@ -113,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
   distanciaLoja distancias;
   var end_temp;
   List<distanciaLoja> listaDist = new List<distanciaLoja>();
+  var barcesta;
   var local_end;
   var local_=null;
   var viewListProd=false;
@@ -132,9 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
+      statusBarColor: Colors.transparent
     ));
-
 
     if (v_bg_==true){
         v_bg_=false;
@@ -146,10 +146,6 @@ class _MyHomePageState extends State<MyHomePage> {
           resizeToAvoidBottomInset : true,
           body:
       Stack( children: <Widget>[
-
-
-
-
       SingleChildScrollView(child:
       Column(
           children: <Widget>[
@@ -208,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
        Visibility( visible: v_bg_load , child:
-              blur_background()
+              blur_background_load()
           ),
       StreamBuilder<List<Produto_cesta>>(
           stream: bloc.check,
@@ -238,7 +234,8 @@ class _MyHomePageState extends State<MyHomePage> {
     child:  Container(
     decoration:  BoxDecoration(color: Colors.orange[100].withOpacity(.50)),child:
 
-            Container(alignment: Alignment.center, child: autenticacao("login",(value){return _hidepop_login(value);}),))))))),),
+      Container(alignment: Alignment.center, child: autenticacao("login",(value){return _hidepop_login(value);}),))))))),),
+
 
        Positioned(
         width: MediaQuery.of(context).size.width,
@@ -252,13 +249,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   distanciaLoja d;
                   for (var i=0;i<listaDist.length;i++){
                     if (listaDist[i].loja==value.data[0].loja){
-                      d = listaDist[i];
-                      print("BAR CESTA distance");
+                        d = listaDist[i];
                     }
                   }
                   return
-
-                    barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
+                     barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
                 }else{
                     v_bg=false;
                     return Container();
@@ -338,9 +333,26 @@ void initState() {
   super.initState();
 }
 
+  blur_background(){
+    return  Container(
+      child: ClipRect(
+        child:  BackdropFilter(
+          filter:  ImageFilter.blur(sigmaX:4, sigmaY:4),
+          child:  Container(
+            width: double.infinity,
+            height:  double.infinity,
+            decoration:  BoxDecoration(color: Colors.transparent),
+            child:  Container(
+              ),
+          ),
+        ),
+      ),
+    );
+  }
 
 
-blur_background(){
+
+  blur_background_load(){
   return  Container(
       child: ClipRect(
         child:  BackdropFilter(
@@ -417,7 +429,9 @@ checkStateUser() async {
 void getUser(var data,var documentID){
 
     print("getdados data read user");
-    Usuario = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
+    setState(() {
+      Usuario = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
+    });
 
     print("user recuperado "+Usuario.email);
 

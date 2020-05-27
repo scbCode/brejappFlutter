@@ -382,10 +382,10 @@ _incrementQntdItem(){
 _itemOff(){
   print("item off");
   setState(() {
-
     vbtnremoveitem=false;
-  textBtnadd="ADICIONAR";
-  colorBtnAdd=Colors.orange;
+    textBtnadd="ADICIONAR";
+    total=0;
+    colorBtnAdd=Colors.orange;
   });
 
 }

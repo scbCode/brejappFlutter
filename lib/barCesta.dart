@@ -28,7 +28,7 @@ class barCesta extends StatefulWidget  {
   List<Produto_cesta> listaCesta = new List<Produto_cesta>();
   distanciaLoja listaDistancia_ ;
   show_blur_bg call_back_show_bg;
-  User user;
+  var user;
   barCesta (this.user,this.listaCesta,this.listaDistancia_,this.call_back_show_bg);
 
   @override
@@ -65,7 +65,8 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var tipoPagSelectItem;
   enderecoUserSnapShot end_user;
   enderecoUser end_user_;
-
+  var view=false;
+  var user;
   double distance=0.0;
 
 
@@ -85,217 +86,219 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
         ctrol_view_btnEnd=false;
       }
 
-
       return
+        Visibility(visible: view,child:
+            barCompleta());
 
+  }
+
+  barCompleta(){
+return
 //Container(decoration: BoxDecoration(color: Colors.transparent),child:
     SingleChildScrollView(child:
     Stack(
         alignment: Alignment.bottomCenter,
         children: <Widget>[
 
-      Column(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-        Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
-         BoxShadow(
-          color: Colors.black12,
-          blurRadius: 0.0,
-          offset: Offset(
-            0.0, // horizontal, move right 10
-            0.0, // vertical, move down 10
-          ),
-          )
-        ]),height: 45,
-          margin: EdgeInsets.fromLTRB(0, 0, 0, alturaBarra),
-          child:
-          barra()
-       ),
- //////////////////////////////////////////////////////////
-          LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
-              SingleChildScrollView(child:
+          Column(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 0.0,
+                    offset: Offset(
+                      0.0, // horizontal, move right 10
+                      0.0, // vertical, move down 10
+                    ),
+                  )
+                ]),height: 45,
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, alturaBarra),
+                    child:
+                    barra()
+                ),
+                //////////////////////////////////////////////////////////
+                LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
+                SingleChildScrollView(child:
 
-          Visibility(visible:view_resumo_cesta, child:
-             Container(
-                 margin: EdgeInsets.fromLTRB(0, 0, 0, bttmResumo),
-                 decoration: BoxDecoration(color: Colors.white,boxShadow: [
+                Visibility(visible:view_resumo_cesta, child:
+                Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, bttmResumo),
+                    decoration: BoxDecoration(color: Colors.white,boxShadow: [
                       BoxShadow( color: Colors.black12,blurRadius:4.0,
-                      offset: Offset(0.0,45.0,  ),)
-                      ],),
-                 child:
-             Column(
-                 children: <Widget>[
-
-
-                   Container(
-                   decoration: BoxDecoration(color: Colors.white),
-                   padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                   child:
-                   Row(
-                     crossAxisAlignment: CrossAxisAlignment.center,
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     mainAxisSize: MainAxisSize.max,
-                     children: <Widget>[
-                       Container(margin: EdgeInsets.fromLTRB(0, 0, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                       Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                           child:Text(widget.listaCesta[0].loja.toString().toUpperCase()+" ",textAlign: TextAlign.right, style: TextStyle(color: Colors.black ,fontSize:14,fontFamily: 'BreeSerif'))),
-                       Container(margin: EdgeInsets.fromLTRB(5, 0, 0, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
+                        offset: Offset(0.0,45.0,  ),)
+                    ],),
+                    child:
+                    Column(
+                        children: <Widget>[
+                          Container(
+                            decoration: BoxDecoration(color: Colors.white),
+                            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                            child:
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: <Widget>[
+                                Container(margin: EdgeInsets.fromLTRB(0, 0, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
+                                Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                    child:Text(widget.listaCesta[0].loja.toString().toUpperCase()+" ",textAlign: TextAlign.right, style: TextStyle(color: Colors.black ,fontSize:14,fontFamily: 'BreeSerif'))),
+                                Container(margin: EdgeInsets.fromLTRB(5, 0, 0, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
 //                       Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Frete: R\u0024 3,00 ",style: TextStyle(color: Colors.black54,fontSize: 14,fontFamily: 'BreeSerif')),),
 //                       Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                    //   Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 4, 5, 0), child:Text( formatDistancia(),textAlign: TextAlign.right, style: TextStyle(color: Colors.black54,fontSize:14,fontFamily: 'BreeSerif'))),
-                   ],),
-                 ),
+                                //   Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 4, 5, 0), child:Text( formatDistancia(),textAlign: TextAlign.right, style: TextStyle(color: Colors.black54,fontSize:14,fontFamily: 'BreeSerif'))),
+                              ],),
+                          ),
 
-                   Divider(color: Colors.black45,height: 2,),
+                          Divider(color: Colors.black45,height: 2,),
 
-                   Container(
-                       margin: EdgeInsets.fromLTRB(0, 10,0, 5),
-                       alignment: Alignment.topCenter, child: listaCesta_),
+                          Container(
+                              margin: EdgeInsets.fromLTRB(0, 10,0, 5),
+                              alignment: Alignment.topCenter, child: listaCesta_),
 
-                   Visibility(visible: !view_cestadetalhes,child:
-                   GestureDetector(onTap: (){
-                     setState(() {
+                          Visibility(visible: !view_cestadetalhes,child:
+                          GestureDetector(onTap: (){
+                            setState(() {
 
-                       if (view_cestadetalhes)
-                         view_cestadetalhes=false;
-                       else
-                         view_cestadetalhes=true;
-                     });
-                   },
-                     child:
-                     Container(
-                         width: 100,
-                         decoration: BoxDecoration(border: Border.all(color: Colors.orange[200]), borderRadius: BorderRadius.all(Radius.circular(5))),
-                         margin: EdgeInsets.fromLTRB(0, 5,0, 10),
-                         padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                         alignment: Alignment.topCenter, child:
-                     Text("Fazer pedido",style:
-                     TextStyle(color: Colors.orange,fontFamily: 'RobotoLight'),)),)),
+                              if (view_cestadetalhes)
+                                view_cestadetalhes=false;
+                              else
+                                view_cestadetalhes=true;
+                            });
+                          },
+                            child:
+                            Container(
+                                width: 100,
+                                decoration: BoxDecoration(border: Border.all(color: Colors.orange[200]), borderRadius: BorderRadius.all(Radius.circular(5))),
+                                margin: EdgeInsets.fromLTRB(0, 5,0, 10),
+                                padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                alignment: Alignment.topCenter, child:
+                            Text("Fazer pedido",style:
+                            TextStyle(color: Colors.orange,fontFamily: 'RobotoLight'),)),)),
 //
-                   Visibility(visible: view_cestadetalhes,child:
-                   GestureDetector(onTap: (){
-                     setState(() {
-                       if (view_cestadetalhes)
-                         view_cestadetalhes=false;
-                       else
-                         view_cestadetalhes=true;
-                     });
-                   },
-                     child:
-                     Container(
-                         width: 100,
-                         margin: EdgeInsets.fromLTRB(0, 5,0, 0),
-                         alignment: Alignment.topCenter, child:
+                          Visibility(visible: view_cestadetalhes,child:
+                          GestureDetector(onTap: (){
+                            setState(() {
+                              if (view_cestadetalhes)
+                                view_cestadetalhes=false;
+                              else
+                                view_cestadetalhes=true;
+                            });
+                          },
+                            child:
+                            Container(
+                                width: 100,
+                                margin: EdgeInsets.fromLTRB(0, 5,0, 0),
+                                alignment: Alignment.topCenter, child:
                             Icon(Icons.keyboard_arrow_up,color:Colors.orange)),)),
 
-                   Visibility(visible:view_cestadetalhes, child:
-                     Column(
-                     children: <Widget>[
-                           Divider(color: Colors.orange,height: 2,),
+                          Visibility(visible:view_cestadetalhes, child:
+                          Column(
+                              children: <Widget>[
+                                Divider(color: Colors.orange,height: 2,),
 
-                   //END ENTREGA TEXT
-                   Container(
-                       padding: EdgeInsets.fromLTRB(10,10,0,0),
-                       alignment: Alignment.centerLeft,
-                       child: Text("TOTAL + FRETE: "+totalComFrete()
-                         ,textAlign: TextAlign.center,style: TextStyle(fontSize: 19,fontFamily: 'BreeSerif',color: Colors.orange),)),
+                                //END ENTREGA TEXT
+                                Container(
+                                    padding: EdgeInsets.fromLTRB(10,10,0,0),
+                                    alignment: Alignment.centerLeft,
+                                    child: Text("TOTAL + FRETE: "+totalComFrete()
+                                      ,textAlign: TextAlign.center,style: TextStyle(fontSize: 19,fontFamily: 'BreeSerif',color: Colors.orange),)),
 
-                       Container(
-                           padding: EdgeInsets.fromLTRB(10,5,0,0),
-                           alignment: Alignment.centerLeft,
-                           child: Text(""+formatFrete() ,style:
-                           TextStyle(fontStyle: FontStyle.italic,fontSize: 12,fontFamily:'RobotoRegular',color: Colors.black87),)),
+                                Container(
+                                    padding: EdgeInsets.fromLTRB(10,5,0,0),
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(""+formatFrete() ,style:
+                                    TextStyle(fontStyle: FontStyle.italic,fontSize: 12,fontFamily:'RobotoRegular',color: Colors.black87),)),
 
 
-                       Container(
-                          margin: EdgeInsets.fromLTRB(10, 20,0,10),
-                          alignment: Alignment.center, child:
-                          Text("ENDEREÇO DE ENTREGA ",style:
-                          TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
+                                Container(
+                                    margin: EdgeInsets.fromLTRB(10, 20,0,10),
+                                    alignment: Alignment.center, child:
+                                Text("ENDEREÇO DE ENTREGA ",style:
+                                TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
 
-                StreamBuilder(
-                      stream: Firestore.instance.collection('Usuarios').document("fA65MXAxoXcwDLIPmRDNPNkbquz1")
-                    .collection("endereco").where("temp",isEqualTo: false).snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState==ConnectionState.active){
-                          if (snapshot.data.documents.length > 0) {
-                                    return
-                                      enderecoUserView(snapshot.data.documents[0]);
-                                    }
-                                    else{
-                                   return
-                                     StreamBuilder(
-                                      stream: Firestore.instance.collection('Usuarios').document("fA65MXAxoXcwDLIPmRDNPNkbquz1")
-                                          .collection("endereco").where("temp",isEqualTo: true).snapshots(),
-                                      builder: (context, snapshot1) {
-                                        if (snapshot1.connectionState==ConnectionState.active){
-                                          if (snapshot1.data.documents.length > 0) {
-                                            print("STREM " + snapshot1.data.documents.toString());
-                                            return
-                                              enderecoTemp(snapshot1.data.documents[0]);
-                                          }else
-                                            return Container();
-                                        }else
-                                          return Container();
+                                StreamBuilder(
+                                    stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
+                                        .collection("endereco").where("temp",isEqualTo: false).snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState==ConnectionState.active){
+                                        if (snapshot.data.documents.length > 0) {
+                                          return
+                                            enderecoUserView(snapshot.data.documents[0]);
+                                        }
+                                        else{
+                                          return
+                                            StreamBuilder(
+                                                stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
+                                                    .collection("endereco").where("temp",isEqualTo: true).snapshots(),
+                                                builder: (context, snapshot1) {
+                                                  if (snapshot1.connectionState==ConnectionState.active){
+                                                    if (snapshot1.data.documents.length > 0) {
+                                                      print("STREM " + snapshot1.data.documents.toString());
+                                                      return
+                                                        enderecoTemp(snapshot1.data.documents[0]);
+                                                    }else
+                                                      return Container();
+                                                  }else
+                                                    return Container();
+                                                });
+                                        }
+                                      }else
+                                        return Container();
+                                    }),
+
+                                Visibility(
+                                    visible: ctrol_view_btnEnd,
+                                    child:
+
+                                    GestureDetector(onTap: (){
+                                      setState(() {
+                                        confirmarEndereco=true;
                                       });
-                                  }
-                               }else
-                                return Container();
-                        }),
+                                    },
+                                      child:
+                                      Container(
+                                          decoration: BoxDecoration(border: Border.all(color: Colors.orange[200]), borderRadius: BorderRadius.all(Radius.circular(5))),
+                                          margin: EdgeInsets.fromLTRB(40, 5, 40, 30),
+                                          padding: EdgeInsets.fromLTRB(0, 10, 0,10),
+                                          alignment: Alignment.topCenter, child:
+                                      Text("CONFIRMAR ENDEREÇO",textAlign: TextAlign.center,style:
+                                      TextStyle(color: Colors.orange,fontFamily: 'RobotoBold'),)),)),
 
-                       Visibility(
-                           visible: ctrol_view_btnEnd,
-                           child:
+                              ])),
 
-                       GestureDetector(onTap: (){
-                       setState(() {
-                         confirmarEndereco=true;
-                       });
-                     },
-                       child:
-                       Container(
-                           decoration: BoxDecoration(border: Border.all(color: Colors.orange[200]), borderRadius: BorderRadius.all(Radius.circular(5))),
-                           margin: EdgeInsets.fromLTRB(40, 5, 40, 30),
-                           padding: EdgeInsets.fromLTRB(0, 10, 0,10),
-                           alignment: Alignment.topCenter, child:
-                       Text("CONFIRMAR ENDEREÇO",textAlign: TextAlign.center,style:
-                       TextStyle(color: Colors.orange,fontFamily: 'RobotoBold'),)),)),
+                          Visibility(visible: confirmarEndereco,child:
+                          Column(children: <Widget>[
+                            Container(
+                                margin: EdgeInsets.fromLTRB(10, 20,0,10),
+                                alignment: Alignment.center, child:
+                            Text("PAGAMENTO",style:
+                            TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
 
-                   ])),
+                            pagamentoDinheiro(),
+                            pagamentoCartaoItem(),
+                            pagamentoCartaoVazio(),
 
-                    Visibility(visible: confirmarEndereco,child:
-                   Column(children: <Widget>[
-                   Container(
-                       margin: EdgeInsets.fromLTRB(10, 20,0,10),
-                       alignment: Alignment.center, child:
-                   Text("PAGAMENTO",style:
-                   TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
+                          ]))
+                        ])
+                )
+                )),),
 
-                   pagamentoDinheiro(),
-                   pagamentoCartaoItem(),
-                   pagamentoCartaoVazio(),
-
-                   ]))
-                 ])
-             )
-          )),),
-
-        ]),
+              ]),
 
 
-       Visibility(child:
-       formularioEndereco(),visible: view_form_end,),
+          Visibility(child:
+          formularioEndereco(),visible: view_form_end,),
 
-      ]));
-
+        ]));
   }
 
 
   @override
   void initState() {
 
-    getUseruid();
 
+    getUseruid();
     bloc.getEnderecoUser();
     listaCesta_=listaCesta();
     if (widget.listaCesta.length==0)
@@ -308,8 +311,9 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
 
   void getDadosUser(var uid) async {
 
+    var user = await FirebaseAuth.instance.currentUser();
 
-    var document = await Firestore.instance.collection('Usuarios').document(uid);
+    var document = await Firestore.instance.collection('Usuarios').document(user.uid);
     document.snapshots()
         .listen((data) => {
       getUser(data,data.documentID)
@@ -319,7 +323,12 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
 
 
   void getUser(var data,var documentID){
-    widget.user = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
+    user = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
+   setState(() {
+     view=true;
+     print("USER X "+user.uid.toString());
+
+   });
   }
 
   getUseruid() async {
@@ -735,20 +744,23 @@ barraView(){
     var coef = widget.listaCesta[0].coefKm;
     var distKm=0.0;
 
-    for(int i = 0; i < widget.listaCesta.length;i++){
-      if (widget.listaCesta[i].loja == widget.listaDistancia_.loja){
-      }
-    }
-    distKm = double.parse(widget.listaDistancia_.distancia)/1000;
+    for(int i = 0; i < widget.listaCesta.length;i++) {
+//      if (widget.listaCesta[i].loja == widget.listaDistancia_.loja) {}
+//      }
+      if (widget.listaDistancia_ != null) {
+        distKm = double.parse(widget.listaDistancia_.distancia) / 1000;
 
-    if ( widget.listaCesta[0].distanciaGratisKm>=distKm){
-      return "Entrega gratis";
-    }else {
-      if (distKm != 0.0) {
-        var frete = (coef * distKm).round();
-        var fretef = frete.toStringAsFixed(2).toString();
-        return "R\u0024 "+fretef;
-      } else
+        if (widget.listaCesta[0].distanciaGratisKm >= distKm) {
+          return "Entrega gratis";
+        } else {
+          if (distKm != 0.0) {
+            var frete = (coef * distKm).round();
+            var fretef = frete.toStringAsFixed(2).toString();
+            return "R\u0024 " + fretef;
+          } else
+            return "";
+        }
+      }else
         return "";
     }
   }
@@ -759,24 +771,26 @@ barraView(){
     var coef = widget.listaCesta[0].coefKm;
     var distKm=0.0;
 
-    for (int i = 0; i < widget.listaCesta.length;i++){
-      if (widget.listaCesta[i].loja == widget.listaDistancia_.loja){
-
-          distKm = double.parse(widget.listaDistancia_.distancia)/1000;
-          if ( widget.listaCesta[0].distanciaGratisKm>=distKm){
-            return "R\u0024 "+total.toStringAsFixed(2).replaceAll(".", ",");
+    for (int i = 0; i < widget.listaCesta.length;i++) {
+      if (widget.listaDistancia_ != null) {
+        if (widget.listaCesta[i].loja == widget.listaDistancia_.loja) {
+          distKm = double.parse(widget.listaDistancia_.distancia) / 1000;
+          if (widget.listaCesta[0].distanciaGratisKm >= distKm) {
+            return "R\u0024 " + total.toStringAsFixed(2).replaceAll(".", ",");
           }
           else {
             if (distKm != 0.0) {
               var frete = (coef * distKm).round();
-              var fretef = (total+frete).toStringAsFixed(2).toString();
+              var fretef = (total + frete).toStringAsFixed(2).toString();
               return fretef;
             } else
-                  return "...";
+              return "...";
           }
         } else
-            return "...";
-     }
+          return "...";
+      }else
+        return "...";
+    }
   }
 
 
@@ -790,7 +804,7 @@ listaCesta()  {
         child:
      StreamBuilder(
         stream: Firestore.instance
-          .collection("Usuarios").document("Pi08gunUSvZtH9Ix88Pf1CkAAgA3").collection("cesta")
+          .collection("Usuarios").document(widget.user.uid).collection("cesta")
           .snapshots(),
          builder: (context, snapshot) {
          switch (snapshot.connectionState) {

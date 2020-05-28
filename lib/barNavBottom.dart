@@ -123,7 +123,10 @@ class barNavBottomState extends State<barNavBottom> {
               Icon(Icons.search,color:  Colors.grey[400]))),
 
        ]),
-          Text(""+widget.end,style: TextStyle(fontFamily: 'BreeSerif',color: Colors.black87),  overflow: TextOverflow.fade,)
+        Container(
+          width: MediaQuery.of(context).size.width*0.55,
+          alignment: Alignment.centerRight, child:  Text(""+widget.end, maxLines: 1,
+            overflow: TextOverflow.ellipsis,style: TextStyle(fontFamily: 'BreeSerif',color: Colors.black87),  ))
 
 
 

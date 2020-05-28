@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_firestore/User.dart';
 import 'package:flutter_firestore/barCurve.dart';
@@ -60,6 +61,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var cor_endereco=Colors.white;
   var ctrol_view_btnEnd=true;
   var confirmarEndereco=false;
+  var confirmarEnderecoviewbtn=false;
   var bttmResumo=0.0;
   var iconCheckPagamento=Icons.radio_button_unchecked;
   var tipoPagSelectItem;
@@ -69,6 +71,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var user;
   double distance=0.0;
 
+  var enderecoTemp_=false;
 
   @override
   Widget build(BuildContext context) {
@@ -77,13 +80,14 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
     if (widget.listaCesta.length==0)
       widget.call_back_show_bg(false);
 
+
     if (confirmarEndereco==false){
       cor_endereco=Colors.white;
-      ctrol_view_btnEnd=true;
+     // ctrol_view_btnEnd=true;
     }else
       {
-        cor_endereco=Colors.green[100];
-        ctrol_view_btnEnd=false;
+        cor_endereco=Colors.amber[100];
+    //    ctrol_view_btnEnd=false;
       }
 
       return
@@ -168,10 +172,10 @@ return
                           },
                             child:
                             Container(
-                                width: 100,
+                                width: MediaQuery.of(context).size.width*0.5,
                                 decoration: BoxDecoration(border: Border.all(color: Colors.orange[200]), borderRadius: BorderRadius.all(Radius.circular(5))),
-                                margin: EdgeInsets.fromLTRB(0, 5,0, 10),
-                                padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                margin: EdgeInsets.fromLTRB(0, 10,0, 10),
+                                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                                 alignment: Alignment.topCenter, child:
                             Text("Fazer pedido",style:
                             TextStyle(color: Colors.orange,fontFamily: 'RobotoLight'),)),)),
@@ -205,24 +209,31 @@ return
                                       ,textAlign: TextAlign.center,style: TextStyle(fontSize: 19,fontFamily: 'BreeSerif',color: Colors.orange),)),
 
                                 Container(
-                                    padding: EdgeInsets.fromLTRB(10,5,0,0),
+                                    padding: EdgeInsets.fromLTRB(13,5,0,10),
                                     alignment: Alignment.centerLeft,
-                                    child: Text(""+formatFrete() ,style:
-                                    TextStyle(fontStyle: FontStyle.italic,fontSize: 12,fontFamily:'RobotoRegular',color: Colors.black87),)),
+                                    child: Text("FRETE: "+formatFrete() ,style:
+                                    TextStyle(fontStyle: FontStyle.italic,fontSize: 14,fontFamily:'RobotoRegular',color: Colors.black54),)),
 
+                                Divider(color:Colors.grey),
 
                                 Container(
-                                    margin: EdgeInsets.fromLTRB(10, 20,0,10),
+                                    margin: EdgeInsets.fromLTRB(10, 0,0,10),
                                     alignment: Alignment.center, child:
                                 Text("ENDEREÇO DE ENTREGA ",style:
                                 TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
 
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(10, 0,0,30),
+                                  alignment: Alignment.center, child:
                                 StreamBuilder(
                                     stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
                                         .collection("endereco").where("temp",isEqualTo: false).snapshots(),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState==ConnectionState.active){
                                         if (snapshot.data.documents.length > 0) {
+                                          ctrol_view_btnEnd=false;
+                                          confirmarEnderecoviewbtn=true;
+                                          enderecoTemp_=false;
                                           return
                                             enderecoUserView(snapshot.data.documents[0]);
                                         }
@@ -234,7 +245,7 @@ return
                                                 builder: (context, snapshot1) {
                                                   if (snapshot1.connectionState==ConnectionState.active){
                                                     if (snapshot1.data.documents.length > 0) {
-                                                      print("STREM " + snapshot1.data.documents.toString());
+                                                      enderecoTemp_=true;
                                                       return
                                                         enderecoTemp(snapshot1.data.documents[0]);
                                                     }else
@@ -245,7 +256,7 @@ return
                                         }
                                       }else
                                         return Container();
-                                    }),
+                                    })),
 
                                 Visibility(
                                     visible: ctrol_view_btnEnd,
@@ -254,6 +265,7 @@ return
                                     GestureDetector(onTap: (){
                                       setState(() {
                                         confirmarEndereco=true;
+                                        ctrol_view_btnEnd=false;
                                       });
                                     },
                                       child:
@@ -270,15 +282,15 @@ return
                           Visibility(visible: confirmarEndereco,child:
                           Column(children: <Widget>[
                             Container(
-                                margin: EdgeInsets.fromLTRB(10, 20,0,10),
+                                margin: EdgeInsets.fromLTRB(10, 10,0,10),
                                 alignment: Alignment.center, child:
                             Text("PAGAMENTO",style:
                             TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
 
                             pagamentoDinheiro(),
                             pagamentoCartaoItem(),
+                            formaPagMaquina(),
                             pagamentoCartaoVazio(),
-
                           ]))
                         ])
                 )
@@ -288,7 +300,7 @@ return
 
 
           Visibility(child:
-          formularioEndereco(),visible: view_form_end,),
+            formularioEndereco(),visible: view_form_end,),
 
         ]));
   }
@@ -326,7 +338,7 @@ return
     user = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
    setState(() {
      view=true;
-     print("USER X "+user.uid.toString());
+     print("USER X "+data['uid'].toString());
 
    });
   }
@@ -343,7 +355,7 @@ return
       return
                        Container(
                            margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
-                           decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:cor_endereco),
+                           decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)),boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:cor_endereco),
                            child:
 
                            Column(
@@ -359,14 +371,15 @@ return
                                Icon(Icons.location_searching,size: 20,),),
 
                              Column(
-
                                mainAxisSize: MainAxisSize.max,
                                children: <Widget>[
 
                                  Container(
-                                     margin: EdgeInsets.fromLTRB(0, 5,0, 0),
+                                     width: MediaQuery.of(context).size.width*.54,
+                                     margin: EdgeInsets.fromLTRB(10, 5,0, 0),
                                      alignment: Alignment.center, child:
-                                 Text(data['rua']+", "+data['bairro'],style:
+                                 Text(data['rua']+", "+data['bairro'], maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,style:
                                  TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
 
                                  Container(
@@ -377,14 +390,17 @@ return
 
                              ],),
 
-                              GestureDetector(onTap: (){setState(() {
-                              view_form_end=true;
+                              Visibility(visible:true,child:
+                              GestureDetector(onTap: (){
+                                setState(() {
+                                view_form_end=true;
+                                ctrol_view_btnEnd=true;
                               }); },child:
                              Container(
                                  margin: EdgeInsets.fromLTRB(0, 5,10, 5),
                                  alignment: Alignment.center, child:
                              Text("Atualizar",style:
-                             TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),))),
+                             TextStyle(color: Colors.red,fontFamily: 'RobotoLight'),)))),
                            ],),
 
                     ],));
@@ -410,26 +426,28 @@ return
 
           Container(
               margin: EdgeInsets.fromLTRB(15, 5, 15, 0),
-              decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
+              padding: EdgeInsets.all(5),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)),boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
               child:
 
 
               Row(mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max, children: <Widget>[
 
                 Container(
-                  margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  margin: EdgeInsets.fromLTRB(15, 0, 0, 0),
                   child:
                   Icon(Icons.location_searching,size: 20,),),
 
 
                 Column(
+
                   children: <Widget>[
                     Container(
                       width: MediaQuery.of(context).size.width*0.7,
-                        margin: EdgeInsets.fromLTRB(25, 10,0, 10),
+                        margin: EdgeInsets.fromLTRB(20, 10,0, 10),
                           alignment: Alignment.centerLeft, child:
                             Text(data['rua']+", "+data['bairro'],
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style:
                           TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
@@ -439,8 +457,8 @@ return
 
               ],)),
           Container(
-              padding: EdgeInsets.fromLTRB(0, 5, 0, 10),
-              margin: EdgeInsets.fromLTRB(15, 5, 15, 10),
+              padding: EdgeInsets.fromLTRB(0, 10, 0, 15),
+              margin: EdgeInsets.fromLTRB(15, 15, 15, 10),
               decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
               child:
               Row(mainAxisAlignment: MainAxisAlignment.center,mainAxisSize: MainAxisSize.max, children: <Widget>[
@@ -454,13 +472,60 @@ return
                         margin: EdgeInsets.fromLTRB(0, 5,0, 0),
                         alignment: Alignment.center, child:
                     Text("COMPLETAR ENDEREÇO",style:
-                    TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),))),
+                    TextStyle(color: Colors.orange,fontFamily: 'RobotoLight'),))),
                   ],),
               ],)),
         ],),
 
     ],);
   }
+
+
+
+  formaPagMaquina()
+  {
+    return
+      GestureDetector(
+          onTap: (){setState(() {
+            iconCheckPagamento=Icons.radio_button_checked;
+          });},
+          child:
+          Column(children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+
+                Container(
+                    margin: EdgeInsets.fromLTRB(15, 0, 15, 10),
+                    padding: EdgeInsets.fromLTRB(0, 5, 0, 10),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
+                        boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
+                    child:
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
+                        Container(
+                            margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                            child: Image.asset("card_machine.png",width: 40,height: 40)),
+                        Container(
+                            margin: EdgeInsets.fromLTRB(25, 10,0, 10),
+                            alignment: Alignment.center, child:
+                        Text("Máquina de cartão",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                          TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
+                      ],),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                        child:Icon(iconCheckPagamento,color: Colors.orange,),),
+                    ],)),
+
+              ],),
+
+          ],));
+  }
+
+
 
 
   pagamentoDinheiro()
@@ -478,24 +543,33 @@ return
 
             Container(
                 margin: EdgeInsets.fromLTRB(15, 0, 15, 10),
-                padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
+                padding: EdgeInsets.fromLTRB(0, 5, 0, 10),
+                decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
+                    boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
                 child:
-
-
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Container(
                     margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                    child:
-                    Icon(Icons.monetization_on,size: 30,color: Colors.green,),),
-
+                    child: Image.asset("money.png",width: 50,height: 50)),
                       Container(
                           margin: EdgeInsets.fromLTRB(25, 10,0, 10),
                           alignment: Alignment.center, child:
                       Text("Dinheiro",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style:
+                        TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
+
+
+                      Container(
+                          width: 80,
+                          height: 20,
+                          margin: EdgeInsets.fromLTRB(10, 20,0, 0),
+                          alignment: Alignment.center, child:
+                      TextFormField(
+                        decoration: InputDecoration(hintText: "Troco: 50,00"),
+                        keyboardType:  TextInputType.number,
                         style:
                         TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
                   ],),
@@ -531,11 +605,10 @@ return
 
             Container(
                 margin: EdgeInsets.fromLTRB(15, 0, 15, 30),
-                padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
+                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
+                    boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
                 child:
-
-
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                     Container(
@@ -546,7 +619,7 @@ return
                     Container(
                         margin: EdgeInsets.fromLTRB(25, 10,0, 10),
                         alignment: Alignment.center, child:
-                    Text("Adicionar cartão ",
+                    Text("Adicionar cartão",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style:
@@ -573,17 +646,18 @@ return
 
             Container(
                 margin: EdgeInsets.fromLTRB(15, 0, 15, 10),
-                padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 3),
+                decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
+                    boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
                 child:
-
 
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                     Container(
+                      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                       margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                       child:
-                      Icon(Icons.credit_card,size: 30,color: Colors.blue,),),
+                      Image.asset("cardcredit.png",width: 40,height: 60,)),
 
                     Container(
                         margin: EdgeInsets.fromLTRB(25, 10,0, 10),
@@ -608,17 +682,17 @@ return
   formularioEndereco(){
 
     return
-      Container( width: double.infinity,height: MediaQuery.of(context).size.height,child: Container(
+      Container( width: double.infinity,height: MediaQuery.of(context).size.height*0.7,
+          child: Container(
         margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child:
       ClipRect(
         child:  BackdropFilter(
         filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
         child:  Container(
-          decoration:  BoxDecoration(color: Colors.white.withOpacity(.40)),
+          decoration:  BoxDecoration(color: Colors.white.withOpacity(.20)),
           child:
           Container(
-            padding: EdgeInsets.fromLTRB(30, 10, 30,10),
-            decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black12,blurRadius: 5,offset: Offset(0,3))]),
+            padding: EdgeInsets.fromLTRB(30, 0, 30,10),
             child:Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
 
               form_endereco_user(end_user_,null,(){desativarFormEndereco();})
@@ -715,8 +789,8 @@ barraView(){
             borderRadius: BorderRadius.all(Radius.circular(5))),
         alignment: Alignment.centerRight,
         margin: EdgeInsets.fromLTRB(5, 5, 0, 5),
-        child:
-        Icon(Icons.shopping_basket, color: Colors.white)),
+        child: Image.asset("basket_.png",width:25,height:25,)),
+//        Icon(Icons.shopping_basket, color: Colors.white)),
     Container(padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(5))),
@@ -795,9 +869,6 @@ barraView(){
 
 
 listaCesta()  {
-
-  print("ITEM LISTA CESTA "+widget.user.uid.toString());
-
   return
     Container(
         height: 125,

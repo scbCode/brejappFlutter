@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:android_intent/android_intent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,7 +43,7 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
   var fbairro = new FocusNode();
   var fnumero = new FocusNode();
   var fcomplemento = new FocusNode();
-
+  var angCamMap=0.0;
   GoogleMapController mapController;
   LatLng _center = const LatLng(-1.521563, -48.677433);
   LatLng _center_current = const LatLng(-1.521563, -48.677433);
@@ -73,11 +75,10 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
           _center_start =_center;
         });
     }
-
     _controllerIcon = AnimationController(duration: Duration(milliseconds: 200),vsync: this);
-//    _getLocation();
 
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,79 +88,90 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
 
     return
       Container(
-        child:
+          decoration: BoxDecoration( boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 5,offset: Offset(0,3))]),
+          child:
           Container(
-            decoration: BoxDecoration(color:Colors.black54),
+            decoration: BoxDecoration(color:Colors.white),
                  child: Column(
                  mainAxisAlignment: MainAxisAlignment.center,
                  children: <Widget>[
                    SingleChildScrollView(child:
                    Container(
                    width: MediaQuery.of(context).size.width,
-                   padding: EdgeInsets.all(40),
-                   decoration: BoxDecoration(color:Colors.white),
-                      child:
+                       decoration: BoxDecoration(color:Colors.white, borderRadius:BorderRadius.all(Radius.circular(20))),
+                       padding: EdgeInsets.all(0),
+                       child:
                      Column(
                        mainAxisSize: MainAxisSize.min,
                        mainAxisAlignment: MainAxisAlignment.center,
                        children: <Widget>[
-                         Container(child:Text("NOVO ENDEREÇO",style: TextStyle(color:Colors.orange,fontFamily: 'RobotoBold'))),
-                         Container(height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
+                         Container(
+                             padding: EdgeInsets.all(20),
+                             child:Text("NOVO ENDEREÇO",style: TextStyle(color:Colors.orange,fontFamily: 'RobotoBold'))),
+                         Container(
+                             padding: EdgeInsets.all(20),
+                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(onFieldSubmitted: (term) {
                                _fieldFocusChange (frua, fbairro);
                              },focusNode:frua,controller:c_rua,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Rua",hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
 
-                         Container(height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
+                         Container(
+                             padding: EdgeInsets.all(20),
+                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(focusNode:fbairro,
                                  onFieldSubmitted: (term) {
                                _fieldFocusChange ( fbairro , fnumero);
                              },controller:c_bairro,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Bairro",hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
-                         Container(height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
+                         Container(
+                             padding: EdgeInsets.all(20),
+                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(onFieldSubmitted: (term) {
                                _fieldFocusChange (fnumero , fcomplemento);
                                },focusNode:fnumero,controller:c_numero,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Numero",hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
-                         Container(height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
+                         Container(                             padding: EdgeInsets.all(20),
+                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(focusNode:fcomplemento,controller:c_complemento,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Complemento",hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
 
-//                         Container(
-//                           height: 130, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
-//                            child:
-//                            Stack(children: <Widget>[
-////                             GoogleMap(
-////                               onMapCreated: _onMapCreated,
-////                              zoomControlsEnabled: false,
-////                              mapType: MapType.normal,
-////                              onCameraMove: (object) => {_moveMarkerCenter(object.target)},
-////                              initialCameraPosition:  CameraPosition(
-////                                target: getLocal(),
-////                                zoom: 8.0,
-////                              ),
-////                            ),
-//                              Visibility(visible: show_googlemaps, child:
-//                            Container(
-//                                  height: 130,
-//                                  decoration: BoxDecoration(color: Colors.grey),
-//                                  alignment: Alignment.center)),
-//                             Visibility(visible: true, child:
-//                              Container(
-//                                  height: 130,
-//                                  alignment: Alignment.center,
-//                                  child:Icon(Icons.adjust,color: Colors.orange,))),
-//                              GestureDetector(
-//                                  onTap: (){ returnLocalInit();},
-//                                  child: Visibility(visible: true, child:
-//                                  Container(
-//                                      height: 130,
-//                                      alignment: Alignment.bottomRight,
-//                                      child:
-//                                      RotationTransition(
-//                                          turns: Tween(begin: 0.0, end: 1.0).animate(_controllerIcon),
-//                                          child:Icon(Icons.refresh,color: Colors.blue,size: 25,))))),
-//                            ],)),
+                         Container(
+                           height: 130, margin: EdgeInsets.fromLTRB(0, 20, 0, 0), alignment: Alignment.centerLeft,
+                            child:
+                            Stack(children: <Widget>[
+                             GoogleMap(
+                              onMapCreated:  _onMapCreated,
+                              zoomControlsEnabled: true,
+                              buildingsEnabled: true,
+                              mapType: MapType.normal,
+                              onCameraMove: (object) => {_moveMarkerCenter(object.target)},
+                              initialCameraPosition:  CameraPosition(
+                                target: getLocal(),
+                                zoom: 12.0
+                              ),
+                            ),
+                              Visibility(visible: show_googlemaps, child:
+                            Container(
+                                  height: 130,
+                                  decoration: BoxDecoration(color: Colors.grey),
+                                  alignment: Alignment.center)),
+                             Visibility(visible: true, child:
+                              Container(
+                                  height: 130,
+                                  alignment: Alignment.center,
+                                  child:Icon(Icons.adjust,color: Colors.orange,))),
+                              GestureDetector(
+                                  onTap: (){ returnLocalInit();},
+                                  child: Visibility(visible: true, child:
+                                  Container(
+                                      height: 130,
+                                      alignment: Alignment.bottomRight,
+                                      child:
+                                      RotationTransition(
+                                          turns: Tween(begin: 0.0, end: 1.0).animate(_controllerIcon),
+                                          child:Icon(Icons.refresh,color: Colors.blue,size: 25,))))),
+                            ],)),
 
                          Row(
                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -175,7 +187,7 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                      width: 100,
                                      padding: EdgeInsets.all(5),
                                      decoration: BoxDecoration(color:Colors.white,border: Border.all(color:Colors.orange)),
-                                     margin: EdgeInsets.fromLTRB(10, 20, 10, 0),
+                                     margin: EdgeInsets.all(30),
                                      alignment: Alignment.center,
                                      child: Text("CANCELAR",style: TextStyle(color: Colors.orange),),
                                    ),
@@ -190,13 +202,12 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                      width: 70,
                                      padding: EdgeInsets.all(5),
                                      decoration: BoxDecoration(color:Colors.white,border: Border.all(color:Colors.orange)),
-                                      margin: EdgeInsets.fromLTRB(10, 20, 10, 0),
+                                     margin: EdgeInsets.all(30),
                                      alignment: Alignment.center,
                                      child: Text("SALVAR",style: TextStyle(color: Colors.orange),),
                                    ),
                               )),
                          ],),
-
                        ],)))
                 ],)
         )
@@ -211,20 +222,14 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
 
 
   getLocal(){
-
     show_googlemaps=false;
     if (mapController!=null)
-        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 16));
+        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 12));
 
    _center=new LatLng(widget.enderecoExist.localizacao.latitude,
        widget.enderecoExist.localizacao.longitude);
 
     return _center;
-
-//   else{
-//    _getLocation();
-//    return new LatLng(  _center_current.latitude,  _center_current. longitude);}
-
   }
 
   _initSaveEndereco_check(){

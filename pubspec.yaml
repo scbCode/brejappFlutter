@@ -62,6 +62,13 @@ flutter:
     - gelada.png
     - isometric_localmap.png
     - gif_load.gif
+    - money.png
+    - cardcredit.png
+    - cardBlock.png
+    - card_machine.png
+    - basket_iso.png
+    - cardcredt_visa.png
+    - basket_.png
   # FONTS
   fonts:
     - family: RobotoLight

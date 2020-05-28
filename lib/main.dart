@@ -424,11 +424,11 @@ checkStateUser() async {
        .listen((data) => {
          getUser(data,data.documentID)
     });
+
 }
 
 void getUser(var data,var documentID){
 
-    print("getdados data read user");
     setState(() {
       Usuario = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
     });
@@ -437,6 +437,7 @@ void getUser(var data,var documentID){
 
     getEnderecoUser();
 }
+
 
 void getEnderecoUser() async {
 
@@ -451,7 +452,9 @@ void getEnderecoUser() async {
   }
 
  void setUiEndereco(var data){
-    setState(() {
+   getDistanciaLoja();
+
+   setState(() {
       if (data.exists) {
           enderecoUser    endereco = new enderecoUser(
               data['rua'], data['bairro'], data['numero'], data['complemento'],
@@ -459,7 +462,8 @@ void getEnderecoUser() async {
           local_end = LatLng(endereco.localizacao.latitude,endereco.localizacao.longitude);
           local_user=local_end;
           local_ = local_end;
-          v_bg_load=false;
+          getDistanciaLoja();
+
       }else {
           print("ENDERECO NULL");
           v_bg_load=false;
@@ -481,7 +485,7 @@ void getEnderecoUser() async {
   }
 
   void setUiEndereco_Temp(var data) {
-    getDistanciaLoja();
+//    getDistanciaLoja();
     setState(() {
       if (data.exists) {
         enderecoUser    endereco = new enderecoUser(

@@ -97,9 +97,10 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
                       if (value.data.isNotEmpty) {
                           var ct5rl=false;
                           for ( int i = 0;i< value.data.length;i++ ){
-//                              print("BLOC CONTEM ITEM NA CESTA "+value.data[i].quantidade.toString());
                               if (value.data[i].id==widget.produto.id){
                                   print("BLOC ITEM == ITEM "+value.data[i].quantidade.toString());
+                                  if ( widget.produto.quantidade==0)
+                                    widget.produto.quantidade=1;
                                   widget.produto.quantidade=value.data[i].quantidade;
                                   total=widget.produto.quantidade;
                                   ct5rl=true;
@@ -384,7 +385,7 @@ _itemOff(){
   setState(() {
     vbtnremoveitem=false;
     textBtnadd="ADICIONAR";
-    total=0;
+    total=1;
     colorBtnAdd=Colors.orange;
   });
 

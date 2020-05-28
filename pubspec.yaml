@@ -69,6 +69,8 @@ flutter:
     - basket_iso.png
     - cardcredt_visa.png
     - basket_.png
+    - credit-card.png
+    - machine2.png
   # FONTS
   fonts:
     - family: RobotoLight

@@ -84,20 +84,21 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
 
 
     if (confirmarEndereco==false){
-      cor_endereco=Colors.white;
+        cor_endereco=Colors.white;
+        ctrol_view_btnEnd=true;
     }else
       {
         cor_endereco=Colors.amber[100];
       }
 
     if (widget.listaCesta[0].cartaoApp!=null)
-      setState(() {
-        cartao = widget.listaCesta[0].cartaoApp;
-      });
+        setState(() {
+          cartao = widget.listaCesta[0].cartaoApp;
+        });
     if (widget.listaCesta[0].maquinaCartao!=null)
-     setState(() {
-       maquina = widget.listaCesta[0].maquinaCartao;
-     });
+       setState(() {
+         maquina = widget.listaCesta[0].maquinaCartao;
+       });
 
     return
         Visibility(visible: view,child:
@@ -157,8 +158,8 @@ return
                                 Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
                                     child:Text(widget.listaCesta[0].loja.toString().toUpperCase()+" ",textAlign: TextAlign.right, style: TextStyle(color: Colors.black ,fontSize:14,fontFamily: 'BreeSerif'))),
                                 Container(margin: EdgeInsets.fromLTRB(5, 0, 0, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-//                       Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Frete: R\u0024 3,00 ",style: TextStyle(color: Colors.black54,fontSize: 14,fontFamily: 'BreeSerif')),),
-//                       Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
+//                         Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Frete: R\u0024 3,00 ",style: TextStyle(color: Colors.black54,fontSize: 14,fontFamily: 'BreeSerif')),),
+//                         Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
                                 //   Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(0, 4, 5, 0), child:Text( formatDistancia(),textAlign: TextAlign.right, style: TextStyle(color: Colors.black54,fontSize:14,fontFamily: 'BreeSerif'))),
                               ],),
                           ),
@@ -192,10 +193,11 @@ return
                           Visibility(visible: view_cestadetalhes,child:
                           GestureDetector(onTap: (){
                             setState(() {
-                              if (view_cestadetalhes)
-                                view_cestadetalhes=false;
-                              else
-                                view_cestadetalhes=true;
+                              if (view_cestadetalhes){
+                                confirmarEndereco=false;
+                                view_cestadetalhes=false;}
+                              else{
+                                view_cestadetalhes=true;}
                             });
                           },
                             child:
@@ -208,20 +210,33 @@ return
                           Visibility(visible:view_cestadetalhes, child:
                           Column(
                               children: <Widget>[
-                                Divider(color: Colors.orange,height: 2,),
 
-                                //END ENTREGA TEXT
+                                Divider(color: Colors.orange,height: 2,),
                                 Container(
                                     padding: EdgeInsets.fromLTRB(10,10,0,0),
                                     alignment: Alignment.centerLeft,
                                     child: Text("TOTAL + FRETE: "+totalComFrete()
                                       ,textAlign: TextAlign.center,style: TextStyle(fontSize: 19,fontFamily: 'BreeSerif',color: Colors.orange),)),
 
+                                //END ENTREGA TEXT
+                                Row(children: <Widget>[
+
                                 Container(
                                     padding: EdgeInsets.fromLTRB(13,5,0,10),
                                     alignment: Alignment.centerLeft,
                                     child: Text("FRETE: "+formatFrete() ,style:
                                     TextStyle(fontStyle: FontStyle.italic,fontSize: 14,fontFamily:'RobotoRegular',color: Colors.black54),)),
+                                  Visibility(visible: cartao,child:
+                                  Container(
+                                      padding: EdgeInsets.fromLTRB(15,0,0,0),
+                                      alignment: Alignment.centerLeft,
+                                      child: Image.asset("credit-card.png",width: 20,height: 20,))),
+                                  Visibility(visible: cartao,child:
+                                  Container(
+                                      padding: EdgeInsets.fromLTRB(5,0,0,0),
+                                      alignment: Alignment.centerLeft,
+                                      child: Image.asset("machine2.png",width: 20,height: 20,))),
+                                ],),
 
                                 Divider(color:Colors.grey),
 
@@ -618,16 +633,17 @@ return
 
             Container(
                 margin: EdgeInsets.fromLTRB(15, 0, 15, 30),
-                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                 decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
                     boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
                 child:
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                     Container(
-                      margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                      child:
-                      Icon(Icons.credit_card,size: 30,color: Colors.grey,),),
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                        margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                        child:
+                        Image.asset("cardcredit.png",width: 40,height: 60,)),
 
                     Container(
                         margin: EdgeInsets.fromLTRB(25, 10,0, 10),
@@ -651,6 +667,7 @@ return
 
   pagamentoCartaoItem()
   {
+    Offset _offset = Offset.zero;
     return
       Column(children: <Widget>[
         Column(
@@ -666,11 +683,13 @@ return
 
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
+
+
                     Container(
                       padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                       margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                       child:
-                      Image.asset("cardcredit.png",width: 40,height: 60,)),
+                      Image.asset("visa.png",width: 40,height: 60,)),
 
                     Container(
                         margin: EdgeInsets.fromLTRB(25, 10,0, 10),
@@ -697,7 +716,7 @@ return
     return
       Container( width: double.infinity,height: MediaQuery.of(context).size.height*0.7,
           child: Container(
-        margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child:
+          margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child:
       ClipRect(
         child:  BackdropFilter(
         filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
@@ -706,22 +725,10 @@ return
           child:
           Container(
             padding: EdgeInsets.fromLTRB(30, 0, 30,10),
-            child:Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-
-              form_endereco_user(end_user_,null,(){desativarFormEndereco();})
-//              Container(padding: EdgeInsets.fromLTRB(20, 10, 20, 10), margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
-//                  decoration: BoxDecoration(color:Colors.white,borderRadius: BorderRadius.all(Radius.circular(5)),boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 3,offset: Offset(0,3))]), child:
-//              Text("ENDEREÇO DE ENTREGA",style: TextStyle(color: Colors.orange,fontSize: 14,fontFamily: 'RobotoBold'),)),
-//              Container(
-//                height: 50,
-//                padding: EdgeInsets.all(5),
-//                  decoration: BoxDecoration(color:Colors.white
-//                      ,borderRadius: BorderRadius.all(Radius.circular(5)),
-//                      boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 3,offset: Offset(0,3))]),
-//                  child:
-//              TextFormField())
-
-            ],)
+            child:Column(mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                  form_endereco_user(end_user_,null,(){desativarFormEndereco();})
+              ],)
           ),
 
 
@@ -737,6 +744,7 @@ return
 
 
   formatDistancia(){
+
     var unidadeMedida="";
     double valeu = double.parse(widget.listaDistancia_.distancia);
     if (valeu<1000)
@@ -746,7 +754,8 @@ return
       unidadeMedida = "km";
     }
     var distTxt="";
-  return  distTxt= valeu.toStringAsFixed(1)+""+unidadeMedida;
+    return  distTxt= valeu.toStringAsFixed(1)+""+unidadeMedida;
+
   }
 
 
@@ -775,6 +784,9 @@ return
      if (view_resumo_cesta == false) {
        widget.call_back_show_bg(true);
        view_resumo_cesta=true;
+
+       confirmarEndereco=false;
+
      }
      else{
        confirmarEndereco=false;

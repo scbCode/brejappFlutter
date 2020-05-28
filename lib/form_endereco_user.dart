@@ -83,9 +83,6 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
   @override
   Widget build(BuildContext context) {
 
-//    if (_center!=_center_start)
-//         show_googlemaps=false;
-
     return
       Container(
           decoration: BoxDecoration( boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 5,offset: Offset(0,3))]),

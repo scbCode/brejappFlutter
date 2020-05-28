@@ -69,6 +69,8 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   enderecoUser end_user_;
   var view=false;
   var user;
+  var cartao = false;
+  var maquina = false;
   double distance=0.0;
 
   var enderecoTemp_=false;
@@ -83,14 +85,21 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
 
     if (confirmarEndereco==false){
       cor_endereco=Colors.white;
-     // ctrol_view_btnEnd=true;
     }else
       {
         cor_endereco=Colors.amber[100];
-    //    ctrol_view_btnEnd=false;
       }
 
-      return
+    if (widget.listaCesta[0].cartaoApp!=null)
+      setState(() {
+        cartao = widget.listaCesta[0].cartaoApp;
+      });
+    if (widget.listaCesta[0].maquinaCartao!=null)
+     setState(() {
+       maquina = widget.listaCesta[0].maquinaCartao;
+     });
+
+    return
         Visibility(visible: view,child:
             barCompleta());
 
@@ -223,7 +232,7 @@ return
                                 TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
 
                               Container(
-                                  margin: EdgeInsets.fromLTRB(10, 0,0,30),
+                                  margin: EdgeInsets.fromLTRB(10, 0,0,10),
                                   alignment: Alignment.center, child:
                                 StreamBuilder(
                                     stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
@@ -231,8 +240,6 @@ return
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState==ConnectionState.active){
                                         if (snapshot.data.documents.length > 0) {
-                                          ctrol_view_btnEnd=false;
-                                          confirmarEnderecoviewbtn=true;
                                           enderecoTemp_=false;
                                           return
                                             enderecoUserView(snapshot.data.documents[0]);
@@ -286,11 +293,13 @@ return
                                 alignment: Alignment.center, child:
                             Text("PAGAMENTO",style:
                             TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
-
-                            pagamentoDinheiro(),
-                            pagamentoCartaoItem(),
-                            formaPagMaquina(),
-                            pagamentoCartaoVazio(),
+                                pagamentoDinheiro(),
+                            Visibility(visible: maquina,
+                                child:formaPagMaquina()),
+                            Visibility(visible:cartao,
+                                child:pagamentoCartaoItem()
+                               ),
+                                pagamentoCartaoVazio(),
                           ]))
                         ])
                 )
@@ -309,7 +318,6 @@ return
   @override
   void initState() {
 
-
     getUseruid();
     bloc.getEnderecoUser();
     listaCesta_=listaCesta();
@@ -318,7 +326,6 @@ return
 
     super.initState();
   }
-
 
 
   void getDadosUser(var uid) async {
@@ -343,10 +350,13 @@ return
    });
   }
 
+
+
   getUseruid() async {
     var userx = await FirebaseAuth.instance.currentUser();
     getDadosUser(userx.uid);
   }
+
 
   enderecoUserView(var data){
     end_user = new enderecoUserSnapShot(data);
@@ -395,7 +405,8 @@ return
                                 setState(() {
                                 view_form_end=true;
                                 ctrol_view_btnEnd=true;
-                              }); },child:
+                                confirmarEndereco=false;
+                                }); },child:
                              Container(
                                  margin: EdgeInsets.fromLTRB(0, 5,10, 5),
                                  alignment: Alignment.center, child:
@@ -526,8 +537,6 @@ return
   }
 
 
-
-
   pagamentoDinheiro()
   {
     return
@@ -549,6 +558,7 @@ return
                 child:
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
+
                   Container(
                     margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: Image.asset("money.png",width: 50,height: 50)),
@@ -564,11 +574,12 @@ return
 
                       Container(
                           width: 80,
-                          height: 20,
-                          margin: EdgeInsets.fromLTRB(10, 20,0, 0),
+                          margin: EdgeInsets.fromLTRB(10, 0,0, 0),
                           alignment: Alignment.center, child:
                       TextFormField(
-                        decoration: InputDecoration(hintText: "Troco: 50,00"),
+                        decoration: InputDecoration.collapsed(
+                          hintText: 'Troco:'
+                          ),
                         keyboardType:  TextInputType.number,
                         style:
                         TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
@@ -582,6 +593,7 @@ return
 
       ],));
   }
+
   callTokenrizarCartao() async {
     print("callTokenrizarCartao");
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
@@ -593,6 +605,7 @@ return
     print("callTokenrizarCartaofinal");
 
   }
+
 
   pagamentoCartaoVazio()
   {
@@ -715,11 +728,14 @@ return
      )))));
   }
 
+
   desativarFormEndereco(){
     setState(() {
       view_form_end=false;
     });
   }
+
+
   formatDistancia(){
     var unidadeMedida="";
     double valeu = double.parse(widget.listaDistancia_.distancia);
@@ -732,6 +748,7 @@ return
     var distTxt="";
   return  distTxt= valeu.toStringAsFixed(1)+""+unidadeMedida;
   }
+
 
   barra(){
   return  Container(decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
@@ -751,7 +768,7 @@ return
   }
 
 
-barraView(){
+  barraView(){
  return
    GestureDetector(onTap: () {
    setState(() {
@@ -868,7 +885,7 @@ barraView(){
   }
 
 
-listaCesta()  {
+  listaCesta()  {
   return
     Container(
         height: 125,
@@ -908,7 +925,48 @@ listaCesta()  {
 }
 
 
-selectItemCestaList(var prod){
+  listaCards()  {
+    return
+      Container(
+          height: 125,
+          child:
+          StreamBuilder(
+              stream: Firestore.instance
+                  .collection("Usuarios").document(widget.user.uid).collection("cartoes")
+                  .snapshots(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting:
+                    return new Text("AGUARDE....");
+                  case ConnectionState.none:
+                    return new Text("sem item");
+                    // TODO: Handle this case.
+                    break;
+                  case ConnectionState.active:
+                    return new ListView.builder(
+                        padding: EdgeInsets.all(0.0),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: snapshot.data.documents.length,
+                        itemBuilder: (context, index) {
+                          print("ITEM CESTA LISTA"+index .toString());
+                          return item_cesta(snapshot.data.documents[index],null,(value){return selectItemCestaList(value);});
+                        }
+                    );
+                    // TODO: Handle this case.
+                    break;
+                  case ConnectionState.done:
+                    return new Text("sem item");
+                    // TODO: Handle this case.
+                    break;
+                }
+              }
+          ));
+  }
+
+
+
+  selectItemCestaList(var prod){
     setState(() {
       if (prod==null)
         ctrolControls=false;
@@ -920,13 +978,12 @@ selectItemCestaList(var prod){
 }
 
 
-getPrecoFormat(preco,quantidade){
+  getPrecoFormat(preco,quantidade){
     double p = (quantidade*preco)*1.0;
     preco = p.toStringAsFixed(2).toString();
     preco=preco.replaceAll(".", ",");
     return preco;
 }
-
 
 
   _checkreresult() {

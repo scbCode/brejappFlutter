@@ -16,6 +16,8 @@ class Produto{
   var coefKm;
   var distanciaMaxKm;
   var distanciaGratisKm;
+  bool cartaoApp;
+  bool maquinaCartao;
   LatLng localizacao;
   DocumentSnapshot snapshot;
 
@@ -33,6 +35,8 @@ class Produto{
     this.distanciaMaxKm =  snapshot["distanciaMaxKm"];
     this.distanciaGratisKm =  snapshot["distanciaGratisKm"];
     this.localizacao =  snapshot["localizacao"];
+    this.cartaoApp =  snapshot["cartaoApp"];
+    this.maquinaCartao =  snapshot["maquinaCartao"];
   }
 
    getproduto(){
@@ -40,7 +44,7 @@ class Produto{
     Map<String, dynamic> p = {
      'nome':this.nome,'preco':this.preco,'vol':this.vol,'loja':this.loja,'img':this.img,'id':this.id,
       'tags':this.tags,'localizacao':this.localizacao,'gelada':this.gelada,
-      'coefKm':this.coefKm,'distanciaMaxKm':this.distanciaMaxKm,'distanciaGratisKm':this.distanciaGratisKm
+      'coefKm':this.coefKm,'distanciaMaxKm':this.distanciaMaxKm,'distanciaGratisKm':this.distanciaGratisKm,'cartaoApp':this.cartaoApp,'maquinaCartao':this.maquinaCartao
     };
     return p;
   }

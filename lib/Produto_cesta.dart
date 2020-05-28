@@ -19,6 +19,8 @@ class Produto_cesta{
   var distanciaMaxKm;
   var distanciaGratisKm;
   bool cesta;
+  bool cartaoApp;
+  bool maquinaCartao;
   GeoPoint localizacao;
   DocumentSnapshot snapshot;
 
@@ -38,6 +40,8 @@ class Produto_cesta{
     this.distanciaMaxKm =  snapshot["distanciaMaxKm"];
     this.distanciaGratisKm =  snapshot["distanciaGratisKm"];
     this.gelada =  snapshot["gelada"];
+    this.cartaoApp =  snapshot["cartaoApp"];
+    this.maquinaCartao =  snapshot["maquinaCartao"];
   }
 
   getproduto(){
@@ -45,7 +49,7 @@ class Produto_cesta{
     Map<String, dynamic> p = {
       'nome':this.nome,'preco':this.preco,'vol':this.vol,'loja':this.loja,'img':this.img,'quantidade':this.quantidade,'id':this.id
     ,'cesta':this.cesta,'tags':this.tags,'marca':this.marca,'localizacao':this.localizacao,'gelada':this.gelada,
-      'coefKm':this.coefKm,'distanciaMaxKm':this.distanciaMaxKm,'distanciaGratisKm':this.distanciaGratisKm
+      'coefKm':this.coefKm,'distanciaMaxKm':this.distanciaMaxKm,'distanciaGratisKm':this.distanciaGratisKm,'cartaoApp':this.cartaoApp,'maquinaCartao':this.maquinaCartao
     };
     return p;
   }

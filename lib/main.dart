@@ -448,22 +448,21 @@ void getEnderecoUser() async {
           .listen((data) => {
         setUiEndereco(data)
       });
+}
 
-  }
 
  void setUiEndereco(var data){
    getDistanciaLoja();
 
    setState(() {
       if (data.exists) {
-          enderecoUser    endereco = new enderecoUser(
-              data['rua'], data['bairro'], data['numero'], data['complemento'],
-              data['localizacao'],data['temp']);
+          enderecoUser endereco =
+          new enderecoUser(data['rua'], data['bairro'], data['numero'], data['complemento'],
+                           data['localizacao'],data['temp']);
           local_end = LatLng(endereco.localizacao.latitude,endereco.localizacao.longitude);
           local_user=local_end;
           local_ = local_end;
           getDistanciaLoja();
-
       }else {
           print("ENDERECO NULL");
           v_bg_load=false;

@@ -120,6 +120,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var listalojasview = listaLojas();
   final listv = GlobalKey<_MyHomePageState>();
   var bloc = BlocAll();
+  var positionCesta=45.0;
+  var view_barranav=true;
   double _sigmaX = 10.0; // from 0-10
   double _sigmaY = 10.0; // from 0-10
   double _opacity = 0.1; // from 0-1.0
@@ -141,9 +143,9 @@ class _MyHomePageState extends State<MyHomePage> {
         v_bg=false;
     }
 
-    return
+   return
       Scaffold(
-          resizeToAvoidBottomInset : true,
+          resizeToAvoidBottomInset : false,
           body:
       Stack( children: <Widget>[
       SingleChildScrollView(child:
@@ -167,7 +169,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     Column(children: <Widget>[
                                             listaProdutos])),
         ])),
-
+    Visibility(visible: view_barranav,
+    child:
     Positioned(bottom: 0, child:
     Container(width: MediaQuery.of(context).size.width, alignment: Alignment.centerRight, child:
     GestureDetector(onTap: (){ setState((){
@@ -194,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
     })
       ),
-    ))),
+    )))),
 
       Container(
           width: MediaQuery.of(context).size.width,
@@ -239,7 +242,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
        Positioned(
         width: MediaQuery.of(context).size.width,
-        bottom:45,
+        bottom:positionCesta,
         child:
         StreamBuilder<List<dynamic>>(
             stream: bloc.check,
@@ -321,6 +324,11 @@ class _MyHomePageState extends State<MyHomePage> {
  showhide_bg(var b){
     setState(() {
       v_bg=b;
+      view_barranav = !b;
+      if (b)
+      positionCesta=0.0;
+      else
+        positionCesta=45.0;
     });
 }
 

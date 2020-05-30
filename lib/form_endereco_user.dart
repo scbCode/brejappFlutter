@@ -6,9 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_firestore/botao3dFormEnd.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'ClickyButton.dart';
 import 'enderecoUser.dart';
 
 
@@ -84,57 +86,73 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
   Widget build(BuildContext context) {
 
     return
+
+
+        Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
       Container(
-          decoration: BoxDecoration( boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 5,offset: Offset(0,3))]),
+
+          decoration: BoxDecoration(
+              color:Colors.white, borderRadius:BorderRadius.all(Radius.circular(20)),
+              boxShadow: [BoxShadow(color: Colors.black26,blurRadius:2,offset: Offset(0,0))]),
           child:
-          Container(
-            decoration: BoxDecoration(color:Colors.white),
-                 child: Column(
+
+                 SingleChildScrollView(child:
+                 Column(
                  mainAxisAlignment: MainAxisAlignment.center,
                  children: <Widget>[
-                   SingleChildScrollView(child:
                    Container(
                    width: MediaQuery.of(context).size.width,
-                       decoration: BoxDecoration(color:Colors.white, borderRadius:BorderRadius.all(Radius.circular(20))),
+                       decoration: BoxDecoration(color:Colors.transparent,),
                        padding: EdgeInsets.all(0),
                        child:
                      Column(
-                       mainAxisSize: MainAxisSize.min,
                        mainAxisAlignment: MainAxisAlignment.center,
                        children: <Widget>[
                          Container(
                              padding: EdgeInsets.all(20),
                              child:Text("NOVO ENDEREÇO",style: TextStyle(color:Colors.orange,fontFamily: 'RobotoBold'))),
                          Container(
-                             padding: EdgeInsets.all(20),
-                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
-                             child:TextFormField(onFieldSubmitted: (term) {
-                               _fieldFocusChange (frua, fbairro);
-                             },focusNode:frua,controller:c_rua,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Rua",hintStyle: TextStyle(color: Colors.black26)),
+                             margin: EdgeInsets.fromLTRB(15, 0,15, 0), alignment: Alignment.centerLeft,
+                             child:
+                             TextField(controller:c_rua,
+                                 onChanged: (value) {
+                                   setState(() {
+                                   });},textInputAction:  TextInputAction.next,
+                                 textCapitalization: TextCapitalization.words,
+                                 decoration: InputDecoration(hintText: "Rua",
+                                     hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
 
                          Container(
-                             padding: EdgeInsets.all(20),
-                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
+                             margin: EdgeInsets.fromLTRB(15, 0, 15, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(focusNode:fbairro,
                                  onFieldSubmitted: (term) {
                                _fieldFocusChange ( fbairro , fnumero);
-                             },controller:c_bairro,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Bairro",hintStyle: TextStyle(color: Colors.black26)),
+                             },
+                                 controller:c_bairro,
+                                 textInputAction:  TextInputAction.next
+                                 ,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Bairro",hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
                          Container(
-                             padding: EdgeInsets.all(20),
-                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
+                             margin: EdgeInsets.fromLTRB(15, 0, 15, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(onFieldSubmitted: (term) {
                                _fieldFocusChange (fnumero , fcomplemento);
-                               },focusNode:fnumero,controller:c_numero,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Numero",hintStyle: TextStyle(color: Colors.black26)),
+                               },focusNode:fnumero,controller:c_numero,textInputAction:
+                             TextInputAction.next,textCapitalization: TextCapitalization.words,
+                                 decoration: InputDecoration(hintText: "Numero",hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
-                         Container(                             padding: EdgeInsets.all(20),
-                             height: 15, margin: EdgeInsets.fromLTRB(10, 20, 10, 0), alignment: Alignment.centerLeft,
-                             child:TextFormField(focusNode:fcomplemento,controller:c_complemento,textInputAction:  TextInputAction.next,textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: "Complemento",hintStyle: TextStyle(color: Colors.black26)),
-                                 style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
+                         Container(                             padding: EdgeInsets.all(5),
+                              margin: EdgeInsets.fromLTRB(10,0, 10, 0), alignment: Alignment.centerLeft,
+                             child:TextFormField(focusNode:fcomplemento,controller:c_complemento
+                                 ,textInputAction:  TextInputAction.next,textCapitalization:
+                                 TextCapitalization.words, decoration: InputDecoration(hintText: "Complemento",hintStyle: TextStyle(color: Colors.black26)),
+                                 style:
+                                 TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
 
                          Container(
-                           height: 130, margin: EdgeInsets.fromLTRB(0, 20, 0, 0), alignment: Alignment.centerLeft,
+                           height: 150, margin: EdgeInsets.fromLTRB(0, 20, 0, 0), alignment: Alignment.centerLeft,
                             child:
                             Stack(children: <Widget>[
                              GoogleMap(
@@ -148,21 +166,21 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                 zoom: 12.0
                               ),
                             ),
-                              Visibility(visible: show_googlemaps, child:
+                           Visibility(visible: show_googlemaps, child:
                             Container(
-                                  height: 130,
+                                height: 150,
                                   decoration: BoxDecoration(color: Colors.grey),
                                   alignment: Alignment.center)),
                              Visibility(visible: true, child:
                               Container(
-                                  height: 130,
+                                  height: 150,
                                   alignment: Alignment.center,
                                   child:Icon(Icons.adjust,color: Colors.orange,))),
                               GestureDetector(
                                   onTap: (){ returnLocalInit();},
                                   child: Visibility(visible: true, child:
                                   Container(
-                                      height: 130,
+                                      height: 150,
                                       alignment: Alignment.bottomRight,
                                       child:
                                       RotationTransition(
@@ -170,45 +188,69 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                           child:Icon(Icons.refresh,color: Colors.blue,size: 25,))))),
                             ],)),
 
-                         Row(
-                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                           children: <Widget>[
-                             GestureDetector(
-                               onTap: (){
-                                 widget.callback_return_cancel();
-                               },
-                               child:
-                                 Container(alignment: Alignment.centerLeft,
-                                   child:
-                                   Container(
-                                     width: 100,
-                                     padding: EdgeInsets.all(5),
-                                     decoration: BoxDecoration(color:Colors.white,border: Border.all(color:Colors.orange)),
-                                     margin: EdgeInsets.all(30),
-                                     alignment: Alignment.center,
-                                     child: Text("CANCELAR",style: TextStyle(color: Colors.orange),),
-                                   ),
-                                 ),),
 
-                             Container(alignment: Alignment.centerRight,
-                               child:
-                               GestureDetector(
-                                 onTap: (){_initSaveEndereco_check();},
-                                 child:
-                                 Container(
-                                     width: 70,
-                                     padding: EdgeInsets.all(5),
-                                     decoration: BoxDecoration(color:Colors.white,border: Border.all(color:Colors.orange)),
-                                     margin: EdgeInsets.all(30),
-                                     alignment: Alignment.center,
-                                     child: Text("SALVAR",style: TextStyle(color: Colors.orange),),
-                                   ),
-                              )),
-                         ],),
-                       ],)))
-                ],)
+                       ],)),
+
+
+
+                 ],)
         )
-    );
+    ),
+Container(
+    margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
+    child:
+     Row (
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+
+            Container(
+                width: MediaQuery.of(context).size.width*0.4,
+                margin: EdgeInsets.fromLTRB(0,0,0,0),
+                child:
+                Transform.scale(scale: 0.8,child:
+
+                botao3dFormEnd(
+                  colorFactor: 3,
+                  sizeW: MediaQuery.of(context).size.width*.5,
+                  child: Text(
+                    'SALVAR',
+                    style: TextStyle(
+                        fontFamily:'BreeSerif',
+                        color: Colors.white,
+                        letterSpacing: 3,
+                        fontSize: 20),
+                  ),
+                  color: Colors.amber,
+                  onPressed: () { _initSaveEndereco_check();},
+                ))),
+
+            Container(
+            width: MediaQuery.of(context).size.width*0.4,
+             child:
+              Transform.scale(scale: 0.8,child:
+                  Container(
+                  child:
+                      botao3dFormEnd(
+                        colorFactor: 3,
+                        sizeW: MediaQuery.of(context).size.width*.5,
+                        child: Text(
+                          'CANCELAR',
+                          style: TextStyle(
+                              fontFamily:'BreeSerif',
+                              color: Colors.white,
+                              letterSpacing: 3,
+                              fontSize: 18),
+                        ),
+                        color: Colors.grey,
+                        onPressed: () { widget.callback_return_cancel();},
+                      )))),
+
+
+            ],)),
+
+
+        ]);
   }
 
 

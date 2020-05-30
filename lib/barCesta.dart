@@ -19,6 +19,7 @@ import 'dart:async';
 
 import 'Loja.dart';
 import 'Produto_cesta.dart';
+import 'cartao_form.dart';
 import 'item_cesta.dart';
 
 
@@ -52,6 +53,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var bloc = BlocAll();
   var view_resumo_cesta=false;
   var view_cestadetalhes=false;
+  var view_cestadetalhespreco=false;
   var view_form_end=false;
   Produto_cesta selecionado;
   var listaCesta_;
@@ -65,6 +67,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var bttmResumo=0.0;
   var iconCheckPagamento=Icons.radio_button_unchecked;
   var tipoPagSelectItem;
+  var view_card_form = false;
   enderecoUserSnapShot end_user;
   enderecoUser end_user_;
   var view=false;
@@ -72,7 +75,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var cartao = false;
   var maquina = false;
   double distance=0.0;
-
+  var enderecoView ;
   var enderecoTemp_=false;
 
   @override
@@ -195,7 +198,8 @@ return
                             setState(() {
                               if (view_cestadetalhes){
                                 confirmarEndereco=false;
-                                view_cestadetalhes=false;}
+                                view_cestadetalhes=false;
+                              }
                               else{
                                 view_cestadetalhes=true;}
                             });
@@ -210,19 +214,39 @@ return
                           Visibility(visible:view_cestadetalhes, child:
                           Column(
                               children: <Widget>[
-
                                 Divider(color: Colors.orange,height: 2,),
-                                Container(
+                                Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
+                                    Container(
                                     padding: EdgeInsets.fromLTRB(10,10,0,0),
                                     alignment: Alignment.centerLeft,
                                     child: Text("TOTAL + FRETE: "+totalComFrete()
                                       ,textAlign: TextAlign.center,style: TextStyle(fontSize: 19,fontFamily: 'BreeSerif',color: Colors.orange),)),
 
+                                GestureDetector(
+                                     onTap: (){
+                                       setState(() {
+                                       if (!view_cestadetalhespreco)
+                                            view_cestadetalhespreco=true;
+                                          else
+                                            view_cestadetalhespreco=false;
+                                       });
+                                     },
+                                     child:
+                                  Container(
+                                      padding: EdgeInsets.fromLTRB(10,10,0,0),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text("mais detalhes",
+                                        textAlign: TextAlign.right,
+                                        style:
+                                        TextStyle(fontSize: 12,fontFamily: 'RobotoRegular',color: Colors.black54),))),
+
+                                ]),
                                 //END ENTREGA TEXT
-                                Row(children: <Widget>[
+                              Visibility(visible:view_cestadetalhespreco, child:
+                              Row(children: <Widget>[
 
                                 Container(
-                                    padding: EdgeInsets.fromLTRB(13,5,0,10),
+                                    padding: EdgeInsets.fromLTRB(20,5,0,10),
                                     alignment: Alignment.centerLeft,
                                     child: Text("FRETE: "+formatFrete() ,style:
                                     TextStyle(fontStyle: FontStyle.italic,fontSize: 14,fontFamily:'RobotoRegular',color: Colors.black54),)),
@@ -236,54 +260,25 @@ return
                                       padding: EdgeInsets.fromLTRB(5,0,0,0),
                                       alignment: Alignment.centerLeft,
                                       child: Image.asset("machine2.png",width: 20,height: 20,))),
-                                ],),
+                                ],)),
 
                                 Divider(color:Colors.grey),
 
                                 Container(
-                                    margin: EdgeInsets.fromLTRB(10, 0,0,10),
+                                    margin: EdgeInsets.fromLTRB(10, 15,0,10),
                                     alignment: Alignment.center, child:
                                 Text("ENDEREÇO DE ENTREGA ",style:
-                                TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
+                                TextStyle(color: Colors.black87,fontSize: 18,fontFamily: 'RobotoBold'),)),
 
                               Container(
                                   margin: EdgeInsets.fromLTRB(10, 0,0,10),
-                                  alignment: Alignment.center, child:
-                                StreamBuilder(
-                                    stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
-                                        .collection("endereco").where("temp",isEqualTo: false).snapshots(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState==ConnectionState.active){
-                                        if (snapshot.data.documents.length > 0) {
-                                          enderecoTemp_=false;
-                                          return
-                                            enderecoUserView(snapshot.data.documents[0]);
-                                        }
-                                        else{
-                                          return
-                                            StreamBuilder(
-                                                stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
-                                                    .collection("endereco").where("temp",isEqualTo: true).snapshots(),
-                                                builder: (context, snapshot1) {
-                                                  if (snapshot1.connectionState==ConnectionState.active){
-                                                    if (snapshot1.data.documents.length > 0) {
-                                                      enderecoTemp_=true;
-                                                      return
-                                                        enderecoTemp(snapshot1.data.documents[0]);
-                                                    }else
-                                                      return Container();
-                                                  }else
-                                                    return Container();
-                                                });
-                                        }
-                                      }else
-                                        return Container();
-                                    })),
+                                    alignment: Alignment.center, child:
+                                  enderecoView
+                                 ),
 
                                 Visibility(
                                     visible: ctrol_view_btnEnd,
                                     child:
-
                                     GestureDetector(onTap: (){
                                       setState(() {
                                         confirmarEndereco=true;
@@ -298,7 +293,6 @@ return
                                           alignment: Alignment.topCenter, child:
                                       Text("CONFIRMAR ENDEREÇO",textAlign: TextAlign.center,style:
                                       TextStyle(color: Colors.orange,fontFamily: 'RobotoBold'),)),)),
-
                               ])),
 
                           Visibility(visible: confirmarEndereco,child:
@@ -306,8 +300,9 @@ return
                             Container(
                                 margin: EdgeInsets.fromLTRB(10, 10,0,10),
                                 alignment: Alignment.center, child:
-                            Text("PAGAMENTO",style:
-                            TextStyle(color: Colors.black87,fontSize: 14,fontFamily: 'RobotoLight'),)),
+                            Text("PAGAMENTO",
+                              style:
+                            TextStyle(color: Colors.black,fontSize: 16,fontFamily: 'RobotoBold'),)),
                                 pagamentoDinheiro(),
                             Visibility(visible: maquina,
                                 child:formaPagMaquina()),
@@ -315,7 +310,11 @@ return
                                 child:pagamentoCartaoItem()
                                ),
                                 pagamentoCartaoVazio(),
-                          ]))
+                          ])),
+
+
+
+
                         ])
                 )
                 )),),
@@ -323,24 +322,67 @@ return
               ]),
 
 
+          Container(decoration:BoxDecoration(borderRadius: BorderRadius.circular((20))),child:
           Visibility(child:
-            formularioEndereco(),visible: view_form_end,),
+             formularioEndereco(),visible: view_form_end,)),
+
+          Positioned(
+            child:
+            Visibility( child:
+               formularioCartao(),visible: view_card_form,)),
 
         ]));
   }
 
+  formtCredit_numero(){
+
+  }
 
   @override
   void initState() {
 
     getUseruid();
     bloc.getEnderecoUser();
+    enderecoView = enderecoView_();
     listaCesta_=listaCesta();
     if (widget.listaCesta.length==0)
     widget.call_back_show_bg(false);
 
     super.initState();
   }
+
+enderecoView_(){
+ return StreamBuilder(
+  stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
+      .collection("endereco").where("temp",isEqualTo: false).snapshots(),
+  builder: (context, snapshot) {
+  if (snapshot.connectionState==ConnectionState.active){
+  if (snapshot.data.documents.length > 0) {
+  enderecoTemp_=false;
+  return
+  enderecoUserView(snapshot.data.documents[0]);
+  }
+  else{
+  return
+  StreamBuilder(
+  stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
+      .collection("endereco").where("temp",isEqualTo: true).snapshots(),
+  builder: (context, snapshot1) {
+  if (snapshot1.connectionState==ConnectionState.active){
+  if (snapshot1.data.documents.length > 0) {
+  enderecoTemp_=true;
+  return
+  enderecoTemp(snapshot1.data.documents[0]);
+  }else
+  return Container();
+  }else
+  return Container();
+  });
+  }
+  }else
+  return Container();
+  });
+}
 
 
   void getDadosUser(var uid) async {
@@ -609,23 +651,14 @@ return
       ],));
   }
 
-  callTokenrizarCartao() async {
-    print("callTokenrizarCartao");
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'criarToken',
-    );
-    dynamic resp = await callable.call(<String, dynamic>{
-      'YOUR_PARAMETER_NAME': 'YOUR_PARAMETER_VALUE',
-    });
-    print("callTokenrizarCartaofinal");
-
-  }
 
 
   pagamentoCartaoVazio()
   {
     return
-    GestureDetector(onTap:(){callTokenrizarCartao();} ,child:
+    GestureDetector(onTap:(){setState(() {
+      view_card_form=true;
+    });} ,child:
       Column(children: <Widget>[
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -710,11 +743,42 @@ return
       ],);
   }
 
+  formularioCartao(){
+
+    return
+      Container( width: double.infinity,height: MediaQuery.of(context).size.height,
+          child: Container(
+              margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child:
+          ClipRect(
+              child:  BackdropFilter(
+                  filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
+                  child:  Container(
+                    decoration:  BoxDecoration(color: Colors.grey[200].withOpacity(.60)),
+                    child:
+                    Container(
+                        padding: EdgeInsets.fromLTRB(30, 0, 30,0),
+                        child:Column(mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            cartao_form((){hide_pop_cardform();})
+                          ],)
+                    ),
+
+
+                  )))));
+  }
+
+
+  hide_pop_cardform()
+  {
+    setState(() {
+      view_card_form=false;
+    });
+  }
 
   formularioEndereco(){
 
     return
-      Container( width: double.infinity,height: MediaQuery.of(context).size.height*0.7,
+      Container( width: double.infinity,height: MediaQuery.of(context).size.height,
           child: Container(
           margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child:
       ClipRect(
@@ -724,7 +788,7 @@ return
           decoration:  BoxDecoration(color: Colors.white.withOpacity(.20)),
           child:
           Container(
-            padding: EdgeInsets.fromLTRB(30, 0, 30,10),
+            padding: EdgeInsets.fromLTRB(20, 0, 20,10),
             child:Column(mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                   form_endereco_user(end_user_,null,(){desativarFormEndereco();})
@@ -778,13 +842,12 @@ return
 
 
   barraView(){
- return
+  return
    GestureDetector(onTap: () {
    setState(() {
      if (view_resumo_cesta == false) {
        widget.call_back_show_bg(true);
        view_resumo_cesta=true;
-
        confirmarEndereco=false;
 
      }

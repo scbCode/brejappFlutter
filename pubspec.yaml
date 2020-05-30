@@ -36,6 +36,8 @@ dependencies:
   dio: 3.0.9
   cloud_functions: 0.5.0
   rxdart: 0.24.1
+  flutter_masked_text: 0.8.0
+  button3d: 0.1.1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
@@ -85,10 +87,21 @@ flutter:
       fonts:
         - asset: fonts/Roboto-Regular.ttf
           style: normal
-
+    - family: kredit
+      fonts:
+        - asset: fonts/kredit.ttf
+          style: normal
     - family: BreeSerif
       fonts:
         - asset: fonts/BreeSerif-Regular.ttf
+          style: normal
+    - family: NomeCredito
+      fonts:
+        - asset: fonts/credit_nome.ttf
+          style: normal
+    - family: credtfontbold
+      fonts:
+        - asset: fonts/kredit_back.ttf
           style: normal
   # To add assets to your application, add an assets section, like this:
   # assets:

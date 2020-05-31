@@ -1,6 +1,7 @@
 import 'package:button3d/button3d.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firestore/Bloc_finaceiro.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 
 import 'ClickyButton.dart';
@@ -20,27 +21,66 @@ class cartao_form extends StatefulWidget {
 
 }
 
-class cartao_formState extends State<cartao_form>  with SingleTickerProviderStateMixin {
+class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin {
 
-  final myController_numero = TextEditingController();
+  final myController_nome = TextEditingController();
   var controller_mask_card = new MaskedTextController(mask: '0000 0000 0000 0000', text: '');
   var controller_mask_card_data = new MaskedTextController(mask: '00/00', text: '');
+  AnimationController _controller;
+  AnimationController _controller_rotate;
+  Animation<double> _animation;
+  Animation<double> _animation_rotate;
+  Bloc_financeiro bloc_finance = new Bloc_financeiro();
+
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    myController_numero.dispose();
+    myController_nome.dispose();
+    controller_mask_card.dispose();
+    controller_mask_card_data.dispose();
+    _controller_rotate.dispose();
+    _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  initState() {
+
+
+    setState(() {
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 1500), vsync: this, value: 0.1);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+//    _animation = CurvedAnimation(parent: _controller, curve: Curves.bounceInOut);
+
+      _controller_rotate = AnimationController(
+          duration: const Duration(milliseconds: 1500), vsync: this, value: 0.1);
+      _animation_rotate = CurvedAnimation(parent: _controller_rotate, curve: Curves.ease);
+//    _animation = CurvedAnimation(parent: _controller, curve: Curves.bounceInOut);
+
+
+      _controller.forward();
+
+    });
+
+    super.initState();
+
   }
 
   @override
   Widget build(BuildContext context) {
 
   return
-   Container(
+  Stack(children: <Widget>[
+    Positioned(top: 0,bottom: 0,left: 0,right: 0, child:
+    Container( alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
+      ScaleTransition(
+        scale: _animation,
+    child:
+    Container(
        child:
       Column(children: <Widget>[
-
         Container(
           margin: EdgeInsets.fromLTRB(0, 60,0, 0),
           padding: EdgeInsets.all(20),
@@ -66,7 +106,7 @@ class cartao_formState extends State<cartao_form>  with SingleTickerProviderStat
 
            Container(
              height: 30,
-             child: TextFormField( style: TextStyle(fontSize: 19,color: Colors.amber,fontFamily: 'credtfontbold'),
+             child: TextFormField(controller: myController_nome, style: TextStyle(fontSize: 19,color: Colors.amber,fontFamily: 'credtfontbold'),
                textInputAction: TextInputAction.next,
                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                decoration: InputDecoration.collapsed(
@@ -104,7 +144,7 @@ class cartao_formState extends State<cartao_form>  with SingleTickerProviderStat
                         fontSize: 25),
                   ),
                   color: Colors.amber,
-                  onPressed: () {},
+                  onPressed: () { checkCardDados();},
                 ))
 //          Button3d(
 //            height: 50,
@@ -140,13 +180,9 @@ class cartao_formState extends State<cartao_form>  with SingleTickerProviderStat
 //          )
         ),
        ],)
-     );
+     ))],);
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
 
   formatNumero(String numero){
 
@@ -170,21 +206,40 @@ class cartao_formState extends State<cartao_form>  with SingleTickerProviderStat
 
     }
 
-    myController_numero.text=n;
+//    myController_nome.text=n;
   }
 
-  callTokenrizarCartao() async {
+  _snackbar(text){
+    final snackBar = SnackBar(content: Text(text));
+    Scaffold.of(context).showSnackBar(snackBar);
+
+  }
 
 
-    print("callTokenrizarCartao");
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'criarToken',
-    );
-    dynamic resp = await callable.call(<String, dynamic>{
-      'YOUR_PARAMETER_NAME': 'YOUR_PARAMETER_VALUE',
-    });
-    print("callTokenrizarCartaofinal");
+  checkCardDados() {
+    var numero = controller_mask_card.text;
+    String nome = myController_nome.text;
+    var data = controller_mask_card_data.text;
 
+    if (numero.length < 19)
+      _snackbar("número incompleto");
+    else if (nome
+        .toString()
+        .split(" ")
+        .length < 2)
+      _snackbar("nome incompleto");
+    else if (data.length < 5)
+      _snackbar("data incompleta");
+    else {
+      setState(() {
+        _controller.reverse();
+        sendCartaoTokenrize();
+      });
+    }
+  }
+
+  sendCartaoTokenrize(){
+    bloc_finance.callTokenrizarCartao();
   }
 
 

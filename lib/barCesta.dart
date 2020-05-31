@@ -13,6 +13,7 @@ import 'package:flutter_firestore/enderecoUserSnapShot.dart';
 import 'package:flutter_firestore/form_endereco_user.dart';
 import 'package:flutter_firestore/headCurve.dart';
 import 'package:flutter_firestore/itemListLojas.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'BlocAll.dart';
 import 'dart:ui';
 import 'dart:async';
@@ -55,6 +56,7 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   var view_cestadetalhes=false;
   var view_cestadetalhespreco=false;
   var view_form_end=false;
+  GoogleMapController mapController;
   Produto_cesta selecionado;
   var listaCesta_;
   var ctrolControls=false;
@@ -81,27 +83,37 @@ class barCestaState extends State<barCesta> with SingleTickerProviderStateMixin 
   @override
   Widget build(BuildContext context) {
     _checkreresult();
-    if (widget.listaCesta!=null)
+
+      if (widget.listaCesta!=null)
     if (widget.listaCesta.length==0)
-      widget.call_back_show_bg(false);
+      setState(() {
+        widget.call_back_show_bg(false);
+      });
 
 
+    print("confirmarEndereco "+confirmarEndereco.toString());
     if (confirmarEndereco==false){
+      setState(() {
         cor_endereco=Colors.white;
         ctrol_view_btnEnd=true;
+      });
     }else
       {
-        cor_endereco=Colors.amber[100];
-      }
-
-    if (widget.listaCesta[0].cartaoApp!=null)
         setState(() {
-          cartao = widget.listaCesta[0].cartaoApp;
+          cor_endereco=Colors.amber[100];
+//          enderecoView = enderecoView_();
         });
+  }
+
+  if (widget.listaCesta[0].cartaoApp!=null)
+      setState(() {
+        cartao = widget.listaCesta[0].cartaoApp;
+      });
+
     if (widget.listaCesta[0].maquinaCartao!=null)
-       setState(() {
-         maquina = widget.listaCesta[0].maquinaCartao;
-       });
+      setState(() {
+        maquina = widget.listaCesta[0].maquinaCartao;
+    });
 
     return
         Visibility(visible: view,child:
@@ -273,6 +285,7 @@ return
                               Container(
                                   margin: EdgeInsets.fromLTRB(10, 0,0,10),
                                     alignment: Alignment.center, child:
+//                              enderecoView_()
                                   enderecoView
                                  ),
 
@@ -422,20 +435,24 @@ enderecoView_(){
       return
                        Container(
                            margin: EdgeInsets.fromLTRB(15, 10, 15, 20),
-                           decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)),boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:cor_endereco),
+                           decoration:
+                           BoxDecoration(borderRadius:BorderRadius.only( topLeft: Radius.circular(20),
+                           bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),)
+    ,boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:cor_endereco),
                            child:
-
+//    BorderRadius.all(Radius.circular(20))
                            Column(
 
                              children: <Widget>[
 
 
-                           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
+                           Row(mainAxisAlignment: MainAxisAlignment.start,
+                             mainAxisSize: MainAxisSize.max, children: <Widget>[
 
-                             Container(
-                               margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                               child:
-                               Icon(Icons.location_searching,size: 20,),),
+//                             Container(
+//                               margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+//                               child:
+//                               Icon(Icons.location_searching,size: 20,),),
 
                              Column(
                                mainAxisSize: MainAxisSize.max,
@@ -443,37 +460,77 @@ enderecoView_(){
 
                                  Container(
                                      width: MediaQuery.of(context).size.width*.54,
-                                     margin: EdgeInsets.fromLTRB(10, 5,0, 0),
+                                     margin: EdgeInsets.fromLTRB(20, 25,0, 0),
                                      alignment: Alignment.center, child:
-                                 Text(data['rua']+", "+data['bairro'], maxLines: 1,
+                                 Text(data['rua']+", "+data['bairro'], maxLines: 4,
                                   overflow: TextOverflow.ellipsis,style:
                                  TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
 
                                  Container(
-                                     margin: EdgeInsets.fromLTRB(0, 0,0, 5),
+                                     width: MediaQuery.of(context).size.width*.54,
+                                     margin: EdgeInsets.fromLTRB(20, 0,0, 5),
                                      alignment: Alignment.centerLeft, child:
-                                 Text("Nº "+data['numero']+", "+data['complemento'],style:
+                                 Text("Nº "+data['numero']+", "+data['complemento'], maxLines: 6,
+                                   overflow: TextOverflow.ellipsis,style:
                                  TextStyle(color: Colors.black45,fontFamily: 'RobotoLight'),)),
 
                              ],),
 
-                              Visibility(visible:true,child:
-                              GestureDetector(onTap: (){
-                                setState(() {
-                                view_form_end=true;
-                                ctrol_view_btnEnd=true;
-                                confirmarEndereco=false;
-                                }); },child:
                              Container(
-                                 margin: EdgeInsets.fromLTRB(0, 5,10, 5),
+                               decoration:
+                               BoxDecoration(borderRadius:BorderRadius.only(topRight: Radius.circular(20))),
+                                 height: 130,
+                                 width:105,
                                  alignment: Alignment.center, child:
-                             Text("Atualizar",style:
-                             TextStyle(color: Colors.red,fontFamily: 'RobotoLight'),)))),
+                             GoogleMap(
+                               onMapCreated:  _onMapCreated,
+                               zoomControlsEnabled: false,
+                               buildingsEnabled: true,
+                               rotateGesturesEnabled: false,
+                               zoomGesturesEnabled: false,
+                               scrollGesturesEnabled: false,
+                               mapType: MapType.normal,
+
+                               initialCameraPosition:  CameraPosition(
+                                   target:getLocal(data),
+                                   zoom: 16.0
+                               ),
+                             )),
+
                            ],),
+                           Divider(color:Colors.red,height: 1,),
+                           Visibility(visible:true,child:
+                               GestureDetector(onTap: (){
+                                 setState(() {
+                                   view_form_end=true;
+                                   ctrol_view_btnEnd=true;
+                                   confirmarEndereco=false;
+                                 }); },child:
+                               Container(
+                                   margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                   alignment: Alignment.center, child:
+                               Text("Atualizar",style:
+                               TextStyle(color: Colors.red,fontFamily: 'RobotoLight'),)))),
 
                     ],));
   }
+  getLocal(var data){
+    var   _center;
 
+    print(data['localizacao']);
+    print(data['localizacao'].longitude);
+
+    _center=new LatLng(data['localizacao'].latitude,
+        data['localizacao'].longitude);
+    if (mapController!=null)
+    mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 15));
+
+    return _center;
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
 
   enderecoTemp(var data)
   {
@@ -963,7 +1020,7 @@ enderecoView_(){
   listaCesta()  {
   return
     Container(
-        height: 125,
+        height: 140,
         child:
      StreamBuilder(
         stream: Firestore.instance

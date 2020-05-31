@@ -34,7 +34,7 @@ dependencies:
   android_intent: 0.3.7+2
   location_permissions: 2.0.5
   dio: 3.0.9
-  cloud_functions: 0.5.0
+  cloud_functions: ^0.5.0
   rxdart: 0.24.1
   flutter_masked_text: 0.8.0
   button3d: 0.1.1

@@ -1,6 +1,5 @@
 
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,12 +9,12 @@ import 'Produto_cesta.dart';
 import 'enderecoUser.dart';
 import 'enderecoUserSnapShot.dart';
 
+
 class BlocAll {
 
   int _total = 0;
   enderecoUserSnapShot enderecoUser_;
   enderecoUserSnapShot enderecoUser_temp;
-
   int get total => _total;
 
   List<Produto_cesta> listaCesta= new List<Produto_cesta> ();

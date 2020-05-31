@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_firestore/BlocAll.dart';
+import 'package:flutter_firestore/Bloc_finaceiro.dart';
 import 'package:flutter_firestore/Produto.dart';
 import 'package:flutter_firestore/autenticacao.dart';
 import 'package:flutter_firestore/barBuscar.dart';
@@ -120,6 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var listalojasview = listaLojas();
   final listv = GlobalKey<_MyHomePageState>();
   var bloc = BlocAll();
+  var bloc_finance = Bloc_financeiro();
   var positionCesta=45.0;
   var view_barranav=true;
   double _sigmaX = 10.0; // from 0-10
@@ -336,6 +338,8 @@ class _MyHomePageState extends State<MyHomePage> {
 @override
 void initState() {
   bloc.initBloc();
+  bloc_finance.callTokenrizarCartao();
+
   listaProdutos = Container();
   checkPermission();
   super.initState();

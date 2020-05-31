@@ -134,7 +134,8 @@ class _itemListProdstate extends State<item_cesta> with SingleTickerProviderStat
                 Container(  margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
                 Text(widget.data['vol'],textAlign: TextAlign.left,
                     style: TextStyle(fontSize:12,fontFamily: 'RobotoLight'))),
-                Container(height: 12, margin: EdgeInsets.fromLTRB(0, 5, 0, 0),child: Text(_FormatPreco(widget.data['preco'],widget.data['quantidade']), style: TextStyle(fontSize:12,fontFamily: 'RobotoLight'))),
+                Container( margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                    child: Text(_FormatPreco(widget.data['preco'],widget.data['quantidade']), style: TextStyle(fontSize:12,fontFamily: 'RobotoLight'))),
 
               ],),
 

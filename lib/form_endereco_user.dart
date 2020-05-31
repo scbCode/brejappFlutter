@@ -152,7 +152,8 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                  TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
 
                          Container(
-                           height: 150, margin: EdgeInsets.fromLTRB(0, 20, 0, 0), alignment: Alignment.centerLeft,
+                           height: 150,
+                             margin: EdgeInsets.fromLTRB(0, 20, 0, 0), alignment: Alignment.centerLeft,
                             child:
                             Stack(children: <Widget>[
                              GoogleMap(

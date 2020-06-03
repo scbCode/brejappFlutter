@@ -338,7 +338,6 @@ class _MyHomePageState extends State<MyHomePage> {
 @override
 void initState() {
   bloc.initBloc();
-  bloc_finance.callTokenrizarCartao();
 
   listaProdutos = Container();
   checkPermission();

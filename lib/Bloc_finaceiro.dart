@@ -20,17 +20,20 @@ class Bloc_financeiro {
 
 
 
-  callTokenrizarCartao() async {
+  callTokenrizarCartao(var CustomerName,var CardNumber,var Holder,var ExpirationDate,var Brand) async {
 
-    print("callTokenrizarCartao");
     final HttpsCallable callable = await CloudFunctions(region: "us-central1").getHttpsCallable(
       functionName: 'criarToken',
     );
     dynamic resp = await callable.call(<String, dynamic>{
-      'YOUR_PARAMETER_NAME': 'YOUR_PARAMETER_VALUE',
+      'CustomerName': CustomerName,
+      'CardNumber': CardNumber,
+      'Holder': Holder,
+      'ExpirationDate': ExpirationDate,
+      'Brand': Brand
     });
-    print(resp.data);
 
+    return resp.data;
   }
 
 }

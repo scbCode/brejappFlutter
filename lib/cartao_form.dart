@@ -220,6 +220,7 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     var numero = controller_mask_card.text;
     String nome = myController_nome.text;
     var data = controller_mask_card_data.text;
+    var bandeira = "Master";
 
     if (numero.length < 19)
       _snackbar("número incompleto");
@@ -233,13 +234,27 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     else {
       setState(() {
         _controller.reverse();
-        sendCartaoTokenrize();
+        sendCartaoTokenrize(nome,numero,nome,data,bandeira);
       });
     }
   }
 
-  sendCartaoTokenrize(){
-    bloc_finance.callTokenrizarCartao();
+  sendCartaoTokenrize(var nome,var numero,var holder,var data,var bandeira) async{
+    print("sendCartaoTokenrize start" );
+    var resulToken = await bloc_finance.callTokenrizarCartao(nome,numero,holder,data,bandeira);
+    print("sendCartaoTokenrize await" );
+    if (resulToken!=null){
+      print("sendCartaoTokenrize resulToken" );
+
+      print(resulToken);
+
+    }else
+      {
+        print("sendCartaoTokenrize resulToken null" );
+
+      }
+
+
   }
 
 

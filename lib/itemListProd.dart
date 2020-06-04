@@ -29,7 +29,7 @@ class itemListProd extends StatefulWidget {
   var itemOncheck=false;
   var uid;
 
-  itemListProd (this.produto,this.local_user, this.distancias,@required this.callback_login);
+  itemListProd (this.produto,this.local_user, this.distancias,this.listaCesta,@required this.callback_login);
 
   @override
   _itemListProdstate createState() => _itemListProdstate();
@@ -40,6 +40,7 @@ class itemListProd extends StatefulWidget {
 class _itemListProdstate extends State<itemListProd> with SingleTickerProviderStateMixin {
   distanciaLoja distancia;
   var total=1;
+  var incremental=0;
   var totalPreco=0.0;
   var totalPrecotxt=0.0;
   var opc=0.0;
@@ -102,7 +103,8 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
                                   if ( widget.produto.quantidade==0)
                                     widget.produto.quantidade=1;
                                   widget.produto.quantidade=value.data[i].quantidade;
-                                  total=widget.produto.quantidade;
+                                  total=widget.produto.quantidade+incremental;
+                                  incremental=0;
                                   ct5rl=true;
                               }
                           }
@@ -209,7 +211,7 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
               ],),
             Stack(children: <Widget>[
               Visibility(
-                visible: addvisi,
+                visible: addvisi || itemOn==true,
                 child:
                 Column(children: <Widget>[Divider(
                   color: Colors.orange[200],
@@ -217,16 +219,92 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-
                       //btn adicionar
-                      Container(margin: EdgeInsets.fromLTRB(10, 0, 0, 0),child:
-                      OutlineButton(hoverColor: Colors.orange,focusColor: Colors.orange, textTheme: ButtonTextTheme.normal,splashColor: Colors.orange,color: Colors.yellow[300],
-                          onPressed:(){ _addLista();} ,
-                          child:
-                          Row(children: <Widget>[
-                            Container( margin:EdgeInsets.fromLTRB(0, 0, 5, 0),child:Icon(Icons.shopping_basket,color:colorBtnAdd, size:15),),
-                            Text(textBtnadd+" R\u0024 "+totalPrecotxt.toStringAsFixed(2).replaceAll(".", ","),style: TextStyle(color:colorBtnAdd,fontFamily: 'RobotoLight'),)
-                          ]))),
+                    StreamBuilder<List<dynamic>>(
+                    stream: bloc.check,
+                    builder: (context,value) {
+                    if (value.connectionState==ConnectionState.active) {
+                      var ctrol = false;
+                      print("GET CESTA ++++");
+                      widget.listaCesta.addAll(value.data);
+
+                      if (value.data.isNotEmpty) {
+                        return
+                          Container(
+                              margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                          OutlineButton(hoverColor: Colors.orange,
+                              focusColor: Colors.orange,
+                              textTheme: ButtonTextTheme.normal,
+                              splashColor: Colors.orange,
+                              color: Colors.yellow[300],
+                              onPressed: () {
+                                _addLista();
+                              },
+                              child:
+                              Row(children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                  child: Icon(
+                                      Icons.shopping_basket, color: colorBtnAdd,
+                                      size: 15),),
+                                Text(textBtnadd + " R\u0024 " +
+                                    totalPrecotxt.toStringAsFixed(2).replaceAll(
+                                        ".", ","), style: TextStyle(
+                                    color: colorBtnAdd,
+                                    fontFamily: 'RobotoLight'),)
+                              ])));
+                      } else
+                        return
+                          Container(
+                              margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                          OutlineButton(hoverColor: Colors.orange,
+                              focusColor: Colors.orange,
+                              textTheme: ButtonTextTheme.normal,
+                              splashColor: Colors.orange,
+                              color: Colors.yellow[300],
+                              onPressed: () {
+                                _addLista();
+                              },
+                              child:
+                              Row(children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                  child: Icon(
+                                      Icons.shopping_basket, color: colorBtnAdd,
+                                      size: 15),),
+                                Text(textBtnadd + " R\u0024 " +
+                                    totalPrecotxt.toStringAsFixed(2).replaceAll(
+                                        ".", ","), style: TextStyle(
+                                    color: colorBtnAdd,
+                                    fontFamily: 'RobotoLight'),)
+                              ])));
+                    }else
+                      return
+                        Container(
+                            margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                        OutlineButton(hoverColor: Colors.orange,
+                            focusColor: Colors.orange,
+                            textTheme: ButtonTextTheme.normal,
+                            splashColor: Colors.orange,
+                            color: Colors.yellow[300],
+                            onPressed: () {
+                               widget.listaCesta.add(widget.produto);
+                              _addLista();
+                            },
+                            child:
+                            Row(children: <Widget>[
+                              Container(
+                                margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                child: Icon(
+                                    Icons.shopping_basket, color: colorBtnAdd,
+                                    size: 15),),
+                              Text(textBtnadd + " R\u0024 " +
+                                  totalPrecotxt.toStringAsFixed(2).replaceAll(
+                                      ".", ","), style: TextStyle(
+                                  color: colorBtnAdd,
+                                  fontFamily: 'RobotoLight'),)
+                            ])));
+                    }),
 
                       //total qntd
                       Opacity(
@@ -249,8 +327,7 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
                               child: SizedBox(
                                 width: 35,
                                 height: 35,
-                                child: Icon(Icons.plus_one,color:colorBtnAdd,),
-
+                                child: Icon(Icons.plus_one, color:colorBtnAdd)
                               )
                           )
                       ),
@@ -316,6 +393,9 @@ class _itemListProdstate extends State<itemListProd> with SingleTickerProviderSt
     setState(() {
       if (itemOn==true){
         if (total>1) {
+          setState(() {
+            incremental -= 1;
+          });
             decrementItemCesta_on(widget.produto);
         }
       }else {
@@ -336,12 +416,12 @@ formatFrete(){
       print("FRETE "+widget.distancias.toString());
       for(int i = 0; i < widget.distancias.length;i++){
         if (widget.distancias[i].loja == widget.produto.loja){
-          if (widget.distancias[0].distancia!=null)
-           distKm = double.parse(widget.distancias[0].distancia)/1000;
+            if (widget.distancias[i].distancia!=null)
+                distKm = double.parse(widget.distancias[i].distancia)/1000;
         }
       }
 
-      if ( widget.produto.distanciaGratisKm>=distKm){
+    if ( widget.produto.distanciaGratisKm>=distKm){
           styleTextFrete=styleTextFreteGratis;
         return "Entrega gratis";
       }else {
@@ -364,7 +444,10 @@ _incrementQntdItem(){
         opc=1.0;
         vbtnRemoveqntd=true;
         if (widget.produto.quantidade<99) {
-            incrementItemCesta_on(widget.produto);
+          setState(() {
+            incremental += 1;
+          });
+          incrementItemCesta_on(widget.produto);
         }
     }else{
       opc=1.0;
@@ -505,11 +588,19 @@ _addLista() async{
 
   void addItemCesta(Produto_cesta item) async{
     var ctrol = false;
-    if(widget.listaCesta!=null)
-    if(widget.listaCesta.length>0)
-    if(widget.listaCesta[0].loja!=item.loja){
-        ctrol=true;
+    if(widget.listaCesta!=null){
+      if(widget.listaCesta.length>0) {
+        for (int i = 0;i<widget.listaCesta.length;i++){
+          if (widget.listaCesta[0].loja != item.loja) {
+            print("loja diff");
+            ctrol = true;
+          }
+        }
+      }
     }
+
+    print("addItemCesta "+widget.listaCesta.length.toString());
+
     item.quantidade=total;
     if (ctrol==false){
         if (uid!=null)
@@ -537,9 +628,9 @@ _addLista() async{
   void initState() {
 
 
-    getUser();
 
-      super.initState();
+    getUser();
+    super.initState();
   }
 
   getUser () async {

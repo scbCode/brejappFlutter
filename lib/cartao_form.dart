@@ -40,6 +40,7 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
   var opcstart = true;
   var bcoltr=false;
   var view_pop_=false;
+  var icon_card;
 
   @override
   void dispose() {
@@ -56,6 +57,7 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
   @override
   initState() {
 
+    icon_card = Image.asset('visa.png',width:0,height:0);
 
     setState(() {
     _controller = AnimationController(
@@ -91,8 +93,9 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
 
     return
   Stack(children: <Widget>[
-    Positioned(top: 0,bottom: 0,left: 0,right: 0, child:
-    Container( alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
+
+//    Positioned(top: 0,bottom: 0,left: 0,right: 0, child:
+//    Container( alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
 
     //layout result token
     Visibility( visible: view_pop_,child:
@@ -152,9 +155,21 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     Container(
        child:
       Column(children: <Widget>[
-        Container(
+
+      Container(
+      margin: EdgeInsets.fromLTRB(0, 60,0, 0),
+        padding: EdgeInsets.fromLTRB(20,20,20,10),
+        decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 3)] , color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(8))),
+        child:
+        Column(children: <Widget>[
+          Container(
+              height: 30,
+              child: Text("CARTÃO DE CRÉDITO",textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoLight'),) ),
+      ])),
+
+          Container(
           margin: EdgeInsets.fromLTRB(0, 60,0, 0),
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.fromLTRB(20,20,20,10),
           decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 3)] , color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(8))),
           child:
          Column(children: <Widget>[
@@ -167,6 +182,17 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
                 margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
                 child:
                 TextFormField(controller: controller_mask_card  , maxLength: 19,
+                  onChanged:(text){
+                    if (text.length<=1)
+                      setState(() {
+                      print("CHANGE NUMB "+text);
+                      if (text.length==1){
+                      if (text[0]=='4')icon_card=Image.asset('visa.png',width: 40,height: 40,);
+                      if (text[0]=='5')icon_card=Image.asset('master.png',width: 40,height: 40);}
+                      if (text.length==0)
+                        icon_card=Image.asset('visa.png',width: 0,height: 0);
+                    });
+                  },
                   style: TextStyle(fontSize: 14,color: Colors.amber,fontFamily: 'NomeCredito'),
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
@@ -189,7 +215,8 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
            Container(
              height: 30,
              margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-             child: TextFormField(controller: controller_mask_card_data, style: TextStyle(fontSize: 19,color: Colors.amber,fontFamily: 'credtfontbold'),
+             child: TextFormField(
+                    controller: controller_mask_card_data, style: TextStyle(fontSize: 19,color: Colors.amber,fontFamily: 'credtfontbold'),
                textInputAction: TextInputAction.next,
                onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                decoration: InputDecoration.collapsed(
@@ -197,7 +224,14 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
                    hintText: '00/00'
              ),
              keyboardType:  TextInputType.number,),),
-         ],)),
+
+           Container(
+              alignment: Alignment.bottomRight,
+               margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+               child:icon_card
+           )
+
+      ],)),
 
        Container(
             margin: EdgeInsets.fromLTRB(0,30,0,0),
@@ -294,7 +328,12 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     var numero = controller_mask_card.text;
     String nome = myController_nome.text;
     var data = controller_mask_card_data.text;
-    var bandeira = "Master";
+    var bandeira = "";
+
+    if (numero[0]=='4')
+         bandeira = "Visa";
+    if (numero[0]=='5')
+      bandeira = "Master";
 
     if (numero.length < 19)
       _snackbar("número incompleto");
@@ -321,7 +360,7 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
       var token = resulToken['body']['CardToken'];
       if (token!=null) {
         var returnSendCard = await bloc_finance.saveTokenCartaoUser(widget.uid, token);
-            print(resulToken);
+            print(returnSendCard);
         if (returnSendCard) {
             setState(() {
                 view_pop_ =true;

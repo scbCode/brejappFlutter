@@ -39,16 +39,18 @@ class Bloc_financeiro {
   }
 
 
-  saveTokenCartaoUser(var uid, var token) async {
-    var refData = Firestore.instance;
-    await refData.collection("Usuarios")
-        .document(uid).collection('cartoes')
-        .add({'token':token,'criado':FieldValue.serverTimestamp(),'tipo':'credito','bandeira':'Master','maskNumb':'9876'  })
-        .then((v){
-
-      return true;
-
-    }).catchError((erro){ return false;});
+  Future<bool> saveTokenCartaoUser(var uid, var token) async {
+        var refData = Firestore.instance;
+        await refData.collection("Usuarios")
+            .document(uid).collection('cartoes')
+            .add({'token':token,'criado':FieldValue.serverTimestamp(),'tipo':'credito','bandeira':'Master','maskNumb':'9876'  })
+            .then((v){
+              print("SAVE CARD");
+              Future.value(true);
+            }).catchError((erro){
+              print("SAVE CARD ERROR");
+              Future.value(false);
+        });
 
   }
 

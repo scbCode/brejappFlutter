@@ -57,14 +57,12 @@ class barNavBottomState extends State<barNavBottom> {
 
     return
       Container(
-        child: ClipRect(
-        child:  BackdropFilter(
-        filter:  ImageFilter.blur(sigmaX:1.25, sigmaY:1.25),
+
     child:  Container(
-    decoration:  BoxDecoration(color: Colors.transparent),
+    decoration:  BoxDecoration(color: Colors.white.withOpacity(0.8)),
     child:
-      Container(height: 45, decoration: BoxDecoration(color: Colors.white.withOpacity(0.3),
-       boxShadow: [BoxShadow(color: Colors.black12,offset:  Offset(0.0,-44),blurRadius: 5 ,)]),
+      Container(height: 45, decoration: BoxDecoration(color: Colors.white.withOpacity(0.7),
+       boxShadow: [BoxShadow(color: Colors.black12,offset:  Offset(0.0,0),blurRadius: 3 ,)]),
         child:
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <Widget>[
 
@@ -131,7 +129,7 @@ class barNavBottomState extends State<barNavBottom> {
 
 
      ],)
-   ,)))));
+   ,)));
  }
 
 

@@ -153,10 +153,11 @@ class _MyHomePageState extends State<MyHomePage> {
       SingleChildScrollView(child:
       Column(
           children: <Widget>[
-            Container( margin: EdgeInsets.fromLTRB(15, 80, 0, 0),alignment: Alignment.bottomLeft,
+          GestureDetector(onTap: (){ additem(); },child:
+          Container( margin: EdgeInsets.fromLTRB(15, 80, 0, 0),alignment: Alignment.bottomLeft,
                 child:Text("Lojas",
                   style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.orange,fontSize: 16),)),
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.orange,fontSize: 16),))),
             Container(
                 margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
                 height: 128,
@@ -175,8 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
     child:
     Positioned(bottom: 0, child:
     Container(width: MediaQuery.of(context).size.width, alignment: Alignment.centerRight, child:
-    GestureDetector(onTap: (){ setState((){
-      });  },
+    GestureDetector(onTap: (){   },
       child: Container (
         padding:EdgeInsets.fromLTRB(0, 0, 5, 0),
         alignment: Alignment.centerRight,
@@ -257,8 +257,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         d = listaDist[i];
                     }
                   }
+                  listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
+                  if (Usuario!=null)
                   return
                      barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
+                  else
+                    return Container();
+
                 }else{
                     v_bg=false;
                     return Container();
@@ -347,10 +352,10 @@ void initState() {
     return  Container(
       child: ClipRect(
         child:  BackdropFilter(
-          filter:  ImageFilter.blur(sigmaX:4, sigmaY:4),
+          filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
           child:  Container(
             width: double.infinity,
-            height:  double.infinity,
+            height:  MediaQuery.of(context).size.height,
             decoration:  BoxDecoration(color: Colors.transparent),
             child:  Container(
               ),
@@ -359,6 +364,8 @@ void initState() {
       ),
     );
   }
+
+
 
 
 
@@ -583,7 +590,7 @@ void getEnderecoUser() async {
     return Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
     StreamBuilder(
         stream: Firestore.instance
-            .collection("Produtos_On").orderBy("preco",descending: false).orderBy("marca")
+            .collection("Produtos_On").orderBy("preco",descending: false).orderBy("marca",descending: false)
             .snapshots(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
@@ -631,7 +638,7 @@ void getEnderecoUser() async {
           double di = 0.0;
           if (local_user==null){
             print ("CRIAR LISTA - LOCAL USER NULL");
-            return  itemListProd(produto,null,[],(){return _showpop_gps();});
+            return  itemListProd(produto,null,[],null,(){return _showpop_gps();});
           }
           else {
             if (local_user_cancel == false)
@@ -650,7 +657,16 @@ void getEnderecoUser() async {
                   print("CRIAR LISTA - USER OK - distancia off");
                   if (local_user_cancel == false)
                     checkDistanceAtual(produto);
-                }
+                }else
+                  {
+                    if (di <= produto.distanciaMaxKm) {
+                      print("CRIAR LISTA - USER OK - distancia ON - GET DISTANCE "+listaCesta.length.toString());
+                      return itemListProd(produto, local_, listaDist,listaCesta, () {
+                        return _showpop_login();
+                      });
+                    }else
+                      return Container();
+                  }
               } else {
 
                 print("CRIAR LISTA - USER OK - distancia OFF - lista [] ");
@@ -660,7 +676,7 @@ void getEnderecoUser() async {
                 }
                 else {
                   print("itemProd -d -f");
-                  return itemListProd(produto, null, [], () {
+                  return itemListProd(produto, null, null,[], () {
                     return _showpop_gps();
                   });
                 }
@@ -668,14 +684,14 @@ void getEnderecoUser() async {
             if (local_user_cancel == false) {
               if (di <= produto.distanciaMaxKm) {
                 print("CRIAR LISTA - USER OK - distancia ON - GET DISTANCE");
-                return itemListProd(produto, local_, listaDist, () {
+                return itemListProd(produto, local_, listaDist,null, () {
                   return _showpop_login();
                 });
               }else
                 return Container();
             } else {
               print("itemProd -d -f");
-              return itemListProd(produto, null, [], () {
+              return itemListProd(produto, null, [],null, () {
                 return _showpop_gps();
               });
             }
@@ -685,8 +701,26 @@ void getEnderecoUser() async {
   }
 
 
+  additem()async{
+
+    var refData = Firestore.instance;
+      await refData.collection("Produtos_On")
+          .add({"gelada":true,'descricao':'LongNeck',"nome": "Heineken", "preco": 2.5, "vol": "330ml", "loja": "Lojay",
+        "img":"https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/heineken_1.png?alt=media&token=820319cf-51a3-45ce-8d92-934d3bd31f91",
+        "quantidade": 0, "id": "007", "cesta": null, "tags": ["cerveja", "skol","pilsen", "lata"],
+        "marca": "Heineken", "gelada": true, "coefKm": 1.2, "distanciaMaxKm": 20, "distanciaGratisKm": 15,
+        "localizacao":new GeoPoint(-1.433361, -48.472075),
+        "cartaoApp": true,"maquinaCartao": true})
+          .then((v){
+      print("adtime");
+      });
+
+  }
+
+
   _showpop_gps(){
-    setState(() {
+
+   setState(() {
       print("SHOW GPS POP");
       local_user_cancel=false;
       view_dialogGps=true;

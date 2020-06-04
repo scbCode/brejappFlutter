@@ -1,9 +1,11 @@
 import 'package:button3d/button3d.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firestore/Bloc_finaceiro.dart';
+import 'package:flutter_firestore/animator.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
-
+import 'package:http/http.dart' as http;
 import 'ClickyButton.dart';
 
 typedef hide_pop =  Function();
@@ -13,7 +15,8 @@ class cartao_form extends StatefulWidget {
 
 
   hide_pop hide_pop_callback;
-  cartao_form (this.hide_pop_callback);
+  var uid;
+  cartao_form (this.uid,this.hide_pop_callback);
 
 
   @override
@@ -27,11 +30,16 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
   var controller_mask_card = new MaskedTextController(mask: '0000 0000 0000 0000', text: '');
   var controller_mask_card_data = new MaskedTextController(mask: '00/00', text: '');
   AnimationController _controller;
+  AnimationController _controller_circ;
   AnimationController _controller_rotate;
   Animation<double> _animation;
+  Animation<double> _animation_circ;
   Animation<double> _animation_rotate;
+  var numcard="";
   Bloc_financeiro bloc_finance = new Bloc_financeiro();
-
+  var opcstart = true;
+  var bcoltr=false;
+  var view_pop_=false;
 
   @override
   void dispose() {
@@ -41,6 +49,7 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     controller_mask_card_data.dispose();
     _controller_rotate.dispose();
     _controller.dispose();
+    _controller_circ.dispose();
     super.dispose();
   }
 
@@ -59,9 +68,11 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
       _animation_rotate = CurvedAnimation(parent: _controller_rotate, curve: Curves.ease);
 //    _animation = CurvedAnimation(parent: _controller, curve: Curves.bounceInOut);
 
-
+      _controller_circ = AnimationController(
+          duration: const Duration(milliseconds: 500), vsync: this, value: 1);
+      _animation_circ = CurvedAnimation(parent: _controller_circ, curve: Curves.elasticInOut);
+//    _animation = CurvedAnimation(parent: _controller, curve: Curves.bounceInOut);
       _controller.forward();
-
     });
 
     super.initState();
@@ -71,11 +82,71 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
 
-  return
+//    _controller_circ.repeat();
+//    _controller_circ.forward();
+//    _controller.repeat();
+//    _controller.forward();
+
+
+
+    return
   Stack(children: <Widget>[
     Positioned(top: 0,bottom: 0,left: 0,right: 0, child:
     Container( alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
-      ScaleTransition(
+
+    //layout result token
+    Visibility( visible: view_pop_,child:
+    ScaleTransition(
+      scale: _animation,
+      child:
+        Container(
+        child:
+          Column(children: <Widget>[
+            Container(
+                width: 250,
+                height: 250,
+                margin: EdgeInsets.fromLTRB(0, 60,0, 0),
+            padding: EdgeInsets.all(20),
+            decoration:
+            BoxDecoration(boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 25)] ,
+                color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(500))),
+            child:
+                   Column(children: <Widget>[
+                     Container(
+                         margin: EdgeInsets.fromLTRB(0, 20,0, 0),
+                         height: 30,
+                         child: Text("Cartão salvo!",textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.orange),) ),
+
+//                     Divider(color: Colors.orange,),
+//                     Container(
+//                         child: Text(numcard,textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoRegular',color: Colors.black54),) ),
+
+                     Container(
+                       margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                       child:
+                     Align(alignment: Alignment.bottomCenter ,child:
+                     ScaleTransition(
+                         scale: _animation_circ,
+                             child:Icon(Icons.check_circle,color: Colors.green[500],size: 100,)
+                         ))),
+
+                     GestureDetector(onTap:(){widget.hide_pop_callback();},
+                     child:
+                     Container(
+                         decoration: BoxDecoration(
+                             boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],
+                             color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),
+                         padding: EdgeInsets.fromLTRB(25, 10,25, 10),
+                         margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                         child:
+                         Text("OK",style: TextStyle(color: Colors.white,fontFamily: 'RobotoLight'),)
+                     )),
+                   ])
+          )])))),
+
+    //layout formulario cartao
+    Visibility( visible: !view_pop_,child:
+    ScaleTransition(
         scale: _animation,
     child:
     Container(
@@ -89,13 +160,14 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
          Column(children: <Widget>[
            Container(
              height: 30,
-             child: Text("ADICIONAR CARTÃO DE CRÉDITO",textAlign: TextAlign.center,) ),
+             child: Text("CARTÃO DE CRÉDITO",textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoLight'),) ),
            Container(
                 height: 30,
+                width: MediaQuery.of(context).size.width,
                 margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
                 child:
                 TextFormField(controller: controller_mask_card  , maxLength: 19,
-                  style: TextStyle(fontSize: 16,color: Colors.amber,fontFamily: 'NomeCredito'),
+                  style: TextStyle(fontSize: 14,color: Colors.amber,fontFamily: 'NomeCredito'),
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
                   decoration: InputDecoration.collapsed(
@@ -180,7 +252,9 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
 //          )
         ),
        ],)
-     ))],);
+     )))
+
+  ],);
   }
 
 
@@ -244,19 +318,39 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     var resulToken = await bloc_finance.callTokenrizarCartao(nome,numero,holder,data,bandeira);
     print("sendCartaoTokenrize await" );
     if (resulToken!=null){
-      print("sendCartaoTokenrize resulToken" );
+      var token = resulToken['body']['CardToken'];
+      if (token!=null) {
+        var returnSendCard = await bloc_finance.saveTokenCartaoUser(widget.uid, token);
+            print(resulToken);
+        if (returnSendCard) {
+            setState(() {
+                view_pop_ =true;
+            });
+        } else {
 
-      print(resulToken);
-
+            }
+      }
     }else
       {
         print("sendCartaoTokenrize resulToken null" );
-
       }
 
 
   }
 
+  getDadosCardSave() async{
+    Map<String, String> headers = {
+      'MerchantId': '28b9bbdf-cbd2-44c2-8cd4-975eaf918710',
+      'MerchantKey':'WIGKDGEDWUQYQAKQCZXWTRLRWCWQHHKZJTVYDXDJ'
+    };
+
+    dynamic response = await http.get('https://apiquerysandbox.cieloecommerce.cielo.com.br/1/card/85584f09-9407-4dee-a2be-baec3fe03d2f', headers: headers);
+
+    print(response.body);
+    setState(() {
+      numcard="1";
+    });
+  }
 
 
 }

@@ -73,6 +73,7 @@ flutter:
     - basket_.png
     - credit-card.png
     - machine2.png
+    - star_gif_success.gif
   # FONTS
   fonts:
     - family: RobotoLight

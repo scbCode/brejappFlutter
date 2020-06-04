@@ -316,12 +316,32 @@ return
                             Text("PAGAMENTO",
                               style:
                             TextStyle(color: Colors.black,fontSize: 16,fontFamily: 'RobotoBold'),)),
-                                pagamentoDinheiro(),
+
+                            Container(
+                                child:
+                                StreamBuilder(
+                                    stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
+                                        .collection("cartoes").snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState== ConnectionState.active){
+                                        return ListView.builder(
+                                            padding: EdgeInsets.all(0.0),
+                                            shrinkWrap: true,
+                                            scrollDirection: Axis.vertical,
+                                            itemCount: snapshot.data.documents.length,
+                                            itemBuilder: (context, index) {
+                                              return     pagamentoCartaoItem();
+                                            });
+
+                                      } else
+                                        return Container();
+
+                                    })
+                            ),
+                             pagamentoDinheiro(),
                             Visibility(visible: maquina,
                                 child:formaPagMaquina()),
-                            Visibility(visible:cartao,
-                                child:pagamentoCartaoItem()
-                               ),
+
                                 pagamentoCartaoVazio(),
                           ])),
 
@@ -774,7 +794,6 @@ enderecoView_(){
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
 
-
                     Container(
                       padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                       margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -816,7 +835,7 @@ enderecoView_(){
                         padding: EdgeInsets.fromLTRB(30, 0, 30,0),
                         child:Column(mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            cartao_form((){hide_pop_cardform();})
+                            cartao_form(user.uid,(){hide_pop_cardform();})
                           ],)
                     ),
 

@@ -14,6 +14,7 @@ class Bloc_financeiro {
   Stream <String> get get_frete => control_check.stream;
 
 
+
   void dispose() {
     control_check.close();
   }
@@ -22,7 +23,7 @@ class Bloc_financeiro {
 
   callTokenrizarCartao(var CustomerName,var CardNumber,var Holder,var ExpirationDate,var Brand) async {
 
-    final HttpsCallable callable = await CloudFunctions(region: "us-central1").getHttpsCallable(
+    final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
       functionName: 'criarToken',
     );
     dynamic resp = await callable.call(<String, dynamic>{
@@ -33,7 +34,22 @@ class Bloc_financeiro {
       'Brand': Brand
     });
 
+
     return resp.data;
+  }
+
+
+  saveTokenCartaoUser(var uid, var token) async {
+    var refData = Firestore.instance;
+    await refData.collection("Usuarios")
+        .document(uid).collection('cartoes')
+        .add({'token':token,'criado':FieldValue.serverTimestamp(),'tipo':'credito','bandeira':'Master','maskNumb':'9876'  })
+        .then((v){
+
+      return true;
+
+    }).catchError((erro){ return false;});
+
   }
 
 }

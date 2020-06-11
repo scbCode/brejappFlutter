@@ -1,12 +1,16 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:android_intent/android_intent.dart';
+import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_firestore/BlocAll.dart';
 import 'package:flutter_firestore/Bloc_finaceiro.dart';
@@ -24,6 +28,8 @@ import 'package:location_permissions/location_permissions.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'Produto_cesta.dart';
+import 'ScannerUtils.dart';
+import 'TextDetectorPainter.dart';
 import 'User.dart';
 import 'barCesta.dart';
 import 'distanciaLoja.dart';
@@ -33,7 +39,8 @@ import 'itemListLojas.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'listaLojas.dart';
-
+import 'dart:ui' as ui;
+import 'dart:io' as Io;
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -106,7 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
   var ruanometemp="...";
   var enable_barcesta = false;
   User Usuario;
-  var listaProdutos  ;
   var firstLoad=false;
   var listViewProdutos  ;
   var completeLoad=false;
@@ -119,6 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var local_=null;
   var viewListProd=false;
   var listalojasview = listaLojas();
+  var listaProdutos;
   final listv = GlobalKey<_MyHomePageState>();
   var bloc = BlocAll();
   var bloc_finance = Bloc_financeiro();
@@ -131,7 +138,9 @@ class _MyHomePageState extends State<MyHomePage> {
   var view_dialogGps=false;
   var local_user_cancel=false;
   var viewLoad_local=false;
-
+  var scr= new GlobalKey();
+  File img = new File('');
+  var controller;
 
   @override
   Widget build(BuildContext context) {
@@ -149,11 +158,17 @@ class _MyHomePageState extends State<MyHomePage> {
       Scaffold(
           resizeToAvoidBottomInset : false,
           body:
-      Stack( children: <Widget>[
-      SingleChildScrollView(child:
+          RepaintBoundary(
+              key: scr,
+              child:
+      Stack(
+          children: <Widget>[
+        SingleChildScrollView(
+          child:
       Column(
           children: <Widget>[
-          GestureDetector(onTap: (){ additem(); },child:
+          GestureDetector(onTap: (){ additem(); },
+              child:
           Container( margin: EdgeInsets.fromLTRB(15, 80, 0, 0),alignment: Alignment.bottomLeft,
                 child:Text("Lojas",
                   style:
@@ -242,6 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Container(alignment: Alignment.center, child: autenticacao("login",(value){return _hidepop_login(value);}),))))))),),
 
 
+
        Positioned(
         width: MediaQuery.of(context).size.width,
         bottom:positionCesta,
@@ -322,15 +338,35 @@ class _MyHomePageState extends State<MyHomePage> {
               ],))
            ],)
         )),
-      ])
-    );
+    ]))
+
+
+      );
  }
+
+
+  Future<File> _capturePng() async {
+    print("CAPTURE WIDGET");
+    RenderRepaintBoundary boundary = scr.currentContext.findRenderObject();
+    print("CAPTURE WIDGET 2");
+    ui.Image image = await boundary.toImage();
+    print("CAPTURE WIDGET 3");
+    ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    Uint8List pngBytes = byteData.buffer.asUint8List();
+    print("CAPTURE WIDGET");
+    img = Io.File("decodedBezkoder.png");
+    img.writeAsBytesSync(pngBytes);
+    return img;
+  }
+
+
 
 
 
  showhide_bg(var b){
-    setState(() {
-      v_bg=b;
+
+   setState(() {
+//      v_bg=b;
       view_barranav = !b;
       if (b)
       positionCesta=0.0;
@@ -367,6 +403,11 @@ void initState() {
 
 
 
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
 
   blur_background_load(){
@@ -792,6 +833,7 @@ void getEnderecoUser() async {
   }
 
   checkPermission() async {
+
     if (await Permission.location
         .request()
         .isGranted) {

@@ -86,18 +86,14 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
   Widget build(BuildContext context) {
 
     return
-
-
         Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
       Container(
-
           decoration: BoxDecoration(
               color:Colors.white, borderRadius:BorderRadius.all(Radius.circular(20)),
               boxShadow: [BoxShadow(color: Colors.black26,blurRadius:2,offset: Offset(0,0))]),
           child:
-
                  SingleChildScrollView(child:
                  Column(
                  mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +120,6 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                  decoration: InputDecoration(hintText: "Rua",
                                      hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
-
                          Container(
                              margin: EdgeInsets.fromLTRB(15, 0, 15, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(focusNode:fbairro,
@@ -152,7 +147,7 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                  TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
 
                          Container(
-                           height: 150,
+                           height: 200,
                              margin: EdgeInsets.fromLTRB(0, 20, 0, 0), alignment: Alignment.centerLeft,
                             child:
                             Stack(children: <Widget>[
@@ -169,24 +164,29 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                             ),
                            Visibility(visible: show_googlemaps, child:
                             Container(
-                                height: 150,
+                                height: 200,
                                   decoration: BoxDecoration(color: Colors.grey),
                                   alignment: Alignment.center)),
                              Visibility(visible: true, child:
                               Container(
-                                  height: 150,
+                                  height: 200,
                                   alignment: Alignment.center,
                                   child:Icon(Icons.adjust,color: Colors.orange,))),
                               GestureDetector(
                                   onTap: (){ returnLocalInit();},
                                   child: Visibility(visible: true, child:
                                   Container(
-                                      height: 150,
-                                      alignment: Alignment.bottomRight,
+                                      width: 50,
+                                      height: 50,
+                                      margin: EdgeInsets.fromLTRB(10, 15, 10, 0),
+                                      decoration: BoxDecoration(
+                                          boxShadow: [BoxShadow(color:Colors.black54,blurRadius: 5)],
+                                          color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(50))),
+                                      alignment: Alignment.center,
                                       child:
                                       RotationTransition(
                                           turns: Tween(begin: 0.0, end: 1.0).animate(_controllerIcon),
-                                          child:Icon(Icons.refresh,color: Colors.blue,size: 25,))))),
+                                          child:Icon(Icons.pin_drop,color: Colors.blue,size: 25,))))),
                             ],)),
 
 
@@ -205,16 +205,21 @@ Container(
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
 
-            Container(
-                width: MediaQuery.of(context).size.width*0.4,
-                margin: EdgeInsets.fromLTRB(0,0,0,0),
-                child:
-                Transform.scale(scale: 0.8,child:
 
-                botao3dFormEnd(
-                  colorFactor: 3,
-                  sizeW: MediaQuery.of(context).size.width*.5,
-                  child: Text(
+            GestureDetector(onTap: (){ _initSaveEndereco_check();},child:
+            Container(
+                decoration:BoxDecoration(color:Colors.green),
+                height: 50,
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(5),
+                width: MediaQuery.of(context).size.width*0.4,
+                child:
+//                Transform.scale(scale: 0.8,child:
+//                botao3dFormEnd(
+//                  colorFactor: 3,
+//                  sizeW: MediaQuery.of(context).size.width*.5,
+//                  child:
+                  Text(
                     'SALVAR',
                     style: TextStyle(
                         fontFamily:'BreeSerif',
@@ -222,20 +227,25 @@ Container(
                         letterSpacing: 3,
                         fontSize: 20),
                   ),
-                  color: Colors.amber,
-                  onPressed: () { _initSaveEndereco_check();},
-                ))),
-
+//                  color: Colors.amber,
+//                  onPressed: () { _initSaveEndereco_check();},
+                )),
+        GestureDetector(onTap: (){  widget.callback_return_cancel(); },child:
             Container(
-            width: MediaQuery.of(context).size.width*0.4,
+              width: MediaQuery.of(context).size.width*0.4,
+              height: 50,
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(8),
+              decoration:BoxDecoration(color:Colors.grey[500],),
              child:
-              Transform.scale(scale: 0.8,child:
-                  Container(
-                  child:
-                      botao3dFormEnd(
-                        colorFactor: 3,
-                        sizeW: MediaQuery.of(context).size.width*.5,
-                        child: Text(
+//              Transform.scale(scale: 0.8,child:
+//                  Container(
+//                  child:
+//                      botao3dFormEnd(
+//                        colorFactor: 3,
+//                        sizeW: MediaQuery.of(context).size.width*.5,
+//                        child:
+                        Text(
                           'CANCELAR',
                           style: TextStyle(
                               fontFamily:'BreeSerif',
@@ -243,10 +253,10 @@ Container(
                               letterSpacing: 3,
                               fontSize: 18),
                         ),
-                        color: Colors.grey,
-                        onPressed: () { widget.callback_return_cancel();},
-                      )))),
-
+//                        color: Colors.grey,
+//                        onPressed: () { widget.callback_return_cancel();},
+//                      ))
+          )),
 
             ],)),
 

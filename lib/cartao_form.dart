@@ -1,4 +1,5 @@
 import 'package:button3d/button3d.dart';
+import 'package:camera/camera.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_firestore/animator.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:http/http.dart' as http;
 import 'ClickyButton.dart';
+import 'ScannerUtils.dart';
 
 typedef hide_pop =  Function();
 
@@ -30,9 +32,11 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
   var controller_mask_card = new MaskedTextController(mask: '0000 0000 0000 0000', text: '');
   var controller_mask_card_data = new MaskedTextController(mask: '00/00', text: '');
   AnimationController _controller;
+  AnimationController _controller_finish;
   AnimationController _controller_circ;
   AnimationController _controller_rotate;
   Animation<double> _animation;
+  Animation<double> _animation_finish;
   Animation<double> _animation_circ;
   Animation<double> _animation_rotate;
   var numcard="";
@@ -40,7 +44,11 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
   var opcstart = true;
   var bcoltr=false;
   var view_pop_=false;
+  var view_pop_finish=false;
+  var card_sucesso=false;
   var icon_card;
+  var textPopFinish="";
+  var iconPop=Icon(Icons.check_circle,color: Colors.green[500],size: 100,);
 
   @override
   void dispose() {
@@ -63,6 +71,11 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     _controller = AnimationController(
         duration: const Duration(milliseconds: 1500), vsync: this, value: 0.1);
     _animation = CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+
+    _controller_finish = AnimationController(
+        duration: const Duration(milliseconds: 1500), vsync: this, value: 0.1);
+    _animation_finish = CurvedAnimation(parent: _controller_finish, curve: Curves.elasticInOut);
+
 //    _animation = CurvedAnimation(parent: _controller, curve: Curves.bounceInOut);
 
       _controller_rotate = AnimationController(
@@ -94,31 +107,37 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
     return
   Stack(children: <Widget>[
 
-//    Positioned(top: 0,bottom: 0,left: 0,right: 0, child:
-//    Container( alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
+    Positioned(top: 0,bottom: 0,left: 0,right: 0, child:
+    Container( alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
 
     //layout result token
-    Visibility( visible: view_pop_,child:
+    Visibility( visible: view_pop_finish,child:
     ScaleTransition(
-      scale: _animation,
+
+      scale: _animation_finish,
       child:
         Container(
+          height: MediaQuery.of(context).size.height*.7,
+          alignment: Alignment.center,
         child:
-          Column(children: <Widget>[
+          Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
             Container(
+                alignment: Alignment.center,
                 width: 250,
-                height: 250,
-                margin: EdgeInsets.fromLTRB(0, 60,0, 0),
+                margin: EdgeInsets.fromLTRB(0, 30,0, 0),
             padding: EdgeInsets.all(20),
             decoration:
             BoxDecoration(boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 25)] ,
                 color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(500))),
             child:
-                   Column(children: <Widget>[
+                   Column(
+                       mainAxisAlignment: MainAxisAlignment.center,
+                       children: <Widget>[
                      Container(
                          margin: EdgeInsets.fromLTRB(0, 20,0, 0),
-                         height: 30,
-                         child: Text("Cartão salvo!",textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.orange),) ),
+                         child: Text(textPopFinish,textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.orange),) ),
 
 //                     Divider(color: Colors.orange,),
 //                     Container(
@@ -130,10 +149,19 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
                      Align(alignment: Alignment.bottomCenter ,child:
                      ScaleTransition(
                          scale: _animation_circ,
-                             child:Icon(Icons.check_circle,color: Colors.green[500],size: 100,)
+                             child:iconPop
                          ))),
 
-                     GestureDetector(onTap:(){widget.hide_pop_callback();},
+                     GestureDetector(onTap:(){
+
+                       if (card_sucesso==false){
+                       _controller_finish.reverse();
+                       _controller.repeat();
+                       _controller.forward();
+                       }else
+                         widget.hide_pop_callback();
+
+                     },
                      child:
                      Container(
                          decoration: BoxDecoration(
@@ -157,18 +185,34 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
       Column(children: <Widget>[
 
       Container(
-      margin: EdgeInsets.fromLTRB(0, 60,0, 0),
-        padding: EdgeInsets.fromLTRB(20,20,20,10),
+      margin: EdgeInsets.fromLTRB(0, 20,0, 10),
+        padding: EdgeInsets.fromLTRB(20,10,20,10),
         decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 3)] , color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(8))),
         child:
-        Column(children: <Widget>[
+        Row(children: <Widget>[
+//          Container(
+//              height: 30,
+//              child: Text("Fique tranquilo!",
+//                textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoLight'),) ),
+//
+//          Container(
+//              child: Text("Seus dados não ficam salvos",
+//                textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoLight',fontSize: 12),) ),
           Container(
-              height: 30,
-              child: Text("CARTÃO DE CRÉDITO",textAlign: TextAlign.center,style: TextStyle(fontFamily: 'RobotoLight'),) ),
-      ])),
+          child:  Image.asset("card-seguro.png",width: 30,)),
+          Container(
+              margin: EdgeInsets.fromLTRB(10, 0,0, 0),
+              child: Text("Bandeiras disponiveis:",style: TextStyle(fontSize: 10),)),
+          Container(
+              margin: EdgeInsets.fromLTRB(5, 0,0, 0),
+              child:  Image.asset("visa.png",width: 30,)),
+          Container(
+              margin: EdgeInsets.fromLTRB(10, 0,0, 0),
+              child:  Image.asset("master.png",width: 30,)),
+         ])),
 
           Container(
-          margin: EdgeInsets.fromLTRB(0, 60,0, 0),
+          margin: EdgeInsets.fromLTRB(0, 0,0, 0),
           padding: EdgeInsets.fromLTRB(20,20,20,10),
           decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 3)] , color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(8))),
           child:
@@ -325,10 +369,12 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
 
 
   checkCardDados() {
+
     var numero = controller_mask_card.text;
     String nome = myController_nome.text;
     var data = controller_mask_card_data.text;
     var bandeira = "";
+    print(numero);
 
     if (numero[0]=='4')
          bandeira = "Visa";
@@ -355,24 +401,47 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
   sendCartaoTokenrize(var nome,var numero,var holder,var data,var bandeira) async{
     print("sendCartaoTokenrize start" );
     var resulToken = await bloc_finance.callTokenrizarCartao(nome,numero,holder,data,bandeira);
-    print("sendCartaoTokenrize await" );
+    print("sendCartaoTokenrize await "+resulToken.toString() );
     if (resulToken!=null){
-      var token = resulToken['body']['CardToken'];
-      if (token!=null) {
-        var returnSendCard = await bloc_finance.saveTokenCartaoUser(widget.uid, token);
-            print(returnSendCard);
-        if (returnSendCard) {
-            setState(() {
-                view_pop_ =true;
-            });
-        } else {
 
-            }
-      }
-    }else
+      var body = resulToken['body'];
+      var resp = resulToken['resp'];
+
+      if (resp!=null && resp == 'Sucesso'){
+        var token =body['CardToken'];
+        if (token!=null) {
+          var returnSendCard = await bloc_finance.saveTokenCartaoUser(widget.uid, token);
+          if (returnSendCard==true) {
+              setState(() {
+                view_pop_finish =true;
+                card_sucesso=true;
+                textPopFinish = "Cartão salvo!";
+                iconPop = Icon(Icons.check_circle,color: Colors.green[500],size: 100,);
+                _controller_finish.forward();
+              });
+          } else {
+            view_pop_finish =true;
+            card_sucesso=false;
+            textPopFinish = "Erro ao salvar :(\nTente novamente";
+            iconPop = Icon(Icons.error,color: Colors.red[500],size: 100,);
+            _controller_finish.forward();
+           }
+        }
+    }else//RESP == ERRO
       {
-        print("sendCartaoTokenrize resulToken null" );
+        var msgText='Erro desonhecido';
+        if (body.toString().contains("Credit Card Expiration Date is invalid"))
+            msgText = 'Data do cartão errada';
+        setState(() {
+          view_pop_finish = true;
+          card_sucesso=false;
+          textPopFinish = "Erro ao salvar :(\n$msgText";
+          iconPop = Icon(Icons.error, color: Colors.red[500], size: 100,);
+          _controller_finish.forward();
+        });
       }
+
+    }
 
 
   }

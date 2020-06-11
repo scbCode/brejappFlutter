@@ -10,6 +10,7 @@ class Produto_cesta{
   var vol;
   var loja;
   var id;
+  var idloja;
   var img;
   var quantidade;
   var marca;
@@ -30,6 +31,7 @@ class Produto_cesta{
     this.descricao = snapshot["descricao"];
     this.vol =  snapshot["vol"];
     this.loja =  snapshot["loja"];
+    this.idloja =  snapshot["idloja"];
     this.img =  snapshot["img"];
     this.id =  snapshot["id"];
     this.tags =  snapshot["tags"];
@@ -49,7 +51,7 @@ class Produto_cesta{
     Map<String, dynamic> p = {
       'nome':this.nome,'preco':this.preco,'vol':this.vol,'loja':this.loja,'img':this.img,'quantidade':this.quantidade,'id':this.id
     ,'cesta':this.cesta,'tags':this.tags,'marca':this.marca,'localizacao':this.localizacao,'gelada':this.gelada,
-      'coefKm':this.coefKm,'distanciaMaxKm':this.distanciaMaxKm,'distanciaGratisKm':this.distanciaGratisKm,'cartaoApp':this.cartaoApp,'maquinaCartao':this.maquinaCartao
+      'coefKm':this.coefKm,'distanciaMaxKm':this.distanciaMaxKm,'distanciaGratisKm':this.distanciaGratisKm,'cartaoApp':this.cartaoApp,'maquinaCartao':this.maquinaCartao,'idloja':this.idloja
     };
     return p;
   }

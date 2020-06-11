@@ -26,7 +26,7 @@ class itemCards extends StatefulWidget {
 }
 
 
-class cardsstate  extends State<itemCards> {
+class cardsstate  extends State<itemCards> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {

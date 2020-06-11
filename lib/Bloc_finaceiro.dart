@@ -28,29 +28,30 @@ class Bloc_financeiro {
     );
     dynamic resp = await callable.call(<String, dynamic>{
       'CustomerName': CustomerName,
-      'CardNumber': CardNumber,
+      'CardNumber': CardNumber.toString().trim(),
       'Holder': Holder,
       'ExpirationDate': ExpirationDate,
       'Brand': Brand
     });
-
-
     return resp.data;
   }
 
 
   Future<bool> saveTokenCartaoUser(var uid, var token) async {
         var refData = Firestore.instance;
+        var ctrol=false;
         await refData.collection("Usuarios")
             .document(uid).collection('cartoes')
             .add({'token':token,'criado':FieldValue.serverTimestamp(),'tipo':'credito','bandeira':'Master','maskNumb':'9876'  })
             .then((v){
               print("SAVE CARD");
-              Future.value(true);
+              ctrol=true;
+             return  true;
             }).catchError((erro){
               print("SAVE CARD ERROR");
-              Future.value(false);
         });
+
+         return ctrol;
 
   }
 

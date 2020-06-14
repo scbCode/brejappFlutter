@@ -60,8 +60,8 @@ class _itemListProdstate extends State<itemListProd>  {
   var uid;
   final bloc = BlocAll();
   var styleTextFreteGratis = TextStyle(letterSpacing: 1.5,color: Colors.red,fontSize: 10,fontStyle: FontStyle.italic,fontFamily: 'RobotoBold');
-  var styleTextFrete =TextStyle(letterSpacing: 1.5,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
-  var styleTextFrete_ =TextStyle(letterSpacing: 1.5,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
+  var styleTextFrete =TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
+  var styleTextFrete_ =TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
 
   AnimationController _controllerIcon;
 
@@ -207,11 +207,11 @@ class _itemListProdstate extends State<itemListProd>  {
                                   Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.vol,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 1.9, color: Colors.grey[700], fontSize:12,fontFamily: 'RobotoLight'))),
                                   Row (mainAxisAlignment: MainAxisAlignment.start,
                                     children: <Widget>[
-                                      Container(alignment: Alignment.bottomRight,margin: EdgeInsets.fromLTRB(10, 4, 5, 0), child:Text(widget.produto.loja,textAlign: TextAlign.right, style: TextStyle(letterSpacing: 1.5,color: Colors.orange[300] ,fontSize:12,fontFamily: 'RobotoLight'))),
+                                      Container(alignment: Alignment.bottomRight,margin: EdgeInsets.fromLTRB(10, 4, 5, 0), child:Text(widget.produto.loja,textAlign: TextAlign.right, style: TextStyle(letterSpacing: 0.5,color: Colors.orange[300] ,fontSize:12,fontFamily: 'RobotoLight'))),
                                       Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
                                       Visibility(
                                         visible:view_dist,child:
-                                      Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(distanceTo().toString(),style: TextStyle(letterSpacing: 1.5,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
+                                      Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(distanceTo().toString(),style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
                                       ),
                                       Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
                                       Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(formatFrete(),style: styleTextFrete),),

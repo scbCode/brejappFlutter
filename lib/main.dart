@@ -18,8 +18,10 @@ import 'package:flutter_firestore/Produto.dart';
 import 'package:flutter_firestore/autenticacao.dart';
 import 'package:flutter_firestore/barBuscar.dart';
 import 'package:flutter_firestore/barNavBottom.dart';
+import 'package:flutter_firestore/barPedidoUser.dart';
 import 'package:flutter_firestore/itemListProd.dart';
 import 'package:flutter_firestore/listaLojas.dart';
+import 'package:flutter_firestore/prePedido.dart';
 import 'package:flutter_firestore/returnBarCestaVazia.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:loading/indicator/ball_beat_indicator.dart';
@@ -258,36 +260,56 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-       Positioned(
-        width: MediaQuery.of(context).size.width,
-        bottom:positionCesta,
-        child:
-        StreamBuilder<List<dynamic>>(
-            stream: bloc.check,
-              builder: (context,value) {
-                if (value.connectionState==ConnectionState.active) {
-                if (value.data.length>0){
-                  distanciaLoja d;
-                  for (var i=0;i<listaDist.length;i++){
-                    if (listaDist[i].loja==value.data[0].loja){
-                        d = listaDist[i];
-                    }
-                  }
-                  listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
-                  if (Usuario!=null)
-                  return
-                     barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
-                  else
-                    return Container();
+           Positioned(
+            width: MediaQuery.of(context).size.width,
+            bottom:45,
+            child:
+            StreamBuilder<Pedido>(
+                stream: bloc.stream_pedido,
+                  builder: (context,value) {
+                    print("STREM PEDIDO");
+                    if (value.connectionState==ConnectionState.active) {
+                      print("STREM PEDIDO");
+                      if (Usuario!=null)
+                      return
+                         barPedidoUser(Usuario,value.data, listaDist,(value){return showhide_bg(value);});
+                      else
+                        return Container();
+                    }else
+                      return Container();
 
-                }else{
-                    v_bg=false;
-                    return Container();
-                }
-                } else {
-                  return Container();
-                }
-            })),
+                  })),
+
+            Positioned(
+                width: MediaQuery.of(context).size.width,
+                bottom:positionCesta,
+                child:
+                StreamBuilder<List<dynamic>>(
+                    stream: bloc.check,
+                    builder: (context,value) {
+                      if (value.connectionState==ConnectionState.active) {
+                        if (value.data.length>0){
+                          distanciaLoja d;
+                          for (var i=0;i<listaDist.length;i++){
+                            if (listaDist[i].idloja==value.data[0].idloja){
+                              d = listaDist[i];
+                            }
+                          }
+                          listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
+                          if (Usuario!=null)
+                            return
+                              barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
+                          else
+                            return Container();
+
+                        }else{
+                          v_bg=false;
+                          return Container();
+                        }
+                      } else {
+                        return Container();
+                      }
+                    })),
 
         Visibility( visible:view_dialogGps , child:
 
@@ -378,6 +400,7 @@ class _MyHomePageState extends State<MyHomePage> {
 @override
 void initState() {
   bloc.initBloc();
+
 
   listaProdutos = Container();
   checkPermission();
@@ -690,7 +713,7 @@ void getEnderecoUser() async {
                     di = double.parse(listaDist[i].distancia) / 1000.0;
                     print("distancia xxx " + (di).toString() + "-" +
                         (produto.distanciaMaxKm).toString());
-                    if (listaDist[i].loja == produto.loja)
+                    if (listaDist[i].idloja== produto.idloja)
                       ctrl = true;
                   }
                 }
@@ -746,10 +769,10 @@ void getEnderecoUser() async {
 
     var refData = Firestore.instance;
       await refData.collection("Produtos_On")
-          .add({"gelada":true,'descricao':'LongNeck',"nome": "Heineken", "preco": 2.5, "vol": "330ml", "loja": "Lojay",
+          .add({"gelada":true,'descricao':'LongNeck',"nome": "Heineken", "preco": 2.5, "vol": "330ml", "loja": "loja brejapp",
         "img":"https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/heineken_1.png?alt=media&token=820319cf-51a3-45ce-8d92-934d3bd31f91",
         "quantidade": 0, "id": "007", "cesta": null, "tags": ["cerveja", "skol","pilsen", "lata"],
-        "marca": "Heineken", "gelada": true, "coefKm": 1.2, "distanciaMaxKm": 20, "distanciaGratisKm": 15,
+        "marca": "Heineken", "gelada": true, "coefKm": 1.2, "idloja": "001", "distanciaMaxKm": 20, "distanciaGratisKm": 15,
         "localizacao":new GeoPoint(-1.433361, -48.472075),
         "cartaoApp": true,"maquinaCartao": true})
           .then((v){
@@ -872,7 +895,7 @@ void getEnderecoUser() async {
     if (!data.isEmpty){
         listaDist = new List<distanciaLoja>();
         for(int i=0;i<data.length;i++){
-         d = new distanciaLoja(data[i]['loja'],data[i]['distancia'],data[i]['duracao']);
+         d = new distanciaLoja(data[i]['loja'],data[i]['distancia'],data[i]['duracao'],data[i]['idloja']);
             listaDist.add(d);
         }
         setState(() {
@@ -926,12 +949,12 @@ checkDistanceAtual(produto) async {
       if (local_user!=null) {
         var ctrol = false;
         for (int i=0;i<listaDist.length;i++){
-            if (listaDist[i].loja==produto.loja)
+            if (listaDist[i].idloja==produto.idloja)
                 ctrol=true;
         }
 
       if (ctrol==false){
-        distanciaLoja distancia = distanciaLoja(produto.loja, null,null);
+        distanciaLoja distancia = distanciaLoja(produto.loja, null,null,produto.idloja);
         listaDist.add(distancia);
 
         String lat2 = produto.localizacao.latitude.toString();
@@ -960,10 +983,10 @@ checkDistanceAtual(produto) async {
 
         enderecoUser endUserTemp = new enderecoUser(rua, bairro, numero, "", GeoPoint(local_user.latitude,local_user.longitude),true);
 
-        distancia = new distanciaLoja(produto.loja, d,duration);
+        distancia = new distanciaLoja(produto.loja, d,duration,produto.idloja);
 
         for (int i=0;i<listaDist.length;i++){
-          if (listaDist[i].loja==produto.loja)
+          if (listaDist[i].idloja==produto.idloja)
             setState(() {
               listaDist[i].distancia=d;
               listaDist[i].duracao=duration;
@@ -1004,7 +1027,7 @@ checkDistanceAtual(produto) async {
 
       await Firestore.instance.collection("Usuarios")
           .document(user.uid).collection("distancias")
-          .document(distancia.loja)
+          .document(distancia.idloja)
           .setData(distancia.getdistanciaLoja());
 
       setState(() {

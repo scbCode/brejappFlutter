@@ -39,7 +39,7 @@ class barCesta extends StatefulWidget  {
   List<Produto_cesta> listaCesta = new List<Produto_cesta>();
   distanciaLoja listaDistancia_ ;
   show_blur_bg call_back_show_bg;
-  var user;
+  User user;
   barCesta (this.user,this.listaCesta,this.listaDistancia_,this.call_back_show_bg);
 
   @override
@@ -60,7 +60,7 @@ class barCestaState extends State<barCesta>   {
   var view_remove=false;
   var totaltxt="";
   var total=0.0;
-  var frete=0.0;
+  var frete;
   var listaProdutos;
   double initial=0.0;
   var bloc = BlocAll();
@@ -90,6 +90,8 @@ class barCestaState extends State<barCesta>   {
   var cardSelecionado;
   var tipoPagSelectItem;
   var pagSelect=false;
+  var pagSelectfinal=false;
+  var show_popprocessando=false;
   var tipoPag="";
   var view_troco=false;
   var view_deb_maq=false;
@@ -198,9 +200,24 @@ class barCestaState extends State<barCesta>   {
                       barra()
                   ),
                   //////////////////////////////////////////////////////////
-                  Visibility(visible:pagSelect, child:
+
+                  Visibility(visible:show_popprocessando, child:
+                    Container(child:
+                    Column(children: [
+                      aguardarresppagamento()
+                    ],)),),
+
+                  Visibility(visible: (pagSelectfinal), child:
                   viewcomprapagamento_,),
 
+//                  Visibility(visible:pagSelect, child:
+//                  ColorFiltered(
+//                    colorFilter: ColorFilter.mode(
+//                      Colors.grey,
+//                      BlendMode.saturation,
+//                    ),
+//                      child:viewcomprapagamento_
+//                  ),),
 
                   Visibility(visible:view_resumo_cesta, child:
                   LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
@@ -427,11 +444,63 @@ class barCestaState extends State<barCesta>   {
   }
 
 
+  aguardarresppagamento() {
+
+    return
+    LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
+    SingleChildScrollView(child:
+    Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+        margin: EdgeInsets.fromLTRB(0, 0, 0, bttmResumo),
+        decoration: BoxDecoration(color: Colors.white,boxShadow: [
+          BoxShadow( color: Colors.black12,blurRadius:4.0,
+            offset: Offset(0.0,45.0,  ),)
+        ],),
+        child:
+        Column(
+            children: <Widget>[
+              Container(
+                  alignment: Alignment.centerLeft,
+                  width: MediaQuery.of(context).size.width,
+                  child:
+                  Stack(
+                      children: <Widget>[
+                        Container(
+                            alignment: Alignment.center,
+                            margin:EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            child:Text("PROCESSANDO COMPRA",style: TextStyle(fontSize: 20,fontFamily: 'BreeSerif',letterSpacing: 0.4),)),
+                      ])),
+
+              Container(
+                  padding:EdgeInsets.all(10),
+                  margin:EdgeInsets.fromLTRB(0, 15, 0, 0),
+                  child:
+                  Column(
+                      children: <Widget>[
+                        Image.asset('gif_load.gif',width: 50,height: 50,),
+                      ])),
+
+              Container(
+                padding:EdgeInsets.all(10),
+                margin:EdgeInsets.fromLTRB(0, 0, 0, 0),
+                child:Text("Aguarde...",
+                  style: TextStyle(color:Colors.grey,fontSize: 20,fontFamily: 'BreeSerif',letterSpacing: 0.4),)),
+
+
+
+            ])
+    )));
+  }
+
+
+
   viewresumopagamento (){
 
     listaCesta_=listaCesta();
 
     return
+
   Visibility(visible: true ,child:
   LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
   SingleChildScrollView(child:
@@ -476,21 +545,6 @@ class barCestaState extends State<barCesta>   {
                   margin:EdgeInsets.fromLTRB(0, 0, 0, 0),
                   child:Text("RESUMO DA COMPRA",style: TextStyle(fontSize: 20,fontFamily: 'BreeSerif',letterSpacing: 0.4),)),
     ])),
-
-//    Container(
-//        padding:EdgeInsets.all(10),
-//        margin:EdgeInsets.fromLTRB(0, 20, 0, 0),
-//        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),
-//            boxShadow: [BoxShadow(color: Colors.grey[400],blurRadius: 1)],color:Colors.orange[400]),
-//        child:
-//        Column(
-//            mainAxisAlignment: MainAxisAlignment.center,
-//            children: <Widget>[
-//
-//              Container(
-//                  margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-//                  child:  Container(child:Text("Finalizar pedido",style: TextStyle(color:Colors.white,fontFamily: 'BreeSerif',fontSize: 20),))),
-//            ])),
 
     Container(
         padding:EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -579,6 +633,11 @@ class barCestaState extends State<barCesta>   {
             GestureDetector(
                 onTap:(){
                   enviarPedido();
+                  setState(() {
+                    show_popprocessando=true;
+                    pagSelectfinal=false;
+                  });
+
                 },
                 child:
             Container(
@@ -710,6 +769,7 @@ class barCestaState extends State<barCesta>   {
       iconCheckPagamento_dinheiro=Icons.radio_button_unchecked;
       iconCheckPagamento_maquina=Icons.radio_button_unchecked;
       pagSelect=true;
+      pagSelectfinal=true;
       tipoPag="cartao";
       cartaoselect=resp;
       cardSelecionado=cartao;
@@ -1087,6 +1147,7 @@ class barCestaState extends State<barCesta>   {
               tipoPag="maquina";
               view_formpag=false;
               pagSelect=true;
+              pagSelectfinal=true;
             });},
           child:
           Column(children: <Widget>[
@@ -1242,6 +1303,7 @@ class barCestaState extends State<barCesta>   {
                           cartaoselect=-1;
                           tipoPag="dinheiro";
                           pagSelect=true;
+                          pagSelectfinal=true;
                           view_troco=true;
                         });},
                         child:
@@ -1670,27 +1732,57 @@ class barCestaState extends State<barCesta>   {
   }
 
 
+  enviarPedido() async {
 
-  enviarPedido(){
 
     Pedido pedido_= new Pedido();
-    var totalP = total;
-    var frete_ = frete;
-    var endereco = end_user_;
+    enderecoUser endereco = end_user_;
+    var idloja;
     var formaPagamaneto = tipoPag;
-    var troco_ = troco;
-    var indexCard = cartaoselect;
-    List<Produto_cesta> lista_produtos_ = new List<Produto_cesta>();
+    List<Map> lista_produtos_ = new List<Map>();
     for (int i=0; i < listaProdutos.length;i++){
       Produto_cesta p = new Produto_cesta(listaProdutos[i]);
-      lista_produtos_.add(p);
+      lista_produtos_.add(p.getproduto());
+      idloja=p.idloja;
     }
     var time=FieldValue.serverTimestamp();
-//    var idLoja=listaProdutos[0].idloja;
-    var nomeUser;
-    var tellUser;
-    var status;
+    var nomeUser=widget.user.nome ;
+    var tellUser = widget.user.tell;
+    //aguardando//recusado//confirmado//fazendo sua cesta//entrega//finalizado//cancelado
+    var status = "aguardando";
+    pedido_.total=total;
+    pedido_.frete=frete;
+    pedido_.enderecoEntrega = endereco.getenderecoUser();
+    pedido_.tipoPagamento=formaPagamaneto;
+    pedido_.troco=troco;
+    pedido_.lista_produtos=lista_produtos_;
+    pedido_.nomeUser=nomeUser;
+    pedido_.tellUser=tellUser;
+    pedido_.status=status;
+    pedido_.time=time;
+    pedido_.idloja=idloja;
+    pedido_.emailUser=widget.user.email;
+    pedido_.statusPagamento=status;
+
+    if (tipoPag=="cartao"){
+        var resultEnvioPedido = await bloc.savePrePedido(widget.user.uid,pedido_);
+        if (resultEnvioPedido){
+          //show pop card cvv || se pag for dinheiro ou maquina enviar pedido direto
+        }
+    }else
+      {
+        var resultEnvioPedidofinal = await bloc.savePedidoFinal(widget.user.uid,pedido_);
+        if (resultEnvioPedidofinal){
+           //hide barCesta; show  barPedido
+          widget.call_back_show_bg(false);
+        }else
+          {
+            pagSelectfinal=true;
+          }
+      }
+
   }
+
 
 
 }

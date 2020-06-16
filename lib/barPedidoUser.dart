@@ -52,6 +52,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   var status_entrega=false;
   var status_confirmacao=true;
   var statustext="";
+  var view_statusbar_pedido=true;
   var line;
   var view_ajuda=false;
   var view_ajuda_pedido=false;
@@ -70,6 +71,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   var veiw_voltar_2=false;
   var veiw_voltar_enviar_pedidoerrado=false;
   var bg_pop_pedido=false;
+  var pop_pedido_view=false;
   var bg_pop_end=false;
   var bg_pop_end_view=false;
   var pop_precess_cancel=false;
@@ -165,19 +167,26 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     Stack(
         children: <Widget>[
 
+          Visibility(
+              visible:true,
+              child:
         Column(
-        children: <Widget>[
-              Container(
-              width: MediaQuery.of(context).size.width,
+         children: <Widget>[    
+         Container(
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(color:Colors.white),
-            child:Column(children: [
+            child:
+
+            Column(children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround ,
                 children: [
             Container(padding: EdgeInsets.all(5),
                   child:Text("Loja xxyy",style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.black),)),
             ]),
 
-
+                  Visibility(
+                    visible:true,
+                    child:
             Container(
                 margin: EdgeInsets.fromLTRB(10, 0, 50,10),
                 width: MediaQuery.of(context).size.width,
@@ -297,7 +306,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                   child:
                 Text( infoDistanciaTime())),
 
-              ])),
+              ]))),
 
               Divider(color:Colors.red)],)),
 
@@ -343,9 +352,15 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               decoration: BoxDecoration(color:Colors.white,
                   boxShadow: [BoxShadow(color: Colors.grey[500],blurRadius: 4,offset: Offset(-2,2.0) ),
                   ]),
-              child: Column(children: [
+              child: 
+              
+              
+              Column(children: [
 
-                  Container(
+              Stack(children: [
+               Column(children: [
+
+              Container(
                       width: MediaQuery.of(context).size.width,
                       padding: EdgeInsets.fromLTRB(10, 10,10,0),
                   child:    Text("Endereço de entrega",
@@ -403,7 +418,14 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     child:    Text(totalTxt(),textAlign: TextAlign.center,
                       style: TextStyle(color:Colors.black,fontSize: 16,
                           fontFamily: 'BreeSerif'),)),
+                          ]),
 
+
+
+                popChat(),
+
+              ]),
+  
                   Row(children: [
                     Container(
                         padding: EdgeInsets.fromLTRB(10, 5,10,10),
@@ -452,11 +474,15 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       onTap:(){
 
                       setState((){
-                      if(!bg_pop_pedido)
-                        bg_pop_pedido=true;
-                      else
-                        bg_pop_pedido=false;
-
+                      if(!bg_pop_pedido) {
+                        bg_pop_pedido = true;
+                        view_statusbar_pedido=false;
+                        pop_pedido_view=true;
+                      }else {
+                        bg_pop_pedido = false;
+                        view_statusbar_pedido=true;
+                        pop_pedido_view=false;
+                      }
                       });
                       },
                       child:
@@ -471,10 +497,16 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       onTap:(){
 
                       setState((){
-                      if(!view_ocorreu_um_problema)
-                        view_ocorreu_um_problema=true;
-                      else
-                        view_ocorreu_um_problema=false;
+                      if(!view_ocorreu_um_problema) {
+                        view_ocorreu_um_problema = true;
+                        view_statusbar_pedido=false;
+                        bg_pop_pedido=true;
+
+                      }  else{
+                        view_statusbar_pedido=true;
+                        bg_pop_pedido=false;
+
+                        view_ocorreu_um_problema=false;}
 
                       });
                       },
@@ -491,10 +523,18 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     onTap:(){
 
     setState((){
-    if(!view_botoes_fazer_denuncia)
-      view_botoes_fazer_denuncia=true;
-    else
-      view_botoes_fazer_denuncia=false;
+    if(!view_botoes_fazer_denuncia) {
+      bg_pop_pedido=true;
+      view_botoes_fazer_denuncia = true;
+      view_statusbar_pedido=false;
+      view_denunc_btn_preceeng=true;
+      view_denunc_btn_prodeng=true;
+      view_denunc_btn_outro=true;
+    }else{
+      view_statusbar_pedido=true;
+      bg_pop_pedido=false;
+
+      view_botoes_fazer_denuncia=false;}
 
     });
     },
@@ -507,7 +547,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     child:    Text("FAZER DENÚNCIA")))),
           ]))),
 
-    ]),
+    ])),
 
       Visibility(visible:view_botoes_fazer_denuncia,child:
           Positioned(
@@ -532,23 +572,23 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
           Visibility(visible: bg_pop_end,child:
           formularioEndereco() ),
-    Visibility(visible:bg_pop_pedido ,child:
-
-    Container(
-
-              child: ClipRect(
-                child:  BackdropFilter(
-                  filter:  ImageFilter.blur(sigmaX:1, sigmaY:1),
-                  child:  Container(
-                    width: double.infinity,
-                    height: MediaQuery.of(context).size.height,
-                    decoration:  BoxDecoration(color: Colors.transparent),
-
-                    ),
-                  ),
-                ),
-              )),
-    Visibility(visible:bg_pop_pedido,child:
+//    Visibility(visible:bg_pop_pedido ,child:
+//
+//    Container(
+//
+//              child: ClipRect(
+//                child:  BackdropFilter(
+//                  filter:  ImageFilter.blur(sigmaX:1, sigmaY:1),
+//                  child:  Container(
+//                    width: double.infinity,
+//                    height: MediaQuery.of(context).size.height,
+//                    decoration:  BoxDecoration(color: Colors.transparent),
+//
+//                    ),
+//                  ),
+//                ),
+//              )),
+    Visibility(visible:pop_pedido_view,child:
 
 
     Positioned(
@@ -585,6 +625,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                           view_btn_confirm_cancel=false;
                         else
                           view_btn_confirm_cancel=true;
+
+
                         });
                       },
                       child:
@@ -626,10 +668,11 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               setState((){
                 view_btn_confirm_cancel=false;
 
-                if(!bg_pop_pedido)
-                  bg_pop_pedido=true;
-                  else
+                if(!bg_pop_pedido) {
+                  bg_pop_pedido = true;
+                } else
                   bg_pop_pedido=false;
+                pop_pedido_view=false;
 
               });
               },
@@ -1103,11 +1146,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     Visibility(visible: view_field_denuncia,child:
     GestureDetector(
           onTap:(){
-            if( testAjudamsn!=""){
-              bloc.enviarDenuncia(widget.pedido,origemDenuncia,msgDenuncia);
-              setState(() {
-                view_field_denuncia=false;
-              });
+            if( msgDenuncia!=""){
+              enviarDenuncia();
             }
           },
           child:
@@ -1120,6 +1160,31 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               child:    Text("ENVIAR",
                   style:TextStyle(color:Colors.blue,fontFamily: 'RobotoBold'))))),
     ]);
+  }
+  
+  popChat(){
+    return 
+        Container(
+          decoration:BoxDecoration(color:Colors.white,borderRadius: BorderRadius.all(Radius.circular(10))),
+              width: 200,
+          height: 200,
+        );
+    
+  }
+
+  enviarDenuncia()async{
+   var b = await bloc.enviarDenuncia(widget.pedido,origemDenuncia,msgDenuncia);
+    setState(() {
+    if (b==true)  _snackbarcor("Denúncia enviada",Colors.green);
+      view_denunc_btn_prodeng =true;
+      view_denunc_btn_preceeng=true;
+      view_denunc_btn_outro=true;
+      view_field_denuncia=false;
+    });
+  }
+  _snackbarcor(text,cor){
+    final snackBar = SnackBar(backgroundColor: cor, content: Text(text));
+    Scaffold.of(context).showSnackBar(snackBar);
   }
 
   totalTxt(){

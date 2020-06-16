@@ -1,15 +1,17 @@
+//
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_firestore/animator.dart';
+
+
 import 'package:flutter_firestore/main.dart';
 import 'package:flutter_firestore/viewBusca.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
+
 import 'package:loading/indicator/ball_beat_indicator.dart';
-import 'package:loading/indicator/ball_pulse_indicator.dart';
 import 'package:loading/loading.dart';
 import 'package:page_transition/page_transition.dart';
+
 
 import 'User.dart';
 import 'animationItem.dart';

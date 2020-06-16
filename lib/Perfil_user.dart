@@ -254,7 +254,7 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
           Positioned( child: barNavBottom("User",true,"",null,null),bottom: 0,width: MediaQuery.of(context).size.width),
 
           Visibility(visible: widget.enableEndForm, child:
-          Positioned( child: form_endereco_user(endereco,null,(){return _closePopEndereco();}),top: 0,
+          Positioned( child: form_endereco_user(endereco,null,null,(){return _closePopEndereco();}),top: 0,
               width: MediaQuery.of(context).size.width, height: MediaQuery.of(context).size.height )),
       ]),
     );

@@ -25,10 +25,11 @@ class form_endereco_user extends StatefulWidget {
   Set<Marker> markers = Set();
   bool isLocationEnabled=false;
 
+  var idloja;
   var    countResetPosit = 0 ;
   enderecoUser enderecoExist;
 
-  form_endereco_user (  this.enderecoExist, @required this.callback_return, @required this.callback_return_cancel);
+  form_endereco_user (  this.enderecoExist,this.idloja ,@required this.callback_return, @required this.callback_return_cancel);
 
 
   @override
@@ -325,16 +326,31 @@ Container(
 
   enviarFormEndereco(enderecoUser endereco) async{
     var refData = Firestore.instance;
-
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     var uid = user.uid;
 
-    await refData.collection("Usuarios")
-        .document(uid)
-        .collection("endereco").document("Entrega")
-        .setData(endereco.getenderecoUser());
-     _snackbar("Endereço salvo");
-     widget.callback_return_cancel();
+    if (widget.idloja==null) {
+
+      await refData.collection("Usuarios")
+          .document(uid)
+          .collection("endereco").document("Entrega")
+          .setData(endereco.getenderecoUser());
+      _snackbar("Endereço salvo");
+      widget.callback_return_cancel();
+
+    }
+
+    else {
+
+      await refData.collection("Usuarios")
+          .document(uid)
+          .collection("Pedidos").document(widget.idloja)
+          .setData({'enderecoEntrega':endereco.getenderecoUser()},merge: true);
+      _snackbar("Endereço salvo");
+      widget.callback_return_cancel();
+    }
+
+
 
   }
 

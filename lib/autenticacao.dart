@@ -611,7 +611,7 @@ Future  signUp() async {
 void criarUser(User muser) async {
     await refData.collection("Usuarios")
         .document(muser.uid)
-        .setData({"nome":widget.Usuario.nome,"tell":widget.Usuario.tell,"email":widget.Usuario.email});
+        .setData({"nome":widget.Usuario.nome,"tell":widget.Usuario.tell,"email":widget.Usuario.email,'uid':widget.Usuario.uid});
     _screen_loading_out(true);
     _snackbarcor("Bem vindo, "+widget.Usuario.nome,Colors.green);
 }

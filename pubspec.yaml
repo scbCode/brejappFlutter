@@ -40,7 +40,8 @@ dependencies:
   button3d: 0.1.1
   firebase_ml_vision: 0.9.4
   camera: 0.5.8+2
-  url_launcher: ^5.4.10
+  url_launcher: 5.4.10
+  flutter_open_whatsapp: 0.1.2
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
@@ -84,6 +85,7 @@ flutter:
     - delivery-man-off.png
     - lojaoff_.png
     - online-shopping.png
+    - iconwhats.png
   # FONTS
   fonts:
     - family: RobotoLight

@@ -154,7 +154,7 @@ class listaProdutoState  extends State<listaProdutos> {
                     di = double.parse(listaDist[i].distancia) / 1000.0;
                     print("distancia xxx " + (di).toString() + "-" +
                         (produto.distanciaMaxKm).toString());
-                    if (listaDist[i].loja == produto.loja)
+                    if (listaDist[i].idloja == produto.idloja)
                       ctrl = true;
                   }
                 }
@@ -406,21 +406,6 @@ class listaProdutoState  extends State<listaProdutos> {
 
 
 
-  additem()async{
-
-    var refData = Firestore.instance;
-    await refData.collection("Produtos_On")
-        .add({"gelada":true,'descricao':'LongNeck',"nome": "Heineken", "preco": 2.5, "vol": "330ml", "loja": "Lojay",
-      "img":"https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/heineken_1.png?alt=media&token=820319cf-51a3-45ce-8d92-934d3bd31f91",
-      "quantidade": 0, "id": "007", "cesta": null, "tags": ["cerveja", "skol","pilsen", "lata"],
-      "marca": "Heineken", "gelada": true, "coefKm": 1.2, "distanciaMaxKm": 20, "distanciaGratisKm": 15,
-      "localizacao":new GeoPoint(-1.433361, -48.472075),
-      "cartaoApp": true,"maquinaCartao": true})
-        .then((v){
-      print("adtime");
-    });
-
-  }
 
 
   _showpop_gps(){
@@ -535,7 +520,7 @@ class listaProdutoState  extends State<listaProdutos> {
     if (!data.isEmpty){
       listaDist = new List<distanciaLoja>();
       for(int i=0;i<data.length;i++){
-        d = new distanciaLoja(data[i]['loja'],data[i]['distancia'],data[i]['duracao']);
+        d = new distanciaLoja(data[i]['loja'],data[i]['distancia'],data[i]['duracao'],data['idloja']);
         listaDist.add(d);
       }
       setState(() {
@@ -589,12 +574,12 @@ class listaProdutoState  extends State<listaProdutos> {
     if (local_user!=null) {
       var ctrol = false;
       for (int i=0;i<listaDist.length;i++){
-        if (listaDist[i].loja==produto.loja)
+        if (listaDist[i].idloja==produto.idloja)
           ctrol=true;
       }
 
       if (ctrol==false){
-        distanciaLoja distancia = distanciaLoja(produto.loja, null,null);
+        distanciaLoja distancia = distanciaLoja(produto.loja, null,null,null);
         listaDist.add(distancia);
 
         String lat2 = produto.localizacao.latitude.toString();
@@ -623,10 +608,10 @@ class listaProdutoState  extends State<listaProdutos> {
 
         enderecoUser endUserTemp = new enderecoUser(rua, bairro, numero, "", GeoPoint(local_user.latitude,local_user.longitude),true);
 
-        distancia = new distanciaLoja(produto.loja, d,duration);
+        distancia = new distanciaLoja(produto.loja, d,duration,produto.idloja);
 
         for (int i=0;i<listaDist.length;i++){
-          if (listaDist[i].loja==produto.loja)
+          if (listaDist[i].idloja==produto.idloja)
             setState(() {
               listaDist[i].distancia=d;
               listaDist[i].duracao=duration;
@@ -667,7 +652,7 @@ class listaProdutoState  extends State<listaProdutos> {
 
       await Firestore.instance.collection("Usuarios")
           .document(user.uid).collection("distancias")
-          .document(distancia.loja)
+          .document(distancia.idloja)
           .setData(distancia.getdistanciaLoja());
 
       setState(() {

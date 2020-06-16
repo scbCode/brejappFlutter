@@ -95,6 +95,29 @@ class BlocAll {
 
   }
 
+ Future<Loja>getLojaPedido(var loja)async{
+    Loja returnloja;
+     await Firestore.instance
+        .collection('Perfil_loja').document(loja).get().
+      then
+        ((data)   {
+       Loja loja = Loja(data);
+       returnloja=loja;
+       print("LOJA GET "+loja.nome);
+       return loja;
+        }
+      );
+
+     return returnloja;
+  }
+  getLojareturn(QuerySnapshot data)  {
+    if (data.documents.isEmpty == false) {
+       data.documents.forEach((p) {
+        Loja loja = Loja(p);
+        return (loja);
+      });
+    }
+  }
 
   _checkreresultLoja(QuerySnapshot data) async {
     listaCesta = [];
@@ -194,6 +217,71 @@ class BlocAll {
 
     }
 
+  Future<bool> cancelPedido(var uid, var pedido) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uid).collection('Pedidos')
+        .document(pedido).setData({"timecancel":FieldValue.serverTimestamp(),"status":"cancelado_user",},merge: true)
+        .then((v){
+      print("SAVE CANCEL-PEDIDO");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE CANCEL-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
+
+
+
+  Future<bool> enviarDenuncia(Pedido pedido,var origemDenuncia, var msg) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Denuncias").document(origemDenuncia)
+        .collection("Geral")
+        .add({"time":FieldValue.serverTimestamp(),
+              "origemDenuncia":origemDenuncia,
+              "loja":pedido.idloja,
+              "emailUser":pedido.emailUser,
+              "msg": msg,
+         })
+        .then((v){
+        print("SAVE CANCEL-PEDIDO");
+        ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE CANCEL-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
+
+  Future<bool> sendMsgAjuda(var uid, var pedido,var msg) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uid).collection('Pedidos')
+        .document(pedido).collection("chat")
+        .add(
+        {"time":FieldValue.serverTimestamp(),
+          "msg":msg,
+        }
+        )
+        .then((v){
+      print("SAVE MSG-PEDIDO");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE MSG-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
 
   Future<bool> savePedidoFinal(var uid, var pedido) async {
     var refData = Firestore.instance;

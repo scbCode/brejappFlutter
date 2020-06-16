@@ -271,8 +271,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     if (value.connectionState==ConnectionState.active) {
                       print("STREM PEDIDO");
                       if (Usuario!=null)
+                        if (value.data.status!="cancelado_user" && value.data.status!="finalizado")
                       return
                          barPedidoUser(Usuario,value.data, listaDist,(value){return showhide_bg(value);});
+                        else
+                          return Container();
                       else
                         return Container();
                     }else

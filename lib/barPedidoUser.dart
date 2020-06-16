@@ -1,17 +1,27 @@
 
 
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firestore/prePedido.dart';
+import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
+import 'package:url_launcher/url_launcher.dart';
+import 'BlocAll.dart';
 import 'LineAnim.dart';
+import 'Loja.dart';
 import 'Produto_cesta.dart';
 import 'User.dart';
 import 'barCesta.dart';
 import 'distanciaLoja.dart';
 import 'dart:typed_data';
+
+import 'enderecoUser.dart';
+import 'enderecoUserSnapShot.dart';
+import 'form_endereco_user.dart';
 
 class barPedidoUser extends StatefulWidget  {
 
@@ -35,6 +45,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   AnimationController _controllerIcon;
   AnimationController _controllerIcon_moto;
   BitmapDescriptor myIcon;
+  enderecoUser end_user_ ;
   var w_anim=false;
   var v_w_animi=200.0;
   var v_w_animtime=700;
@@ -42,6 +53,30 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   var status_confirmacao=true;
   var statustext="";
   var line;
+  var view_ajuda=false;
+  var view_ajuda_pedido=false;
+  var view_ocorreu_um_problema=false;
+  var view_botoes_fazer_denuncia=false;
+  var bottompop=0.0;
+  var view_field_pedidoerrado=false;
+  var view_field_denuncia=false;
+  var view_denunc_btn_prodeng=false;
+  var view_denunc_btn_preceeng=false;
+  var view_denunc_btn_outro=false;
+
+  var testAjudamsn="";
+  var msgDenuncia="";
+  var origemDenuncia="";
+  var veiw_voltar_2=false;
+  var veiw_voltar_enviar_pedidoerrado=false;
+  var bg_pop_pedido=false;
+  var bg_pop_end=false;
+  var bg_pop_end_view=false;
+  var pop_precess_cancel=false;
+  var bloc = BlocAll();
+  var diff_hora;
+  var view_btn_confirm_cancel=false;
+  var tellloja;
   GoogleMapController mapController;
   Animation<RelativeRect> rectAnimation;
   Animation<Offset> animation;
@@ -56,8 +91,13 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   }
 
   barCestaCompleta(){
+    DateTime now = DateTime.now();
+    DateTime data_pedido = widget.pedido.time.toDate();
+    diff_hora = now.difference(data_pedido).inHours;
 
+    if (diff_hora>=2){
 
+    }
     if (widget.pedido.status=="aguardando") {
       setState(() {
 
@@ -90,6 +130,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
         alignment: Alignment.bottomCenter,
         children: <Widget>[
 
+
         Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
@@ -112,7 +153,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                 barra()
             ),
     Visibility(visible:true, child:
-    LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
+    LimitedBox(maxHeight:MediaQuery.of(context).size.height*.820,child:
     SingleChildScrollView(child:
     Container(
     margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -121,10 +162,12 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     offset: Offset(0.0,45.0,  ),)
     ],),
     child:
-    Column(
-    children: <Widget>[
-          Container(
+    Stack(
+        children: <Widget>[
 
+        Column(
+        children: <Widget>[
+              Container(
               width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(color:Colors.white),
             child:Column(children: [
@@ -370,7 +413,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     Container(
                         padding: EdgeInsets.fromLTRB(10, 5,10,10),
                         child: new FlatButton(
-                        onPressed: () => UrlLauncher.launch("tel://5591989716453"),
+                        onPressed: () => UrlLauncher.launch("tel://"+tellloja),
                         child:   Text("Ligar",textAlign: TextAlign.left,
                                               style: TextStyle(color:Colors.green[400],fontSize: 16,
                               fontFamily: 'BreeSerif'),))),
@@ -381,35 +424,246 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                         child:    Text("Já chegou!",textAlign: TextAlign.left,
                           style: TextStyle(color:Colors.green[400],fontSize: 16,
                               fontFamily: 'BreeSerif'),)),
-                  ],)
-          ],) )),
+                  ],),
 
-      Row(children: [
-    Container(
-      margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-    padding: EdgeInsets.fromLTRB(10, 10,10,10),
-    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
-    child:   Text("AJUDA")),
-    Container(
-        margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-        padding: EdgeInsets.fromLTRB(10, 10,10,10),
-    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
-    child:   Text("MEU PEDIDO NÃO CHEGOU")),
-      ],),
-    Container(
-        alignment: Alignment.center ,
-        margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
-        padding: EdgeInsets.fromLTRB(10, 10,10,10),
-    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
-    child:  Text("OCORREU UM PROBLEMA")),
 
+                Row(children: [
+
+                  GestureDetector(
+                      onTap:(){
+
+                        setState((){
+                          if(!view_ajuda)
+                            view_ajuda=true;
+                          else
+                            view_ajuda=false;
+
+                        });
+                      },
+                      child:Container(
+                        margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+                      child:   Text("AJUDA")))
+                  ,
+
+                    Visibility(visible:diff_hora>=1,child:
+                      GestureDetector(
+                      onTap:(){
+
+                      setState((){
+                      if(!bg_pop_pedido)
+                        bg_pop_pedido=true;
+                      else
+                        bg_pop_pedido=false;
+
+                      });
+                      },
+                      child:
+                  Container(
+                      margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+                      child:   Text("MEU PEDIDO NÃO CHEGOU")),)),
+                ],),
+                  Visibility(visible:view_ajuda,child:
+                      GestureDetector(
+                      onTap:(){
+
+                      setState((){
+                      if(!view_ocorreu_um_problema)
+                        view_ocorreu_um_problema=true;
+                      else
+                        view_ocorreu_um_problema=false;
+
+                      });
+                      },
+                      child:
+                  Container(
+                    alignment: Alignment.center ,
+                    margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                    padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+                    child:  Text("OCORREU UM PROBLEMA")))),
+
+            Visibility(visible:view_ajuda,child:
+    GestureDetector(
+    onTap:(){
+
+    setState((){
+    if(!view_botoes_fazer_denuncia)
+      view_botoes_fazer_denuncia=true;
+    else
+      view_botoes_fazer_denuncia=false;
+
+    });
+    },
+    child:
+                Container(
+                    alignment: Alignment.center ,
+                    margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                    padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+                    child:    Text("FAZER DENÚNCIA")))),
+          ]))),
+
+    ]),
+
+      Visibility(visible:view_botoes_fazer_denuncia,child:
+          Positioned(
+            bottom:30,
+            child:
+          Container(
+              padding: EdgeInsets.fromLTRB(10, 10,0,0),
+              child:
+          Container(
+                margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, 10,10,20),
+                width:  MediaQuery.of(context).size.width-20,
+                decoration: BoxDecoration(
+                color:Colors.white,boxShadow: [BoxShadow(color:Colors.grey,blurRadius: 3)]),
+                child:
+
+                btnsFazerDenuncia())))),
+
+
+          Visibility(visible:view_ocorreu_um_problema,child:
+      pop_ocorreu_um_problema()),
+
+          Visibility(visible: bg_pop_end,child:
+          formularioEndereco() ),
+    Visibility(visible:bg_pop_pedido ,child:
+
+    Container(
+
+              child: ClipRect(
+                child:  BackdropFilter(
+                  filter:  ImageFilter.blur(sigmaX:1, sigmaY:1),
+                  child:  Container(
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height,
+                    decoration:  BoxDecoration(color: Colors.transparent),
+
+                    ),
+                  ),
+                ),
+              )),
+    Visibility(visible:bg_pop_pedido,child:
+
+
+    Positioned(
+      bottom:30,
+      child:
       Container(
-          alignment: Alignment.center ,
-          margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
-          padding: EdgeInsets.fromLTRB(10, 10,10,10),
-          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
-          child:    Text("FAZER DENÚNCIA")),
-    ])))))])
+        padding: EdgeInsets.fromLTRB(10, 10,0,0),
+        child:
+            Container(
+                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, 10,10,20),
+                width:  MediaQuery.of(context).size.width-20,
+                decoration: BoxDecoration(
+                    color:Colors.white,boxShadow: [BoxShadow(color:Colors.grey,blurRadius: 3)]),
+                child:Column(
+
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children:[
+
+                    Container(
+                          margin: EdgeInsets.fromLTRB(20, 0, 10, 20),
+                          padding: EdgeInsets.fromLTRB(20, 10,10,0),
+                          decoration:BoxDecoration(color:Colors.white),
+                          child:  Text("Problema com seu pedido?",
+                              style:TextStyle(fontSize: 18,fontFamily: 'BreeSerif'))),
+
+
+                   Visibility(visible: !view_btn_confirm_cancel,child:
+                      GestureDetector(
+                      onTap:(){
+
+                        setState((){
+                        if (view_btn_confirm_cancel)
+                          view_btn_confirm_cancel=false;
+                        else
+                          view_btn_confirm_cancel=true;
+                        });
+                      },
+                      child:
+                    Container(
+                        alignment: Alignment.center ,
+                        margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                        padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+                        child:    Text("CANCELAR PEDIDO",
+                        style:TextStyle())))),
+                        Visibility(visible: view_btn_confirm_cancel,child:
+                        GestureDetector(
+                            onTap:(){
+
+                              setCancelPedido(widget.user.uid,widget. pedido.idloja);
+
+                            },
+                            child:
+                            Container(
+                                alignment: Alignment.center ,
+                                margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.red)),
+                                child:    Text("CONFIRMAR CANCELAMENTO",
+                                    style:TextStyle(color:Colors.red))))),
+
+             Visibility(visible:checkPagCartao(),child:
+
+                        Container(
+                            alignment: Alignment.center ,
+                            margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                            padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+                            child:    Text("Solicitar reembolso e cancelar".toUpperCase()))),
+              GestureDetector(
+              onTap:(){
+
+              setState((){
+                view_btn_confirm_cancel=false;
+
+                if(!bg_pop_pedido)
+                  bg_pop_pedido=true;
+                  else
+                  bg_pop_pedido=false;
+
+              });
+              },
+              child:
+              Container(
+                      alignment: Alignment.center ,
+                      margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                      padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                      width: 100,
+                      decoration:
+                      BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
+                          border:Border.all(color:Colors.grey)),
+                      child:    Text("VOLTAR".toUpperCase(),style:TextStyle(color:Colors.grey[700])))),
+        
+      ])
+                  
+            ),
+                  
+            ))),
+
+
+            Visibility(visible: pop_precess_cancel,child:
+            Positioned(
+            bottom:30,
+              child:
+              Container(
+              padding: EdgeInsets.fromLTRB(10, 10,0,0),
+              child:
+              aguardarrespcancel()))),
+
+
+        ]),
+
+    ))))])
   ]));
   }
   Future<void> _add() async {
@@ -444,6 +698,430 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     });
   }
 
+
+  pop_ocorreu_um_problema(){
+    return
+
+    Positioned(
+    bottom:30,
+    child:
+    Container(
+    padding: EdgeInsets.fromLTRB(10, 10,0,0),
+    child:
+    Container(
+    margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+    padding: EdgeInsets.fromLTRB(0, 10,10,20),
+    width:  MediaQuery.of(context).size.width-20,
+    decoration: BoxDecoration(
+    color:Colors.white,boxShadow: [BoxShadow(color:Colors.grey,blurRadius: 3)]),
+    child:Column(
+
+    mainAxisAlignment: MainAxisAlignment.end,
+    children:[
+
+    Container(
+    margin: EdgeInsets.fromLTRB(20, 0, 10, 20),
+    padding: EdgeInsets.fromLTRB(20, 10,10,0),
+    decoration:BoxDecoration(color:Colors.white),
+    child:  Text("Problema com seu pedido?",
+    style:TextStyle(fontSize: 18,fontFamily: 'BreeSerif'))),
+
+
+    //ENDEREÇO ERRADO
+    Visibility(visible: !status_entrega,child:
+    GestureDetector(
+        onTap:(){
+          setState((){
+            if (!bg_pop_end_view)
+               bg_pop_end_view=true;
+            else
+              bg_pop_end_view=false;
+          });
+        },
+        child:
+    Container(
+        alignment: Alignment.center ,
+        margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+        padding: EdgeInsets.fromLTRB(10, 15,10,15),
+        decoration: BoxDecoration(color:Colors.white,borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+        child:    Text("ENDEREÇO ERRADO",
+        style:TextStyle())))),
+
+     Visibility(visible: bg_pop_end_view,child:
+        enderecoView_()),
+
+//TROCAR FORMA DE PAGAMENTO
+      Visibility(visible: checkPagCartao(),child:
+      GestureDetector(
+          onTap:(){
+
+         //   setCancelPedido(widget.user.uid,widget. pedido.idloja);
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 15,10,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+              child:    Text("TROCAR FORMA DE PAGAMENTO",
+                  style:TextStyle())))),
+
+//MEU PEDIDO VEIO ERRADO
+      Visibility(visible: true,child:
+      GestureDetector(
+          onTap:(){
+
+            setState(() {
+            if (!view_field_pedidoerrado) {
+              view_field_pedidoerrado = true;
+              veiw_voltar_2 = false;
+            }else
+              {
+                bottompop=0.0;
+                view_field_pedidoerrado = false;
+                veiw_voltar_2 = true;
+              }
+            });
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 15,10,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+              child:    Text("MEU PEDIDO VEIO ERRADO",
+                  style:TextStyle())))),
+        Visibility(visible: view_field_pedidoerrado,child:
+        Container(
+            alignment: Alignment.center ,
+            margin: EdgeInsets.fromLTRB(10, 10, 0, 0),child:
+           Text("Fale no chat ou ligue para loja",style: TextStyle(fontFamily: 'RobotoBold'),))),
+
+      Visibility(visible: view_field_pedidoerrado,child:
+      GestureDetector(
+          onTap:(){
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 10,10,10),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
+                  border:Border.all(color:Colors.grey)),
+              child:
+              TextField(
+                  onTap: (){
+                    setState(() {
+                      bottompop=100.0;
+                    });
+                  },
+                    onChanged: (value) {
+                    setState(() {
+                      testAjudamsn=value;
+                    });},textInputAction:  TextInputAction.next,
+                  textCapitalization: TextCapitalization.words,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  maxLength: 250,
+                  decoration: InputDecoration(hintText: "Descreva",
+                      hintStyle: TextStyle(color: Colors.black26)),
+                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular')),
+          ))),
+
+      Visibility(visible: view_field_pedidoerrado,child:
+
+          Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:[
+
+      GestureDetector(
+          onTap:(){
+            if(testAjudamsn!="")
+            sendMsgAjuda(widget.user.uid,widget.pedido.idloja,testAjudamsn);
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(20, 15,20,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
+                  border:Border.all(color:Colors.blue)),
+              child:    Text("ENVIAR MSG",
+                  style:TextStyle(color:Colors.blue,fontFamily: 'RobotoBold')))),
+         GestureDetector(
+                onTap:(){
+                  UrlLauncher.launch("tel://"+tellloja);
+                },
+                child:
+                Container(
+                    alignment: Alignment.center ,
+                    margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                    padding: EdgeInsets.fromLTRB(20, 15,20,15),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
+                        border:Border.all(color:Colors.green)),
+                    child:    Text("LIGAR",
+                        style:TextStyle(color:Colors.green,fontFamily: 'RobotoBold')))),
+        ])),
+
+      Visibility(visible: true,child:
+      GestureDetector(
+          onTap:() {
+            setState(() {
+              FlutterOpenWhatsapp.sendSingleMessage("+559189950036", "Olá, preciso de ajuda.\n Meu nome: "+widget.user.nome+"\nMeu email: "+widget.user.email );
+            });
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 5,10,5),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+              child: Row(children:[
+
+              Container(
+                  alignment: Alignment.center ,
+                  margin: EdgeInsets.fromLTRB(20, 0, 0, 0),child:
+                  Image.asset('iconwhats.png',width: 35,height: 35,) ),
+              Container(
+                  alignment: Alignment.center ,
+                  margin: EdgeInsets.fromLTRB(20, 0, 0, 0),child:Text("FALAR COM SUPORTE",
+                  style:TextStyle()))])   ))),
+
+//      Visibility(visible: true,child:
+//      GestureDetector(
+//          onTap:(){
+//
+//            setState(() {
+//              if (!view_field_pedidoerrado) {
+//                view_field_pedidoerrado = true;
+//                veiw_voltar_2 = false;
+//              }else
+//              {
+//                bottompop=0.0;
+//                view_field_pedidoerrado = false;
+//                veiw_voltar_2 = true;
+//              }
+//            });
+//
+//          },
+//          child:
+//          Container(
+//              alignment: Alignment.center ,
+//              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+//              padding: EdgeInsets.fromLTRB(10, 10,10,10),
+//              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+//              child:  Text("FALAR COM SUPORTE",
+//                  style:TextStyle())))),
+        Visibility(visible: true,child:
+
+        GestureDetector(
+          onTap:(){
+
+            setState((){
+              if(!view_ocorreu_um_problema) {
+                view_ocorreu_um_problema = true;
+              } else{
+                bottompop=0.0;
+                view_field_pedidoerrado=false;
+                view_ocorreu_um_problema=false;
+              }
+            });
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 30, 0, bottompop),
+              padding: EdgeInsets.fromLTRB(10, 15,10,15),
+              width: 100,
+              decoration:
+              BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
+                  border:Border.all(color:Colors.grey)),
+              child:    Text("VOLTAR".toUpperCase(),style:TextStyle(color:Colors.grey[700]))))),
+    ])
+
+    )));
+
+  }
+
+  btnsFazerDenuncia(){
+
+    return Column(children: [
+      Container(
+          margin: EdgeInsets.fromLTRB(20, 0, 10, 20),
+          padding: EdgeInsets.fromLTRB(20, 10,10,0),
+          decoration:BoxDecoration(color:Colors.white),
+          child:  Text("Fazer Denúncia",
+              style:TextStyle(fontSize: 18,fontFamily: 'BreeSerif'))),
+
+      Visibility(visible: view_denunc_btn_prodeng,child:
+      GestureDetector(
+          onTap:(){
+
+            setState(() {
+              if (!view_field_denuncia) {
+                view_field_denuncia = true;
+                view_denunc_btn_preceeng=false;
+                view_denunc_btn_outro=false;
+                origemDenuncia="preduto_enganoso";
+
+              }else
+              {
+                bottompop=0.0;
+                origemDenuncia="";
+                view_denunc_btn_preceeng=true;
+                view_denunc_btn_outro=true;
+                view_field_denuncia = false;
+              }
+            });
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 15,10,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+              child:    Text("PRODUTO ENGANOSO",
+                  style:TextStyle())))),
+
+      Visibility(visible: view_denunc_btn_preceeng,child:
+      GestureDetector(
+          onTap:(){
+
+            setState(() {
+              if (!view_field_denuncia) {
+                view_field_denuncia = true;
+                view_denunc_btn_prodeng =false;
+                view_denunc_btn_outro=false;
+                origemDenuncia="preco_enganoso";
+
+              }else
+              {
+                bottompop=0.0;
+                origemDenuncia="";
+                view_denunc_btn_prodeng =true;
+                view_denunc_btn_outro=true;
+                view_field_denuncia = false;
+              }
+            });
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 15,10,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+              child:    Text("PREÇO ENGANOSO",
+                  style:TextStyle())))),
+
+      Visibility(visible: view_denunc_btn_outro,child:
+      GestureDetector(
+          onTap:(){
+
+            setState(() {
+              if (!view_field_denuncia) {
+                view_field_denuncia = true;
+                view_denunc_btn_prodeng =false;
+                view_denunc_btn_preceeng=false;
+                origemDenuncia="outro";
+
+              }else
+              {
+                view_denunc_btn_prodeng =true;
+                view_denunc_btn_preceeng=true;
+                bottompop=0.0;
+                origemDenuncia="";
+                view_field_denuncia = false;
+              }
+            });
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 15,10,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
+              child:    Text("OUTRO",
+                  style:TextStyle())))),
+
+      Visibility(visible: view_denunc_btn_outro && view_denunc_btn_prodeng && view_denunc_btn_preceeng,child:
+      GestureDetector(
+          onTap:(){
+
+            setState(() {
+              view_botoes_fazer_denuncia=false;
+            });
+
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(10, 15,10,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
+                  border:Border.all(color:Colors.grey)),
+              child:    Text("VOLTAR",
+                  style:TextStyle())))),
+
+      Visibility(visible: view_field_denuncia,child:
+      GestureDetector(
+          onTap:(){
+
+          },
+          child:
+          Container(
+            alignment: Alignment.center ,
+            margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+            padding: EdgeInsets.fromLTRB(10, 10,10,10),
+            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
+                border:Border.all(color:Colors.grey)),
+            child:
+            TextField(
+                onTap: (){
+                  setState(() {
+                    bottompop=100.0;
+                  });
+                },
+                onChanged: (value) {
+                  setState(() {
+                    msgDenuncia=value;
+                  });},textInputAction:  TextInputAction.next,
+                textCapitalization: TextCapitalization.words,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                maxLength: 250,
+                decoration: InputDecoration(hintText: "Descreva",
+                    hintStyle: TextStyle(color: Colors.black26)),
+                style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular')),
+          ))),
+    Visibility(visible: view_field_denuncia,child:
+    GestureDetector(
+          onTap:(){
+            if( testAjudamsn!=""){
+              bloc.enviarDenuncia(widget.pedido,origemDenuncia,msgDenuncia);
+              setState(() {
+                view_field_denuncia=false;
+              });
+            }
+          },
+          child:
+          Container(
+              alignment: Alignment.center ,
+              margin: EdgeInsets.fromLTRB(10, 10, 0, bottompop),
+              padding: EdgeInsets.fromLTRB(20, 15,20,15),
+              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
+                  border:Border.all(color:Colors.blue)),
+              child:    Text("ENVIAR",
+                  style:TextStyle(color:Colors.blue,fontFamily: 'RobotoBold'))))),
+    ]);
+  }
+
   totalTxt(){
     var text="";
       text = "Total: R\u0024 "+getPrecoFormat(widget.pedido.total);
@@ -454,6 +1132,60 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     preco=preco.replaceAll(".", ",");
 
     return preco;
+  }
+
+  void launchWhatsApp(
+      {@required String phone,
+        @required String message,
+      }) async {
+    String url() {
+      if (Platform.isIOS) {
+        return "whatsapp://wa.me/$phone/?text=${Uri.parse(message)}";
+      } else {
+        return "whatsapp://send?   phone=$phone&text=${Uri.parse(message)}";
+      }
+    }
+
+    if (await canLaunch(url())) {
+      await launch(url());
+    } else {
+      throw 'Could not launch ${url()}';
+    }
+  }
+
+  formularioEndereco(){
+    return
+      Container(
+            width: double.infinity,
+          padding: EdgeInsets.fromLTRB(0, 0, 0,80),
+          decoration:  BoxDecoration(color: Colors.white),
+            child: Container(
+                margin: EdgeInsets.fromLTRB(0, 0, 0,0),   child:
+          Container(
+                    decoration:  BoxDecoration(color: Colors.white.withOpacity(.20)),
+                    child:
+                    Container(
+                        padding: EdgeInsets.fromLTRB(20, 0, 20,20),
+                        child:Column(mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            form_endereco_user(end_user_,widget.pedido.idloja,null,(){  hidepop_end();})
+                          ],)
+                    ),
+
+
+                  )));
+  }
+
+  hidepop_end(){
+
+    setState((){bg_pop_end=false;});
+  }
+  checkPagCartao(){
+    var ctrl=false;
+    var tipo= widget.pedido.tipoPagamento;
+    if (tipo=="cartao")
+      ctrl=true;
+    return ctrl;
   }
 
   getTipoPag(){
@@ -468,6 +1200,105 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
       text = "Cartão de crédito - "+widget.pedido.statusPagamento;
     return text;
 
+  }
+
+  enderecoView_(){
+    return StreamBuilder(
+        stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
+            .collection("Pedidos").document(widget.pedido.idloja).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState==ConnectionState.active){
+
+            return
+                enderecoUserView(snapshot.data['enderecoEntrega']);
+              return Container();
+          }else
+            return Container();
+        });
+  }
+
+  enderecoUserView(var data){
+//    enderecoUserSnapShot   end_user = new enderecoUserSnapShot(data);
+      end_user_ =  new enderecoUser(data['rua'],data['bairro'],data['numero'],data['complemento'],data['localizacao'],data['temp']);
+    return
+      Container(
+          margin: EdgeInsets.fromLTRB(10, 10, 15, 10),
+          decoration:
+          BoxDecoration(color:Colors.white,borderRadius:BorderRadius.only( topLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),)
+              ,boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)]),
+          child:
+//    BorderRadius.all(Radius.circular(20))
+          Column(
+
+            children: <Widget>[
+
+
+              Row(mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max, children: <Widget>[
+
+                  Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+
+                      Container(
+                          width: MediaQuery.of(context).size.width*.44,
+                          margin: EdgeInsets.fromLTRB(10, 25,0, 0),
+                          alignment: Alignment.center, child:
+                      Text(data['rua']+", "+data['bairro'], maxLines: 4,
+                        overflow: TextOverflow.ellipsis,style:
+                        TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
+
+                      Container(
+                          width: MediaQuery.of(context).size.width*.44,
+                          margin: EdgeInsets.fromLTRB(10, 0,0, 5),
+                          alignment: Alignment.centerLeft, child:
+                      Text("Nº "+data['numero']+", "+data['complemento'], maxLines: 6,
+                        overflow: TextOverflow.ellipsis,style:
+                        TextStyle(color: Colors.black45,fontFamily: 'RobotoLight'),)),
+
+                    ],),
+//
+                  Container(
+                      height: 180,
+                      width:136,
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0), alignment: Alignment.centerLeft,
+                      child:
+                      Stack(children: <Widget>[
+                        GoogleMap(
+                            onMapCreated:  _onMapCreated,
+                            zoomControlsEnabled: false,
+                            buildingsEnabled: true,
+                            rotateGesturesEnabled: false,
+                            zoomGesturesEnabled: false,
+                            scrollGesturesEnabled: false,
+                            mapType: MapType.normal,
+                            initialCameraPosition:  CameraPosition(
+                                target:getLocal(data),
+                                zoom: 17.0
+                            )),
+                        Visibility(visible: true, child:
+                        Container(
+                            height: 150,
+                            alignment: Alignment.center,
+                            child:Icon(Icons.radio_button_checked,color: Colors.red,size: 25,))),
+                      ],)),
+
+                ],),
+              Divider(color:Colors.red,height: 1,),
+              Visibility(visible:true,child:
+              GestureDetector(onTap: (){
+                setState(() {
+                  bg_pop_end=true;
+                }); },child:
+              Container(
+                padding:EdgeInsets.all(10) ,
+                  margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                  alignment: Alignment.center, child:
+              Text("Atualizar",style:
+              TextStyle(color: Colors.red,fontFamily: 'RobotoBold'),)))),
+
+            ],));
   }
 
   getEnderecoText(){
@@ -502,6 +1333,21 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     var distTxt="";
     return  distTxt= valeu.toStringAsFixed(1)+""+unidadeMedida;
 
+  }
+
+  getLocal(var data){
+    var   _center;
+
+    _center=new LatLng(data['localizacao'].latitude,
+        data['localizacao'].longitude);
+    if (mapController!=null)
+      mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 15));
+
+    return _center;
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
 
@@ -549,10 +1395,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               ))),
       );
   }
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-    _add();
-  }
+
   itemProd(var index){
 
    print("total itens "+ widget.pedido.lista_produtos[index]['img'].toString());
@@ -573,6 +1416,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   void initState() {
     super.initState();
     line=LineAnim();
+    getLoja();
     _controllerIcon_moto = AnimationController(duration: Duration(milliseconds:1500),vsync: this)..repeat();
     animation = Tween<Offset>(begin: Offset(.0, 0), end: Offset(2, 0)).animate(_controllerIcon_moto);
   }
@@ -581,6 +1425,82 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   void dispose() {
     _controllerIcon_moto.dispose();
     super.dispose();
+
+  }
+
+  aguardarrespcancel() {
+
+    return
+      LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
+      SingleChildScrollView(child:
+      Container(
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+          margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+          decoration: BoxDecoration(color: Colors.white,boxShadow: [
+            BoxShadow( color: Colors.black12,blurRadius:4.0,
+              offset: Offset(0.0,45.0,  ),)
+          ],),
+          child:
+          Column(
+              children: <Widget>[
+                Container(
+                    alignment: Alignment.centerLeft,
+                    width: MediaQuery.of(context).size.width,
+                    child:
+                    Stack(
+                        children: <Widget>[
+                          Container(
+                              alignment: Alignment.center,
+                              margin:EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              child:Text("CANCELANDO...",style: TextStyle(fontSize: 20,fontFamily: 'BreeSerif',letterSpacing: 0.4),)),
+                        ])),
+
+                Container(
+                    padding:EdgeInsets.all(10),
+                    margin:EdgeInsets.fromLTRB(0, 15, 0, 0),
+                    child:
+                    Column(
+                        children: <Widget>[
+                          Image.asset('gif_load.gif',width: 50,height: 50,),
+                        ])),
+
+                Container(
+                    padding:EdgeInsets.all(10),
+                    margin:EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    child:Text("Aguarde...",
+                      style: TextStyle(color:Colors.grey,fontSize: 20,fontFamily: 'BreeSerif',letterSpacing: 0.4),)),
+
+
+
+              ])
+      )));
+  }
+
+  setCancelPedido  (var uid,var pedido)async{
+    setState(() {
+      pop_precess_cancel = true;
+      } );
+     var b = await bloc.cancelPedido(uid, pedido);
+
+  }
+
+  getLoja() async{
+    Loja loja = await bloc.getLojaPedido(widget.pedido.idloja);
+    if (loja!=null)
+      tellloja=loja.tell;
+
+    print("loja xxxy "+loja.tell);
+  }
+
+  sendMsgAjuda  (var uid,var idpedido,var msg)async{
+
+    var b = await bloc.sendMsgAjuda(uid, idpedido,msg);
+    if (b==true){
+      bottompop=0.0;
+      view_field_pedidoerrado=false;
+      view_ocorreu_um_problema=false;
+    }
 
   }
 

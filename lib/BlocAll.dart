@@ -23,7 +23,8 @@ class BlocAll {
   final  control_get_loja  = StreamController< Loja>.broadcast();
   final  control_get_endereco_rua  = StreamController< String>.broadcast();
   final  control_get_endereco_salvo  = StreamController< enderecoUserSnapShot>.broadcast();
-  final  streamControl_Pedidos  = StreamController< Pedido>.broadcast();
+  final  streamControl_Pedidos  = StreamController< List<Pedido>>.broadcast();
+  final  streamControl_PrePedidos  = StreamController< Pedido>.broadcast();
   final  control_get_endereco_temp  = StreamController< enderecoUserSnapShot>.broadcast();
   Stream <List<Produto_cesta>> get check => control_check.stream;
   Stream <List>  check2 ;
@@ -31,8 +32,10 @@ class BlocAll {
   Stream <String> get get_rua_end => control_get_endereco_rua.stream;
   Stream <enderecoUserSnapShot> get get_endereco_temp => control_get_endereco_temp.stream;
   Stream <enderecoUserSnapShot> get get_endereco_salvo=> control_get_endereco_temp.stream;
-  Stream <Pedido> get stream_pedido => streamControl_Pedidos.stream;
+  Stream <List<Pedido>> get stream_pedido => streamControl_Pedidos.stream;
+  Stream <Pedido> get stream_Prepedido => streamControl_PrePedidos.stream;
 
+  var pedidoExist=false;
   Future getCesta() async{
 
 
@@ -183,6 +186,7 @@ class BlocAll {
     getCesta();
     getEnderecoUser();
     StreamPedidos();
+    StreamPrePedidos();
   }
 
   callTokenrizarCartao() async {
@@ -217,6 +221,43 @@ class BlocAll {
 
     }
 
+  Future<bool> jachego(var uid, var pedido) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uid).collection('Pedidos')
+        .document(pedido).setData({"time_nao_aceito_visto":FieldValue.serverTimestamp(),"status":"finalizado",},merge: true)
+        .then((v){
+      print("SAVE CANCEL-PEDIDO");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE CANCEL-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
+
+  Future<bool> cancelPedido_nao_aceito(var uid, var pedido) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uid).collection('Pedidos')
+        .document(pedido).setData({"time_nao_aceito_visto":FieldValue.serverTimestamp(),"status":"nao_aceito_visto",},merge: true)
+        .then((v){
+      print("SAVE CANCEL-PEDIDO");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE CANCEL-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
+
+
   Future<bool> cancelPedido(var uid, var pedido) async {
     var refData = Firestore.instance;
     var ctrol=false;
@@ -235,6 +276,23 @@ class BlocAll {
 
   }
 
+  Future<bool> cancelPedido_reembolso(var uid, var pedido) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uid).collection('Pedidos')
+        .document(pedido).setData({"timecancel":FieldValue.serverTimestamp(),"status":"cancelado_user_reembolso",},merge: true)
+        .then((v){
+      print("SAVE CANCEL-PEDIDO");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE CANCEL-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
 
 
   Future<bool> enviarDenuncia(Pedido pedido,var origemDenuncia, var msg) async {
@@ -269,6 +327,8 @@ class BlocAll {
         .add(
         {"time":FieldValue.serverTimestamp(),
           "msg":msg,
+          "remetente":"user-auto-pedidoErrado"
+
         }
         )
         .then((v){
@@ -292,6 +352,13 @@ class BlocAll {
         .then((v){
       print("SAVE PRE-PEDIDO");
       ctrol=true;
+
+       refData.collection("Usuarios")
+          .document(uid).collection('cesta').snapshots().listen((event) {
+            for(int i =0;i<event.documents.length;i++) {
+              event.documents[i].reference.delete();
+            }
+       });
 
       return  true;
     }).catchError((erro){
@@ -329,7 +396,7 @@ class BlocAll {
     if (user!=null){
       var uid = user.uid;
       var document = await Firestore.instance.collection('Usuarios').document(uid);
-      document.collection("Pedidos").orderBy('idloja').snapshots()
+      document.collection("Pedidos").snapshots()
           .listen((data) => {
             setUiPedido(data)
       });
@@ -337,19 +404,62 @@ class BlocAll {
 
   }
 
-  void setUiPedido(var data){
+  void setUiPedido(var data)async{
+
+    print("GET PEDIDO ");
+    List<Pedido> pedidos= [];
+    print(data);
+    if (data!=null) {
+      if (data.documents.isEmpty==false) {
+         await data.documents.forEach((p) {
+            Pedido pd = new Pedido();
+            print ("BLOC - getPedido EXIXST ");
+            pd.setPedido(p);
+            pedidos.add(pd);
+         });
+          streamControl_Pedidos.sink.add(pedidos);
+         pedidoExist=true;
+      }
+    }else {
+      StreamPedidos();
+      pedidoExist=false;
+
+    }
+  }
+
+
+
+  void StreamPrePedidos() async {
+
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    if (user!=null){
+      var uid = user.uid;
+      var document = await Firestore.instance.collection('Usuarios').document(uid);
+      document.collection("prePedidos").orderBy('idloja').snapshots()
+          .listen((data) => {
+        setUiPrePedido(data)
+      });
+    }
+
+  }
+
+   getPedidoExist(){
+    return pedidoExist;
+  }
+
+  void setUiPrePedido(var data){
 
     print("GET PEDIDO ");
     print(data);
     if (data!=null) {
       if (data.documents.isEmpty==false) {
-          data.documents.forEach((p) {
-            Pedido pd = new Pedido();
-            print ("BLOC - getPedido EXIXST");
-            pd.setPedido(p);
-            streamControl_Pedidos.sink.add(pd);
+        data.documents.forEach((p) {
+          Pedido pd = new Pedido();
+          print ("BLOC - getPedido EXIXST");
+          pd.setPedido(p);
+          streamControl_PrePedidos.sink.add(pd);
 
-         });
+        });
       }
     }else {
       StreamPedidos();

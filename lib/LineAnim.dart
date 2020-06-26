@@ -49,7 +49,7 @@ class LinePainter extends CustomPainter {
   LinePainter(this._progress) {
     _paint = Paint()
       ..color = Colors.orange
-      ..strokeWidth = 3.0;
+      ..strokeWidth = 2.0;
   }
 
   @override

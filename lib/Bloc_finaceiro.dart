@@ -20,6 +20,40 @@ class Bloc_financeiro {
   }
 
 
+  enviarMsgChat(var msg,var  emailUsuario,var uidUsuario,var remetente,var idloja,var idPedido,var time) async {
+
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uidUsuario).collection('Pedidos').document(idPedido).collection('chat')
+        .add({
+      'emailUsuario': emailUsuario,
+      'msg': msg,
+      'remetente': remetente,
+      'time': FieldValue.serverTimestamp(),
+      'idloja': idPedido
+    }).then((v){
+      print("SAVE MSG");
+    }).catchError((erro){
+      print("SAVE MSG ERROR");
+    });
+
+    final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
+      functionName: 'enviarMsgChatUserParaLoja',
+    );
+    dynamic resp = await callable.call(<String, dynamic>{
+      'emailUsuario': emailUsuario,
+      'msg': msg,
+      'remetente': remetente,
+      'time': "123",
+      'idloja': idloja
+    });
+    return resp.data;
+  }
+
+
+
+
 
   callTokenrizarCartao(var CustomerName,var CardNumber,var Holder,var ExpirationDate,var Brand) async {
 

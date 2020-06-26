@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -19,6 +18,7 @@ import 'package:flutter_firestore/autenticacao.dart';
 import 'package:flutter_firestore/barBuscar.dart';
 import 'package:flutter_firestore/barNavBottom.dart';
 import 'package:flutter_firestore/barPedidoUser.dart';
+import 'package:flutter_firestore/pop_returnPedido.dart';
 import 'package:flutter_firestore/itemListProd.dart';
 import 'package:flutter_firestore/listaLojas.dart';
 import 'package:flutter_firestore/prePedido.dart';
@@ -36,6 +36,7 @@ import 'User.dart';
 import 'barCesta.dart';
 import 'distanciaLoja.dart';
 import 'enderecoUser.dart';
+import 'geoLocationWeb.dart';
 import 'headCurve.dart';
 import 'itemListLojas.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -92,7 +93,14 @@ class _MyHomePageState extends State<MyHomePage> {
   bool v_bg=false;
   bool v_bg_=false;
   bool v_bg_load=true;
-
+  var modo="app";
+  var view_listaPedidos=false;
+  var cestaAtiva=false;
+  var btnfloat=false;
+  var pedidoAtivo=false;
+  var bottomBarPedido=45.0;
+  var heigthBarcesta=45.0;
+var show_cesta=false;
   static var listaCesta=[];
   int _counter = 0;
   var isLocationEnabled=false;
@@ -143,6 +151,9 @@ class _MyHomePageState extends State<MyHomePage> {
   var scr= new GlobalKey();
   File img = new File('');
   var controller;
+  var show_pop_final_pedido=false;
+  var modo_teste=false;
+  var selecPedido="";
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
    return
-      Scaffold(
+        Scaffold(
           resizeToAvoidBottomInset : false,
           body:
           RepaintBoundary(
@@ -165,6 +176,9 @@ class _MyHomePageState extends State<MyHomePage> {
               child:
       Stack(
           children: <Widget>[
+
+
+
         SingleChildScrollView(
           child:
       Column(
@@ -189,6 +203,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     Column(children: <Widget>[
                                             listaProdutos])),
         ])),
+
+    ///////////
     Visibility(visible: view_barranav,
     child:
     Positioned(bottom: 0, child:
@@ -217,17 +233,21 @@ class _MyHomePageState extends State<MyHomePage> {
     })
       ),
     )))),
-
+//////////////////////////////////////
+      Visibility(visible:show_pop_final_pedido,child:pop_returnPedido((){hide_pop_final();})),
+//////////////////////////////////////
       Container(
           width: MediaQuery.of(context).size.width,
           height: 70,
           child:CustomPaint(
             painter: headCurve(Colors.orange),
           ),
-        ),
+      ),
+       ///////////////////////////////
        Visibility( visible: v_bg_load , child:
               blur_background_load()
           ),
+      ////////////////////////////////////
       StreamBuilder<List<Produto_cesta>>(
           stream: bloc.check,
           initialData: [],
@@ -259,33 +279,114 @@ class _MyHomePageState extends State<MyHomePage> {
       Container(alignment: Alignment.center, child: autenticacao("login",(value){return _hidepop_login(value);}),))))))),),
 
 
+        Positioned(
+              width: MediaQuery.of(context).size.width,
+              bottom:45,
+              child:
+              StreamBuilder<Pedido>(
+              stream: bloc.stream_Prepedido,
+              builder: (context,value) {
+              if (value.connectionState==ConnectionState.active) {
+                print("STREM PRE PEDIDO "+value.data.status );
+                if (value.data.status == "prepedido") {
+                  view_listaPedidos=true;
+                  return Container(height: MediaQuery
+                      .of(context)
+                      .size
+                      .height,
+                      child: blur_background_load());
+                }else
+                    return Container();
+              }else
+              return Container();
 
-           Positioned(
-            width: MediaQuery.of(context).size.width,
-            bottom:45,
-            child:
-            StreamBuilder<Pedido>(
-                stream: bloc.stream_pedido,
-                  builder: (context,value) {
-                    print("STREM PEDIDO");
-                    if (value.connectionState==ConnectionState.active) {
-                      print("STREM PEDIDO");
-                      if (Usuario!=null)
-                        if (value.data.status!="cancelado_user" && value.data.status!="finalizado")
-                      return
-                         barPedidoUser(Usuario,value.data, listaDist,(value){return showhide_bg(value);});
-                        else
-                          return Container();
-                      else
+              })),
+            Positioned(
+                width: MediaQuery.of(context).size.width,
+                bottom:bottomBarPedido,
+                child:
+                StreamBuilder<List<Pedido>>(
+                    stream: bloc.stream_pedido,
+                    builder: (context,value) {
+                      if (value.connectionState==ConnectionState.active) {
+                        print("STREM PEDIDO "+value.data.length.toString());
+                        return
+                          Column(children: <Widget>[
+                            Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 0.0,
+                                offset: Offset(
+                                  0.0, // horizontal, move right 10
+                                  0.0, // vertical, move down 10
+                                ),
+                              )
+                            ]),height: 45,
+                                margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                child:
+                                Container(decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 2.0,
+                                    offset: Offset(
+                                      0.0, // horizontal, move right 10
+                                      -2.0, // vertical, move down 10
+                                    ),
+                                  )
+                                ],),height: 45,child:
+                                barraView()
+                                )
+                            ),
+                            Visibility(visible: view_listaPedidos,child:
+                            Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
+                            ListView.builder(
+                                padding: EdgeInsets.all(0),
+                                shrinkWrap: true,
+                                scrollDirection: Axis.vertical,
+                                itemCount: value.data.length,
+                                itemBuilder: (context, index) {
+                                  print("STREM PEDIDO "+ selecPedido);
+                                  v_bg_load=false;
+                                  var ctrol = false;
+                                  if (selecPedido==value.data[index].idPedido)
+                                    ctrol=true;
+
+                                  if (selecPedido=="" || ctrol){
+                                    if ( Usuario != null ) {
+                                      if ( value.data[index].status != "cancelado_user" &&
+                                          value.data[index].status != "cancelado_user_reembolso" &&
+                                          value.data[index].status != "nao_aceito_visto" &&
+                                          value.data[index].status != "finalizado") {
+                                        if (pedidoAtivo==false)
+                                          pedidoAtivo=true;
+                                        return
+                                          barPedidoUser(
+                                              Usuario, value.data[index], listaDist,ctrol,
+                                                  (value) {
+                                                return showhide_bg(value);
+                                              }, () {
+                                            return show_pop_final();
+                                          }, (value){return selectPedidoView(value);}) ;
+                                      }else
+                                      if (value.data[index].status == "cancelado_user_reembolso") {
+                                        return Container();
+                                      } else{
+                                        return Container();}
+                                    } else{
+                                      return Container();}
+                                  }else {
+                                    return Container();}
+                                })))
+                          ]);
+
+                      }else
                         return Container();
-                    }else
-                      return Container();
+                    })),
 
-                  })),
 
             Positioned(
                 width: MediaQuery.of(context).size.width,
-                bottom:positionCesta,
+                bottom:45,
                 child:
                 StreamBuilder<List<dynamic>>(
                     stream: bloc.check,
@@ -298,21 +399,57 @@ class _MyHomePageState extends State<MyHomePage> {
                               d = listaDist[i];
                             }
                           }
+                          cestaAtiva=true;
+
                           listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
-                          if (Usuario!=null)
+                          if (Usuario!=null) {
+                            if (bloc.getPedidoExist()) {
+                              bottomBarPedido=45.0;
+                              return
+                                  Visibility(visible: show_cesta ,child:
+                                  barCesta(false,Usuario, value.data, d,
+                                          (value) {return showhide_bg(value);},
+                                          (value){return show_btn_cesta_float();}));
+                            }
+                               else
                             return
-                              barCesta(Usuario,value.data, d,(value){return showhide_bg(value);});
-                          else
-                            return Container();
+                              barCesta(true,Usuario, value.data, d, (value) {
+                                return showhide_bg(value);
+                              },null);
+                          } else{
+                            cestaAtiva=false;
+                            return Container();}
 
                         }else{
+                          cestaAtiva=false;
                           v_bg=false;
                           return Container();
                         }
                       } else {
+                        cestaAtiva=false;
                         return Container();
                       }
                     })),
+
+
+            Visibility(visible: bloc.getPedidoExist() && cestaAtiva && !btnfloat && !view_listaPedidos,child:
+            Positioned(
+                bottom: 110,
+                right: 20,
+                child:FloatingActionButton (
+                  onPressed: (){
+                    setState(() {
+                      if (show_cesta) {
+                        show_cesta = false;
+                      }  else{
+                        btnfloat=true;
+                        show_cesta=true;}
+                    });
+                  },
+                  backgroundColor: Colors.orange,
+                  child:
+                  Icon(Icons.shopping_basket),
+                ))),
 
         Visibility( visible:view_dialogGps , child:
 
@@ -370,6 +507,69 @@ class _MyHomePageState extends State<MyHomePage> {
  }
 
 
+ show_btn_cesta_float(){
+    setState(() {
+      show_cesta=false;
+      btnfloat=false;
+    });
+ }
+
+  barraView(){
+
+    return
+      GestureDetector(onTap: () {
+        setState(() {
+          if (view_listaPedidos) {
+            view_listaPedidos = false;
+          } else{
+            view_listaPedidos=true;
+          }
+        });
+      }, child: Container(
+          margin: EdgeInsets.fromLTRB(0, 0, 0,0),
+          child:
+          ClipRect(
+              child:  BackdropFilter(
+                filter:  ImageFilter.blur(sigmaX:3, sigmaY:3),
+                child:  Container(
+                  width: double.infinity,
+                  height:  double.infinity,
+                  decoration:  BoxDecoration(color: Colors.red[400].withOpacity(.7)),
+                  child:
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
+                    Container(
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                        child:Text("Pedido em andamento",
+                          style: TextStyle(fontSize:18,letterSpacing: 0.5,color: Colors.white,fontFamily: 'BreeSerif'),)
+                    ),
+
+                    Container(child:Icon(Icons.list,size: 30,color: Colors.white,))
+                  ],),
+                ),
+              ))),
+      );
+  }
+
+ selectPedidoView(var pedido){
+   setState(() {
+     selecPedido = pedido;
+   });
+ }
+
+
+  hide_pop_final(){
+
+    setState(() {
+      show_pop_final_pedido=false;
+    });
+  }
+  show_pop_final(){
+
+    setState(() {
+      show_pop_final_pedido=true;
+    });
+  }
+
   Future<File> _capturePng() async {
     print("CAPTURE WIDGET");
     RenderRepaintBoundary boundary = scr.currentContext.findRenderObject();
@@ -386,24 +586,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
+  showhide_bg_blur_pedidoreturn(){
+
+    setState(() {
+      v_bg_load=false;
+    });
+
+  }
 
 
  showhide_bg(var b){
 
    setState(() {
-//      v_bg=b;
-      view_barranav = !b;
+//      v_bg_load=!b;
       if (b)
-      positionCesta=0.0;
+        positionCesta=0.0;
       else
         positionCesta=45.0;
     });
-}
+
+ }
 
 @override
 void initState() {
   bloc.initBloc();
-
 
   listaProdutos = Container();
   checkPermission();
@@ -438,19 +644,19 @@ void initState() {
 
   blur_background_load(){
   return  Container(
-      child: ClipRect(
-        child:  BackdropFilter(
-          filter:  ImageFilter.blur(sigmaX:4, sigmaY:4),
+    child: ClipRect(
+      child:  BackdropFilter(
+        filter:  ImageFilter.blur(sigmaX:4, sigmaY:4),
+        child:  Container(
+          width: double.infinity,
+          height:  double.infinity,
+          decoration:  BoxDecoration(color: Colors.transparent),
           child:  Container(
-            width: double.infinity,
-            height:  double.infinity,
-            decoration:  BoxDecoration(color: Colors.transparent),
-            child:  Container(
-                child: Container(alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
-      ),
+              child: Container(alignment: Alignment.center, child:Image.asset('gif_load.gif',width: 50,height: 50,))),
         ),
       ),
-    );
+    ),
+  );
 }
 
 
@@ -467,7 +673,8 @@ void initState() {
 
 checkStateUser() async {
 
- var user = await FirebaseAuth.instance.currentUser();
+ var user = null;
+ user = await FirebaseAuth.instance.currentUser();
 // isLocationEnabled = await Geolocator().isLocationServiceEnabled();
  setState(()  {
    if (user!=null) {
@@ -482,6 +689,9 @@ checkStateUser() async {
            viewListProd=true;
            listaProdutos = listaprod();
        }else
+         if (modo=="web")
+           _getCurrentLocation();
+        else
             if (isLocationEnabled==true)
               _getLocation();//PEGA LOCAL CASAO GPS ATIVADO
             else {
@@ -577,6 +787,7 @@ void getEnderecoUser() async {
         local_end = LatLng(endereco.localizacao.latitude,endereco.localizacao.longitude);
         local_user=local_end;
         local_ = local_end;
+        v_bg_load =false;
         getDistanciaLoja();
 
       }else {
@@ -860,6 +1071,9 @@ void getEnderecoUser() async {
 
   checkPermission() async {
 
+    if (modo=="web")
+      checkStateUser();
+    else
     if (await Permission.location
         .request()
         .isGranted) {
@@ -874,6 +1088,27 @@ void getEnderecoUser() async {
   }
 
 
+  success(pos) {
+    try {
+      print(pos.coords.latitude);
+      print(pos.coords.longitude);
+      if (pos.coords!=null){
+        setState(() {
+          local_user = new LatLng(pos.coords.latitude,pos.coords.longitude);
+          local_ = local_user;
+          view_dialogGps=false;
+          v_bg_load=false;
+          listaProdutos = listaprod();
+          viewLoad_local=false;
+        });}
+    } catch (ex) {
+      print("Exception thrown : " + ex.toString());
+    }
+  }
+  _getCurrentLocation() {
+    print("_getCurrentLocation");
+     // getCurrentPosition(allowInterop((pos) => success(pos)));
+    }
 
   getDistanciaLoja() async{
     print("LISTA DIST 1");

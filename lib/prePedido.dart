@@ -20,6 +20,11 @@ class Pedido {
   var status;
   var statusPagamento;
   var emailUser;
+  var idPedido;
+  var timeAguardando;
+  var timeConfirmado;
+  var timeEntrega;
+  var motivoRecusa;
   List<dynamic> lista_produtos;
 
 
@@ -40,6 +45,10 @@ class Pedido {
     this.emailUser=snapshot['emailUser'];
     this.statusPagamento=snapshot['statusPagamento'];
     this.lista_produtos=snapshot['lista_produtos'];
+    this.idPedido=snapshot['idPedido'];
+    this.timeAguardando=snapshot['timeAguardando'];
+    this.timeConfirmado=snapshot['timeConfirmado'];
+    this.motivoRecusa=snapshot['motivoRecusa'];
   }
 
 
@@ -51,6 +60,11 @@ class Pedido {
       ,'nomeUser':this.nomeUser,'tellUser':this.tellUser,'status':this.status,
       'statusPagamento':this.statusPagamento,'lista_produtos':this.lista_produtos,
       'emailUser':this.emailUser,
+      'idPedido':this.idPedido,
+      'timeAguardando':this.timeAguardando,
+      'timeConfirmado':this.timeConfirmado,
+      'timeEntrega':this.timeEntrega,
+      'motivoRecusa':this.motivoRecusa,
     };
     return p;
   }

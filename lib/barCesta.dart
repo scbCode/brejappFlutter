@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cloud_functions/cloud_functions.dart';
@@ -33,14 +34,17 @@ import 'item_cesta.dart';
 
 
 typedef show_blur_bg =  Function(bool);
+typedef show_btn_float =  Function(bool);
 
 class barCesta extends StatefulWidget  {
 
   List<Produto_cesta> listaCesta = new List<Produto_cesta>();
   distanciaLoja listaDistancia_ ;
   show_blur_bg call_back_show_bg;
+  show_btn_float show_btn_float_;
+  var view_barra_ctrol;
   User user;
-  barCesta (this.user,this.listaCesta,this.listaDistancia_,this.call_back_show_bg);
+  barCesta (this.view_barra_ctrol,this.user,this.listaCesta,this.listaDistancia_,this.call_back_show_bg,this.show_btn_float_);
 
   @override
   barCestaState createState() => barCestaState();
@@ -120,7 +124,10 @@ class barCestaState extends State<barCesta>   {
   Widget build(BuildContext context) {
     _checkreresult();
 
-    if (widget.listaCesta!=null)
+   if (!widget.view_barra_ctrol){
+        view_resumo_cesta=true;
+   }
+   if (widget.listaCesta!=null)
       if (widget.listaCesta.length==0)
         setState(() {
           widget.call_back_show_bg(false);
@@ -185,6 +192,8 @@ class barCestaState extends State<barCesta>   {
                   Visibility(visible: view_resumo_cesta || pagSelect,
                       child:blur_bg),
 
+                  Visibility(visible:true ,
+                      child:
                   Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
@@ -198,18 +207,15 @@ class barCestaState extends State<barCesta>   {
                       margin: EdgeInsets.fromLTRB(0, 0, 0, alturaBarra),
                       child:
                       barra()
-                  ),
+                  )),
                   //////////////////////////////////////////////////////////
-
                   Visibility(visible:show_popprocessando, child:
                     Container(child:
                     Column(children: [
                       aguardarresppagamento()
                     ],)),),
-
                   Visibility(visible: (pagSelectfinal), child:
                   viewcomprapagamento_,),
-
 //                  Visibility(visible:pagSelect, child:
 //                  ColorFiltered(
 //                    colorFilter: ColorFilter.mode(
@@ -219,6 +225,37 @@ class barCestaState extends State<barCesta>   {
 //                      child:viewcomprapagamento_
 //                  ),),
 
+//                  Visibility(visible:view_resumo_cesta && !widget.view_barra_ctrol, child:
+//                      Container(height: 35, decoration:BoxDecoration(color:Colors.orange),
+//                    child:  Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
+//
+
+//              Container(margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+//              Text("R\u0024 " + totaltxt.toString(), style: TextStyle(
+//                  color: Colors.white,
+//                  fontFamily: 'RobotoBold',
+//                  fontWeight: FontWeight.bold,
+//                  fontSize: 14),)),
+//
+//              Container(padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+//                  decoration: BoxDecoration(
+//                      borderRadius: BorderRadius.all(Radius.circular(5))),
+//                  alignment: Alignment.centerRight,
+//                  margin: EdgeInsets.fromLTRB(5, 5, 0, 5),
+//                  child: Image.asset("basket_.png",width:25,height:25,)),
+////        Icon(Icons.shopping_basket, color: Colors.white)),
+//              Container(padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+//                  decoration: BoxDecoration(
+//                      borderRadius: BorderRadius.all(Radius.circular(5))),
+//                  alignment: Alignment.centerRight,
+//                  margin: EdgeInsets.fromLTRB(5, 5, 15, 5),
+//                  child:
+//                  Text(qntdItenstxt, style: TextStyle(color: Colors.white,
+//                      fontFamily: 'RobotoBold',
+//                      fontWeight: FontWeight.bold,
+//                      fontSize: 16),)),
+//            ],),
+//                  )),
                   Visibility(visible:view_resumo_cesta, child:
                   LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
                   SingleChildScrollView(child:
@@ -1473,6 +1510,9 @@ class barCestaState extends State<barCesta>   {
     return
       GestureDetector(onTap: () {
         setState(() {
+          if(widget.view_barra_ctrol==false)
+            widget.show_btn_float_(false);
+
           if (view_resumo_cesta == false) {
             widget.call_back_show_bg(true);
             view_resumo_cesta=true;
@@ -1749,7 +1789,7 @@ class barCestaState extends State<barCesta>   {
     var nomeUser=widget.user.nome ;
     var tellUser = widget.user.tell;
     //aguardando//recusado//confirmado//fazendo sua cesta//entrega//finalizado//cancelado
-    var status = "aguardando";
+    var status = "prepedido";
     pedido_.total=total;
     pedido_.frete=frete;
     pedido_.enderecoEntrega = endereco.getenderecoUser();
@@ -1763,6 +1803,10 @@ class barCestaState extends State<barCesta>   {
     pedido_.idloja=idloja;
     pedido_.emailUser=widget.user.email;
     pedido_.statusPagamento=status;
+    Random random = new Random();
+    int randomNumber = random.nextInt(1000000) + 10000;
+    pedido_.idPedido=idloja+""+ randomNumber.toString();
+    pedido_.timeAguardando=FieldValue.serverTimestamp();
 
     if (tipoPag=="cartao"){
         var resultEnvioPedido = await bloc.savePrePedido(widget.user.uid,pedido_);
@@ -1771,10 +1815,11 @@ class barCestaState extends State<barCesta>   {
         }
     }else
       {
+        widget.call_back_show_bg(false);
+
         var resultEnvioPedidofinal = await bloc.savePedidoFinal(widget.user.uid,pedido_);
         if (resultEnvioPedidofinal){
            //hide barCesta; show  barPedido
-          widget.call_back_show_bg(false);
         }else
           {
             pagSelectfinal=true;

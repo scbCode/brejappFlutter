@@ -61,7 +61,7 @@ class _itemListProdstate extends State<itemListProd>  {
   final bloc = BlocAll();
   var styleTextFreteGratis = TextStyle(letterSpacing: 1.5,color: Colors.red,fontSize: 10,fontStyle: FontStyle.italic,fontFamily: 'RobotoBold');
   var styleTextFrete =TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
-  var styleTextFrete_ =TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
+  var styleTextFrete_ =TextStyle(color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
 
   AnimationController _controllerIcon;
 
@@ -213,15 +213,13 @@ class _itemListProdstate extends State<itemListProd>  {
                                         visible:view_dist,child:
                                       Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(distanceTo().toString(),style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
                                       ),
-                                      Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                                      Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(formatFrete(),style: styleTextFrete),),
                                     ],),
+                                  Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Entrega: "+formatFrete(),style: styleTextFrete),),
 
                                 ],),
-
                               Container(
                                   alignment: Alignment.centerRight,
-                                  margin:EdgeInsets.fromLTRB(0, 10, 5, 0),child:Text("R\u0024 "+_FormatPreco(widget.produto.preco.toString()),textAlign: TextAlign.left, style: TextStyle(color: Colors.deepOrangeAccent,fontSize:20,fontFamily: 'BreeSerif'))),
+                                  margin:EdgeInsets.fromLTRB(0, 15, 5, 0),child:Text("R\u0024 "+_FormatPreco(widget.produto.preco.toString()),textAlign: TextAlign.left, style: TextStyle(color: Colors.deepOrangeAccent,fontSize:24,fontFamily: 'BreeSerif'))),
                             ],))),
 
 
@@ -440,7 +438,7 @@ class _itemListProdstate extends State<itemListProd>  {
 
       if ( widget.produto.distanciaGratisKm>=distKm){
         styleTextFrete=styleTextFreteGratis;
-        return "Entrega gratis";
+        return "grátis";
       }else {
         if (distKm != 0.0) {
           styleTextFrete=styleTextFrete_;
@@ -625,6 +623,7 @@ class _itemListProdstate extends State<itemListProd>  {
             .document(uid).collection("cesta").document(item.id).setData(item.getproduto());
       setState(() {
         print("add item lista pos load");
+        bloc.getCesta();
         itemOn = true;
         widget.produto.cesta = true;
         colorBtnAdd=Colors.green;
@@ -654,8 +653,10 @@ class _itemListProdstate extends State<itemListProd>  {
 
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
 
+    if (user!=null)
     uid =  user.uid;
 
+    if (uid!=null)
     bloc.getCesta();
 //    _controllerIcon = AnimationController(duration: Duration(milliseconds: 10000));
 //

@@ -30,6 +30,7 @@ class itemCardState extends State<itemCarduser>  {
           padding: EdgeInsets.all(0.0),
           shrinkWrap: true,
           scrollDirection: Axis.vertical,
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: widget.snapshot.data.documents.length,
           itemBuilder: (context, index) {
             Offset _offset = Offset.zero;

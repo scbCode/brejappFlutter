@@ -1,0 +1,36 @@
+<html>
+<body>
+<!-- Other firebase SDKs/config here -->
+
+ <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-firestore.js"></script>
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+
+navigator.geolocation.getCurrentPosition(function(position) {
+
+});
+
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyCOjrHO-MeUgupKC6yvRrhG9EyODIE9BVo",
+    authDomain: "brejapp-flutter.firebaseapp.com",
+    databaseURL: "https://brejapp-flutter.firebaseio.com",
+    projectId: "brejapp-flutter",
+    storageBucket: "brejapp-flutter.appspot.com",
+    messagingSenderId: "262478331481",
+    appId: "1:262478331481:web:1a459d9a749608c297bb48",
+    measurementId: "G-ZW05NL5332"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  </script>
+<!-- END OF FIREBASE INIT CODE -->
+<script src="main.dart.js"></script>
+
+</body>
+</html>

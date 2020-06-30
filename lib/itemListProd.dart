@@ -241,6 +241,7 @@ class _itemListProdstate extends State<itemListProd>  {
                               if (value.connectionState==ConnectionState.active) {
                                 var ctrol = false;
                                 print("GET CESTA ++++");
+                                widget.listaCesta.clear();
                                 widget.listaCesta.addAll(value.data);
 
                                 if (value.data.isNotEmpty) {
@@ -253,6 +254,7 @@ class _itemListProdstate extends State<itemListProd>  {
                                         splashColor: Colors.orange,
                                         color: Colors.yellow[300],
                                         onPressed: () {
+                                           print("click");
                                           _addLista();
                                         },
                                         child:
@@ -278,6 +280,7 @@ class _itemListProdstate extends State<itemListProd>  {
                                         splashColor: Colors.orange,
                                         color: Colors.yellow[300],
                                         onPressed: () {
+                                          print("click2");
                                           _addLista();
                                         },
                                         child:
@@ -304,6 +307,7 @@ class _itemListProdstate extends State<itemListProd>  {
                                       color: Colors.yellow[300],
                                       onPressed: () {
                                         widget.listaCesta.add(widget.produto);
+                                        print("click3");
                                         _addLista();
                                       },
                                       child:
@@ -418,6 +422,9 @@ class _itemListProdstate extends State<itemListProd>  {
           total-=1;
           totalPreco-=widget.produto.preco;
           totalPrecotxt = totalPreco;}
+        if (total==1){
+          vbtnRemoveqntd=false;
+        }
       }
     });
 
@@ -470,6 +477,7 @@ class _itemListProdstate extends State<itemListProd>  {
       setState(() {
         totalPreco += widget.produto.preco;
         totalPrecotxt = totalPreco;
+        incremental += 1;
         total+=1;
         print("total : "+total.toString());
         widget.produto.quantidade=total;
@@ -483,7 +491,7 @@ class _itemListProdstate extends State<itemListProd>  {
     setState(() {
       vbtnremoveitem=false;
       textBtnadd="ADICIONAR";
-      total=1;
+//      total=1;
       colorBtnAdd=Colors.orange;
     });
 
@@ -510,13 +518,14 @@ class _itemListProdstate extends State<itemListProd>  {
 
 
   _addLista() async{
+    print("_addLista");
 
     var check = await checkLogado() ;
     if(widget.local_user!=null){
 
       if (itemOn==false)
         if (check==true){
-
+            print("setlist");
           addItemCesta(widget.produto);
         }else
         {
@@ -606,7 +615,7 @@ class _itemListProdstate extends State<itemListProd>  {
     if(widget.listaCesta!=null){
       if(widget.listaCesta.length>0) {
         for (int i = 0;i<widget.listaCesta.length;i++){
-          if (widget.listaCesta[0].loja != item.loja) {
+          if (widget.listaCesta[0].idloja != item.idloja) {
             print("loja diff");
             ctrol = true;
           }
@@ -618,19 +627,20 @@ class _itemListProdstate extends State<itemListProd>  {
 
     item.quantidade=total;
     if (ctrol==false){
-      if (uid!=null)
         await Firestore.instance.collection("Usuarios")
-            .document(uid).collection("cesta").document(item.id).setData(item.getproduto());
-      setState(() {
-        print("add item lista pos load");
-        bloc.getCesta();
-        itemOn = true;
-        widget.produto.cesta = true;
-        colorBtnAdd=Colors.green;
-        vbtnremoveitem = true;
-        vbtnRemoveqntd=false;
-        widget.produto.quantidade = total;
-      });
+            .document(uid).collection("cesta").document(item.id).setData(item.getproduto())
+        .then((e){
+            setState(() {
+              print("add item lista pos load");
+              bloc.getCesta();
+              itemOn = true;
+              widget.produto.cesta = true;
+              colorBtnAdd=Colors.green;
+              vbtnremoveitem = true;
+              vbtnRemoveqntd=false;
+              widget.produto.quantidade = total;
+            });
+        });
     }else
     {
       _snackbar("Voçê possui itens de outra loja na sua cesta, deseja substituir");
@@ -677,7 +687,7 @@ class _itemListProdstate extends State<itemListProd>  {
   @override
 
   void dispose() {
-    _controllerIcon.dispose();
+//    _controllerIcon.dispose();
 
     super.dispose();
   }

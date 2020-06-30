@@ -36,11 +36,11 @@ class BlocAll {
   Stream <Pedido> get stream_Prepedido => streamControl_PrePedidos.stream;
 
   var pedidoExist=false;
+  var cestaExist=false;
   Future getCesta() async{
 
 
     print ("BLOC - getCesta ");
-    listaCesta=[];
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     if (user!=null){
          Firestore.instance      .collection('Usuarios').document(user.uid)
@@ -48,6 +48,7 @@ class BlocAll {
         .listen((data) =>  _checkreresult(data))   ;
         }else
         {
+          cestaExist=false;
           control_check.sink.add([]);
         }
 
@@ -67,11 +68,14 @@ class BlocAll {
           loja = produto.loja;
           listaCesta.add(produto);
           control_check.sink.add(listaCesta);
+          cestaExist=true;
           print ("BLOC - _checkreresult "+produto.quantidade.toString());
       });
       getLojaCesta(loja);
-    }else
-      control_check.sink.add(listaCesta);
+    }else{
+      cestaExist=false;
+
+      control_check.sink.add(listaCesta);}
   }
 
 
@@ -140,7 +144,7 @@ class BlocAll {
     if (user!=null){
     var uid = user.uid;
     var document = await Firestore.instance.collection('Usuarios').document(uid);
-    document.collection("endereco").document("Entrega").snapshots()
+    document.collection("endereco").document("default").snapshots()
         .listen((data) => {
       setUiEndereco(data)
     });}
@@ -163,7 +167,7 @@ class BlocAll {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     var uid = user.uid;
     var document = await Firestore.instance.collection('Usuarios').document(uid);
-    document.collection("endereco").document("Entrega_temp").snapshots()
+    document.collection("endereco").document("automatico").snapshots()
         .listen((data) => {
       setUiEndereco_temp(data)
     });
@@ -226,7 +230,7 @@ class BlocAll {
     var ctrol=false;
     await refData.collection("Usuarios")
         .document(uid).collection('Pedidos')
-        .document(pedido).setData({"time_nao_aceito_visto":FieldValue.serverTimestamp(),"status":"finalizado",},merge: true)
+        .document(pedido).setData({"time_nao_aceito_visto":FieldValue.serverTimestamp(),"status":"finalizado-chegou",},merge: true)
         .then((v){
       print("SAVE CANCEL-PEDIDO");
       ctrol=true;
@@ -318,6 +322,46 @@ class BlocAll {
 
   }
 
+  Future<bool> envarAvaliacao(var loja, var email,var aval) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Avaliacoes")
+        .document(loja).collection('avaliacoes').document(email).setData(
+        {"time":FieldValue.serverTimestamp(),
+          "nota":aval
+        },merge: true
+    ).then((v){
+      print("SAVE Avaliacao");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE Avaliacao - ERROR");
+    });
+
+    return ctrol;
+
+  }
+  Future<bool> finalizarPedidoDesativado(var uid, var pedido) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uid).collection('Pedidos')
+        .document(pedido).setData(
+        {"time":FieldValue.serverTimestamp(),
+          "status":"desativado_finalizado"
+        },merge: true
+      ).then((v){
+      print("SAVE FINALIZADO-PEDIDO");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE FINALIZADO-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
+
   Future<bool> sendMsgAjuda(var uid, var pedido,var msg) async {
     var refData = Firestore.instance;
     var ctrol=false;
@@ -354,12 +398,11 @@ class BlocAll {
       ctrol=true;
 
        refData.collection("Usuarios")
-          .document(uid).collection('cesta').snapshots().listen((event) {
+          .document(uid).collection('cesta').orderBy("status").getDocuments().then((event) {
             for(int i =0;i<event.documents.length;i++) {
               event.documents[i].reference.delete();
             }
        });
-
       return  true;
     }).catchError((erro){
       print("SAVE PRE-PEDIDO - ERROR "+erro.toString());
@@ -408,19 +451,37 @@ class BlocAll {
 
     print("GET PEDIDO ");
     List<Pedido> pedidos= [];
-    print(data);
+    streamControl_Pedidos.sink.add([]);
+    pedidoExist=false;
+
     if (data!=null) {
       if (data.documents.isEmpty==false) {
          await data.documents.forEach((p) {
             Pedido pd = new Pedido();
             print ("BLOC - getPedido EXIXST ");
             pd.setPedido(p);
+            if ( pd.status != "cancelado_user" &&
+                pd.status != "cancelado_user_reembolso" &&
+                pd.status != "nao_aceito_visto" &&
+                pd.status != "desativado_finalizado"){
             pedidos.add(pd);
+            streamControl_Pedidos.sink.add(pedidos);
+            }
          });
-          streamControl_Pedidos.sink.add(pedidos);
-         pedidoExist=true;
+
+//
+         if(pedidos.length>0)
+           pedidoExist=true;
+          else {
+           streamControl_Pedidos.sink.add([]);
+           pedidoExist = false;
+           getCesta();
+
+         }
+
       }
     }else {
+      streamControl_Pedidos.sink.add([]);
       StreamPedidos();
       pedidoExist=false;
 
@@ -442,14 +503,18 @@ class BlocAll {
     }
 
   }
-
+  getCestaExist(){
+    return cestaExist;
+  }
    getPedidoExist(){
+    print("getpedidoexist "+pedidoExist.toString());
     return pedidoExist;
   }
 
   void setUiPrePedido(var data){
 
     print("GET PEDIDO ");
+
     print(data);
     if (data!=null) {
       if (data.documents.isEmpty==false) {
@@ -462,6 +527,8 @@ class BlocAll {
         });
       }
     }else {
+      streamControl_PrePedidos.sink.add(null);
+
       StreamPedidos();
     }
   }

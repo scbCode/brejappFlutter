@@ -2,15 +2,18 @@ import 'dart:async';
 
 import 'package:android_intent/android_intent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_firestore/botao3dFormEnd.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'ClickyButton.dart';
+import 'distanciaLoja.dart';
 import 'enderecoUser.dart';
 
 
@@ -24,12 +27,13 @@ class form_endereco_user extends StatefulWidget {
   final cancelReturn callback_return_cancel;
   Set<Marker> markers = Set();
   bool isLocationEnabled=false;
+  var compareLocal;
 
   var idloja;
   var    countResetPosit = 0 ;
   enderecoUser enderecoExist;
 
-  form_endereco_user (  this.enderecoExist,this.idloja ,@required this.callback_return, @required this.callback_return_cancel);
+  form_endereco_user (  this.enderecoExist,this.idloja,this.compareLocal ,@required this.callback_return, @required this.callback_return_cancel);
 
 
   @override
@@ -42,13 +46,19 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
 
   AnimationController _controllerIcon;
   var show_googlemaps=true;
+  enderecoUser enderecoChecado;
+
+  var cor_map_load =  false;
   var frua = new FocusNode();
   var fbairro = new FocusNode();
   var fnumero = new FocusNode();
   var fcomplemento = new FocusNode();
   var angCamMap=0.0;
+  var view_endereco_map=true;
+  var view_form_endereco=false;
   GoogleMapController mapController;
   LatLng _center = const LatLng(-1.521563, -48.677433);
+  LatLng localupdate = const LatLng(-1.521563, -48.677433);
   LatLng _center_current = const LatLng(-1.521563, -48.677433);
   LatLng _center_start = const LatLng(-1.521563, -48.677433);
 
@@ -76,6 +86,7 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
           c_complemento.text = widget.enderecoExist.complemento;
           _center = LatLng(widget.enderecoExist.localizacao.latitude,widget.enderecoExist.localizacao.longitude);
           _center_start =_center;
+          localupdate =_center;
         });
     }
     _controllerIcon = AnimationController(duration: Duration(milliseconds: 200),vsync: this);
@@ -87,18 +98,56 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
   Widget build(BuildContext context) {
 
     return
-        Column(
+    LimitedBox(
+        maxHeight: MediaQuery.of(context).size.height*.85,
+        child:
+      Scaffold(
+        backgroundColor: Colors.transparent,
+          resizeToAvoidBottomPadding: true,
+          body:
+          SingleChildScrollView(child:
+
+          Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
       Container(
+        margin: EdgeInsets.fromLTRB(0, 40, 0, 0),
           decoration: BoxDecoration(
-              color:Colors.white, borderRadius:BorderRadius.all(Radius.circular(20)),
-              boxShadow: [BoxShadow(color: Colors.black26,blurRadius:2,offset: Offset(0,0))]),
+              borderRadius:BorderRadius.all(Radius.circular(5)),
+              boxShadow: [BoxShadow(color: Colors.black54,blurRadius:0.3,offset: Offset(0,0))]),
           child:
-                 SingleChildScrollView(child:
                  Column(
-                 mainAxisAlignment: MainAxisAlignment.center,
+                 mainAxisAlignment: MainAxisAlignment.end,
                  children: <Widget>[
+                   Row(children:[
+
+                   GestureDetector(onTap: (){
+                     setState(() {
+                       if (view_form_endereco==false)
+                       {
+                          widget.callback_return_cancel();
+                       }
+                          else
+                       {
+                           view_form_endereco=false;
+                           view_endereco_map=true;
+                       }
+                     });
+
+                   },child:
+                   Container(
+                       margin:EdgeInsets.fromLTRB(5,0,0,0),
+                       alignment: Alignment.centerLeft,
+                       padding: EdgeInsets.all(8),
+                       child:Icon(Icons.arrow_back,color:Colors.white)
+                   )),
+                        Container(
+                          margin:EdgeInsets.fromLTRB(15,10,0,5),
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.all(8),
+                        child:Text("ENDEREÇO DE DENTREGA",style: TextStyle(fontSize: 16,color:Colors.white,fontFamily: 'RobotoBold'),)),
+                   ]),
+
                    Container(
                    width: MediaQuery.of(context).size.width,
                        decoration: BoxDecoration(color:Colors.transparent,),
@@ -107,9 +156,20 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                      Column(
                        mainAxisAlignment: MainAxisAlignment.center,
                        children: <Widget>[
+
+                    Visibility(
+                             visible: view_form_endereco,
+                             child:
+                         Container(
+                             padding: EdgeInsets.all(15),
+                             decoration:BoxDecoration(color:Colors.white),
+                             child:
+                     Column(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                       children: <Widget>[
                          Container(
                              padding: EdgeInsets.all(20),
-                             child:Text("NOVO ENDEREÇO",style: TextStyle(color:Colors.orange,fontFamily: 'RobotoBold'))),
+                             child:Text("",style: TextStyle(color:Colors.orange,fontFamily: 'RobotoBold'))),
                          Container(
                              margin: EdgeInsets.fromLTRB(15, 0,15, 0), alignment: Alignment.centerLeft,
                              child:
@@ -121,6 +181,7 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                  decoration: InputDecoration(hintText: "Rua",
                                      hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
+
                          Container(
                              margin: EdgeInsets.fromLTRB(15, 0, 15, 0), alignment: Alignment.centerLeft,
                              child:TextFormField(focusNode:fbairro,
@@ -140,16 +201,22 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                  decoration: InputDecoration(hintText: "Numero",hintStyle: TextStyle(color: Colors.black26)),
                                  style: TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
                          Container(                             padding: EdgeInsets.all(5),
-                              margin: EdgeInsets.fromLTRB(10,0, 10, 0), alignment: Alignment.centerLeft,
+                              margin: EdgeInsets.fromLTRB(10,0, 10, 40), alignment: Alignment.centerLeft,
                              child:TextFormField(focusNode:fcomplemento,controller:c_complemento
                                  ,textInputAction:  TextInputAction.next,textCapitalization:
                                  TextCapitalization.words, decoration: InputDecoration(hintText: "Complemento",hintStyle: TextStyle(color: Colors.black26)),
                                  style:
                                  TextStyle(color:Colors.black54,fontFamily: 'RobotoRegular'))),
 
+                       ]))),
+
+
+                       Visibility(
+                           visible: view_endereco_map,
+                           child:
                          Container(
-                           height: 200,
-                             margin: EdgeInsets.fromLTRB(0, 20, 0, 0), alignment: Alignment.centerLeft,
+                           height: 300,
+                             margin: EdgeInsets.fromLTRB(0, 0, 0, 0), alignment: Alignment.centerLeft,
                             child:
                             Stack(children: <Widget>[
                              GoogleMap(
@@ -160,7 +227,7 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                               onCameraMove: (object) => {_moveMarkerCenter(object.target)},
                               initialCameraPosition:  CameraPosition(
                                 target: getLocal(),
-                                zoom: 12.0
+                                zoom: 16.0
                               ),
                             ),
                            Visibility(visible: show_googlemaps, child:
@@ -168,9 +235,15 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                 height: 200,
                                   decoration: BoxDecoration(color: Colors.grey),
                                   alignment: Alignment.center)),
+
+                              Visibility(visible: cor_map_load, child:
+                              Container(
+                                height: 300,
+                                decoration: BoxDecoration(color:Colors.black54),
+                                alignment: Alignment.center,)),
                              Visibility(visible: true, child:
                               Container(
-                                  height: 200,
+                                  height: 300,
                                   alignment: Alignment.center,
                                   child:Icon(Icons.adjust,color: Colors.orange,))),
                               GestureDetector(
@@ -188,81 +261,101 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                       RotationTransition(
                                           turns: Tween(begin: 0.0, end: 1.0).animate(_controllerIcon),
                                           child:Icon(Icons.pin_drop,color: Colors.blue,size: 25,))))),
-                            ],)),
+                            ],))),
 
 
-                       ],)),
+                       ],) ),
 
 
 
                  ],)
-        )
-    ),
+        ),
 Container(
+  width: MediaQuery.of(context).size.width,
     margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
     child:
      Row (
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
 
-
+            Visibility(visible: view_endereco_map,child:
             GestureDetector(onTap: (){ _initSaveEndereco_check();},child:
-            Container(
-                decoration:BoxDecoration(color:Colors.green),
-                height: 50,
-                alignment: Alignment.center,
-                padding: EdgeInsets.all(5),
-                width: MediaQuery.of(context).size.width*0.4,
+            FlatButton (
+              onPressed: () {
+                  if (widget.compareLocal!=null)
+                  if (localupdate != widget.enderecoExist.localizacao )
+                    getDirections();
+              },
+              textColor: Colors.white,
+              padding: const EdgeInsets.all(0.0),
+              child: Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                  color:Colors.orange
+                ),
+                padding: const EdgeInsets.all(15.0),
                 child:
-//                Transform.scale(scale: 0.8,child:
-//                botao3dFormEnd(
-//                  colorFactor: 3,
-//                  sizeW: MediaQuery.of(context).size.width*.5,
-//                  child:
-                  Text(
-                    'SALVAR',
-                    style: TextStyle(
-                        fontFamily:'BreeSerif',
-                        color: Colors.white,
-                        letterSpacing: 3,
-                        fontSize: 20),
-                  ),
+                const Text('CONFIRMAR', style: TextStyle(fontSize: 20)),
+              ),
+            ),
 //                  color: Colors.amber,
 //                  onPressed: () { _initSaveEndereco_check();},
-                )),
-        GestureDetector(onTap: (){  widget.callback_return_cancel(); },child:
-            Container(
-              width: MediaQuery.of(context).size.width*0.4,
-              height: 50,
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(8),
-              decoration:BoxDecoration(color:Colors.grey[500],),
-             child:
-//              Transform.scale(scale: 0.8,child:
-//                  Container(
-//                  child:
-//                      botao3dFormEnd(
-//                        colorFactor: 3,
-//                        sizeW: MediaQuery.of(context).size.width*.5,
-//                        child:
-                        Text(
-                          'CANCELAR',
-                          style: TextStyle(
-                              fontFamily:'BreeSerif',
-                              color: Colors.white,
-                              letterSpacing: 3,
-                              fontSize: 18),
-                        ),
-//                        color: Colors.grey,
-//                        onPressed: () { widget.callback_return_cancel();},
-//                      ))
-          )),
+            )),
+            Visibility(visible: view_form_endereco,child:
+            GestureDetector(onTap: (){ _initSaveEndereco_check();},child:
+            FlatButton (
+              onPressed: () {
+                setState(() {
+                  _initSaveEndereco_check();
+                });
+              },
+              textColor: Colors.white,
+              padding: const EdgeInsets.all(0.0),
+              child: Container(
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color:Colors.green
+                ),
+                padding: const EdgeInsets.all(15.0),
+                child:
+                const Text('SALVAR', style: TextStyle(fontSize: 20)),
+              ),
+            ),
+//                  color: Colors.amber,
+//                  onPressed: () { _initSaveEndereco_check();},
+            )),
+//            Visibility(visible:false,child:
+//            GestureDetector(onTap: (){ _initSaveEndereco_check();},child:
+//            Container(
+//                decoration:BoxDecoration(color:Colors.green),
+//                height: 50,
+//                alignment: Alignment.center,
+//                padding: EdgeInsets.all(5),
+//                child:
+////                Transform.scale(scale: 0.8,child:
+////                botao3dFormEnd(
+////                  colorFactor: 3,
+////                  sizeW: MediaQuery.of(context).size.width*.5,
+////                  child:
+//                  Text(
+//                    'SALVAR',
+//                    style: TextStyle(
+//                        fontFamily:'BreeSerif',
+//                        color: Colors.white,
+//                        letterSpacing: 3,
+//                        fontSize: 20),
+//                  ),
+////                  color: Colors.amber,
+////                  onPressed: () { _initSaveEndereco_check();},
+//                ))),
+
 
             ],)),
 
 
-        ]);
+        ])))    )
+    ;
   }
 
 
@@ -271,11 +364,19 @@ Container(
     FocusScope.of (context) .requestFocus (nextFocus);
   }
 
+  getDirections(){
+    print("getDirections");
+    if (widget.compareLocal!=null){
+      calcDistancia(widget.compareLocal);
+    }
+
+  }
 
   getLocal(){
     show_googlemaps=false;
+
     if (mapController!=null)
-        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 12));
+        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center,14));
 
    _center=new LatLng(widget.enderecoExist.localizacao.latitude,
        widget.enderecoExist.localizacao.longitude);
@@ -291,8 +392,8 @@ Container(
     var numero = c_numero.text;
     var complemento = c_complemento.text;
 
-    print("POSICAO "+_center.latitude.toString());
-    GeoPoint localizacao = new GeoPoint(_center.latitude, _center.longitude);
+    print("POSICAO "+localupdate.latitude.toString());
+    GeoPoint localizacao = new GeoPoint(localupdate.latitude, localupdate.longitude);
     bool check = false;
 
     if (rua.length==0) {
@@ -323,6 +424,67 @@ Container(
 
   }
 
+  calcDistancia(var produto)async{
+
+
+    print("calcDistancia");
+
+    String lat2 = produto.latitude.toString();
+    String lng2 = produto.longitude.toString();
+    String lat1 = localupdate.latitude.toString();
+    String lng1 = localupdate.longitude.toString();
+    Dio dio = new Dio();
+    Response response = await dio.get(
+        "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" +
+            lat1 + "," + lng1 + "&destinations=" + lat2 + "," + lng2 +
+            "&key=AIzaSyAnQ3zt7IUwj3LnKBssY6s-rH-17PlmXDs");
+
+    print("DISTANCE MATRIX "+ response.data.toString());
+    var d =  response.data['rows'][0]['elements'][0]['distance']['value'].toString();
+    var duration =  response.data['rows'][0]['elements'][0]['duration']['text'].toString();
+    var endtemp =  response.data['origin_addresses'][0].toString();
+    var endtempsplit =  endtemp.split(", ");
+    var rua = endtempsplit[0];
+    var cidade = endtempsplit[2];
+    var pais = endtempsplit[4];
+    var numeebairro = endtempsplit[1].split(" - ");
+    var numero = numeebairro[0];
+    var bairro = numeebairro[1];
+
+    enderecoChecado = new enderecoUser(rua, bairro, numero, "", GeoPoint(localupdate.latitude,localupdate.longitude),true);
+
+    setState(() {
+        c_rua.text=rua;
+        c_bairro.text =bairro;
+        c_numero.text = numero;
+        c_complemento.text = "";
+        view_endereco_map=false;
+        view_form_endereco=true;
+    });
+  }
+
+
+  addDistance(distanciaLoja distancia,produto) async{
+
+    print ("addDistance");
+
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    if (user!=null) {
+
+      await Firestore.instance.collection("Usuarios")
+          .document(user.uid).collection("distancias")
+          .document(distancia.idloja)
+          .setData(distancia.getdistanciaLoja());
+
+      setState(() {
+
+      });
+    }else{
+      print ("addDistance erro - user null");
+    }
+
+
+  }
 
   enviarFormEndereco(enderecoUser endereco) async{
     var refData = Firestore.instance;
@@ -335,13 +497,18 @@ Container(
           .document(uid)
           .collection("endereco").document("Entrega")
           .setData(endereco.getenderecoUser());
+
+      await refData.collection("Usuarios")
+          .document(uid)
+          .collection("distancias").getDocuments().then((value) => value.documents.forEach((element) {element.reference.delete();}));
+
+
       _snackbar("Endereço salvo");
+
+
       widget.callback_return_cancel();
-
     }
-
     else {
-
       await refData.collection("Usuarios")
           .document(uid)
           .collection("Pedidos").document(widget.idloja)
@@ -349,39 +516,21 @@ Container(
       _snackbar("Endereço salvo");
       widget.callback_return_cancel();
     }
-
-
-
   }
 
   _snackbar(text){
     final snackBar = SnackBar(content: Text(text));
     Scaffold.of(context).showSnackBar(snackBar);
-
   }
 
   returnLocalInit(){
 
-    setState(() {
+//    setState(() {
+//      cor_map_load =true;
+//    });
 
-          _controllerIcon.reset();
-          _controllerIcon.forward();
-//          if (show_googlemaps==false)
-//            mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 16));
+      _getLocation();
 
-
-
-//            if (_center.latitude==_center_start.latitude && _center.longitude==_center_start.longitude)
-//             if (widget.enderecoExist==null)
-//                 _getLocation();
-
-            widget.countResetPosit++;
-
-//            if (widget.countResetPosit>=3) {
-//              widget.countResetPosit=0;
-//              _getLocation();
-//            }
-    });
 
   }
 
@@ -395,18 +544,26 @@ Container(
 
     var currentLocation = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-        setState(() {
-          show_googlemaps=false;
 
+
+      if (mapController!=null){
+        var zoom = await mapController.getZoomLevel();
+        print("Get local zomm "+zoom.toString());
+
+        mapController.moveCamera(CameraUpdate.newLatLngZoom(
+            LatLng(currentLocation.latitude, currentLocation.longitude),zoom ));}
+        setState(()  {
+          show_googlemaps=false;
            _center_current   = LatLng(currentLocation.latitude, currentLocation.longitude);
            _center=_center_current;
-          if (mapController!=null)
-          mapController.moveCamera(CameraUpdate.newLatLngZoom(
-                LatLng(currentLocation.latitude, currentLocation.longitude), 16));
+          cor_map_load = false;
+
         });
     }else{
       openLocationSetting();
     }
+
+
   }
   void openLocationSetting() async {
     final AndroidIntent intent = new AndroidIntent(
@@ -422,7 +579,8 @@ Container(
 
   _moveMarkerCenter(var position){
 
-    //_center = LatLng(position.latitude,position.longitude);
+    localupdate = new LatLng(position.latitude,position.longitude);
+    print("change local "+localupdate.latitude.toString());
 
 
   }

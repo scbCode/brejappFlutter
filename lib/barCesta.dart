@@ -69,6 +69,7 @@ class barCestaState extends State<barCesta>   {
   double initial=0.0;
   var bloc = BlocAll();
   var view_resumo_cesta=false;
+  var fazerpedido=false;
   var view_cestadetalhes=false;
   var view_formpag=false;
   var view_resumo_compra=false;
@@ -124,8 +125,8 @@ class barCestaState extends State<barCesta>   {
   Widget build(BuildContext context) {
     _checkreresult();
 
-   if (!widget.view_barra_ctrol){
-        view_resumo_cesta=true;
+   if (widget.view_barra_ctrol==false){
+     listaCesta_=listaCesta();
    }
    if (widget.listaCesta!=null)
       if (widget.listaCesta.length==0)
@@ -139,8 +140,12 @@ class barCestaState extends State<barCesta>   {
           view_cestadetalhes = false;
           view_resumo_cesta=false;
           view_resumo_compra=true;
+          fazerpedido=true;
         });
-    }
+    }else
+      {
+        fazerpedido=false;
+      }
 
 
     if (confirmarEndereco==false){
@@ -177,6 +182,15 @@ class barCestaState extends State<barCesta>   {
 
   }
 
+
+  @override
+
+  void dispose() {
+    controller_mask_troco.dispose();
+    super.dispose();
+  }
+
+
   barCompleta(){
     return
 //Container(decoration: BoxDecoration(color: Colors.transparent),child:
@@ -192,7 +206,7 @@ class barCestaState extends State<barCesta>   {
                   Visibility(visible: view_resumo_cesta || pagSelect,
                       child:blur_bg),
 
-                  Visibility(visible:true ,
+                  Visibility(visible: true,
                       child:
                   Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
                     BoxShadow(
@@ -256,7 +270,7 @@ class barCestaState extends State<barCesta>   {
 //                      fontSize: 16),)),
 //            ],),
 //                  )),
-                  Visibility(visible:view_resumo_cesta, child:
+                  Visibility(visible:view_resumo_cesta || !widget.view_barra_ctrol && !fazerpedido, child:
                   LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
                   SingleChildScrollView(child:
                   Container(
@@ -326,6 +340,7 @@ class barCestaState extends State<barCesta>   {
                                   pagSelect=false;
                                   view_formpag=false;
                                   view_cestadetalhes=false;
+
                                 }
                                 else{
                                   view_cestadetalhes=true;}
@@ -408,7 +423,7 @@ class barCestaState extends State<barCesta>   {
                                   ),
 
                                   Visibility(
-                                      visible: ctrol_view_btnEnd,
+                                      visible: ctrol_view_btnEnd ,
                                       child:
                                       GestureDetector(onTap: (){
                                         setState(() {
@@ -469,6 +484,7 @@ class barCestaState extends State<barCesta>   {
 
 
             Container(decoration:BoxDecoration(borderRadius: BorderRadius.circular((20))),child:
+
             Visibility(child:
             formularioEndereco(),visible: view_form_end,)),
 
@@ -567,12 +583,11 @@ class barCestaState extends State<barCesta>   {
                       tipoPag="";
                       cartaoselect=-1;
                       pagSelect=false;
+                      pagSelectfinal=false;
                       view_formpag=false;
                       view_resumo_cesta=true;
                       view_cestadetalhes=true;
                       listaCesta_=listaCesta();
-
-
                     });
                   },
                   child:
@@ -920,6 +935,7 @@ class barCestaState extends State<barCesta>   {
                     builder: (context, snapshot1) {
                       if (snapshot1.connectionState==ConnectionState.active){
                         if (snapshot1.data.documents.length > 0) {
+                          ctrol_view_btnEnd=false;
                           enderecoTemp_=true;
                           return
                             enderecoTemp(snapshot1.data.documents[0]);
@@ -949,11 +965,10 @@ class barCestaState extends State<barCesta>   {
 
 
   void getUser(var data,var documentID){
-    user = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
     setState(() {
+    user = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
       view=true;
       print("USER X "+data['uid'].toString());
-
     });
   }
 
@@ -1068,12 +1083,13 @@ class barCestaState extends State<barCesta>   {
                   ctrol_view_btnEnd=true;
 //                view_resumo_cesta=false;
                   confirmarEndereco=false;
+                  view_formpag=false;
                 }); },child:
               Container(
-                  margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                  margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
                   alignment: Alignment.center, child:
               Text("Atualizar",style:
-              TextStyle(color: Colors.red,fontFamily: 'RobotoLight'),)))),
+              TextStyle(color: Colors.red,fontFamily: 'RobotoBold'),)))),
 
             ],));
   }
@@ -1145,15 +1161,18 @@ class barCestaState extends State<barCesta>   {
 
                 ],)),
             Container(
-                padding: EdgeInsets.fromLTRB(0, 10, 0, 15),
-                margin: EdgeInsets.fromLTRB(15, 15, 15, 10),
-                decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
+                padding: EdgeInsets.fromLTRB(0, 15, 0, 20),
+                margin: EdgeInsets.fromLTRB(15, 20, 15, 20),
+                decoration: BoxDecoration(
+                    borderRadius:BorderRadius.all(Radius.circular(20)),
+                    boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
                 child:
                 Row(mainAxisAlignment: MainAxisAlignment.center,mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Column(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      GestureDetector(onTap: (){setState(() {
+                      GestureDetector(onTap: (){
+                        setState(() {
                         view_form_end=true;
                       }); },child:
                       Container(
@@ -1453,10 +1472,10 @@ class barCestaState extends State<barCesta>   {
                     decoration:  BoxDecoration(color: Colors.white.withOpacity(.20)),
                     child:
                     Container(
-                        padding: EdgeInsets.fromLTRB(20, 0, 20,10),
+                        padding: EdgeInsets.fromLTRB(20, 30, 20,0),
                         child:Column(mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            form_endereco_user(end_user_,null,null,(){desativarFormEndereco();})
+                            form_endereco_user(end_user_,null,widget.listaCesta[0].localizacao ,null,(){desativarFormEndereco();})
                           ],)
                     ),
 
@@ -1467,6 +1486,8 @@ class barCestaState extends State<barCesta>   {
 
   desativarFormEndereco(){
     setState(() {
+      print("desativaformend");
+
       view_form_end=false;
     });
   }
@@ -1619,7 +1640,7 @@ class barCestaState extends State<barCesta>   {
           else {
             if (distKm != 0.0) {
               var frete_ = (coef * distKm).round();
-              var fretef = (total + frete_).toStringAsFixed(2).toString();
+              var fretef = (total + frete_).toStringAsFixed(2).replaceAll(".", ",");
               frete = frete_;
               return fretef;
             } else

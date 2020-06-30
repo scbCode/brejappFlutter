@@ -96,10 +96,11 @@ class _MyHomePageState extends State<MyHomePage> {
   var modo="app";
   var view_listaPedidos=false;
   var cestaAtiva=false;
-  var btnfloat=false;
+  var cestaAtivaBar=false;
+  var btnfloat=true;
   var pedidoAtivo=false;
   var bottomBarPedido=45.0;
-  var heigthBarcesta=45.0;
+  var bottomBarcesta=105.0;
 var show_cesta=false;
   static var listaCesta=[];
   int _counter = 0;
@@ -155,6 +156,7 @@ var show_cesta=false;
   var modo_teste=false;
   var selecPedido="";
 
+  var hist_pedidoexist=false;
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
@@ -168,16 +170,12 @@ var show_cesta=false;
     }
 
    return
-        Scaffold(
+   Scaffold(
           resizeToAvoidBottomInset : false,
           body:
-          RepaintBoundary(
-              key: scr,
-              child:
-      Stack(
+          Container(child:
+          Stack(
           children: <Widget>[
-
-
 
         SingleChildScrollView(
           child:
@@ -271,14 +269,11 @@ var show_cesta=false;
                 width: double.infinity,height: MediaQuery.of(context).size.height,
     margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child:
     ClipRect(
-    child:  BackdropFilter(
-    filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
-    child:  Container(
-    decoration:  BoxDecoration(color: Colors.orange[100].withOpacity(.50)),child:
-
+      child:  BackdropFilter(
+      filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
+      child:  Container(
+      decoration:  BoxDecoration(color: Colors.orange[100].withOpacity(.50)),child:
       Container(alignment: Alignment.center, child: autenticacao("login",(value){return _hidepop_login(value);}),))))))),),
-
-
         Positioned(
               width: MediaQuery.of(context).size.width,
               bottom:45,
@@ -301,6 +296,7 @@ var show_cesta=false;
               return Container();
 
               })),
+
             Positioned(
                 width: MediaQuery.of(context).size.width,
                 bottom:bottomBarPedido,
@@ -309,19 +305,22 @@ var show_cesta=false;
                     stream: bloc.stream_pedido,
                     builder: (context,value) {
                       if (value.connectionState==ConnectionState.active) {
-                        print("STREM PEDIDO "+value.data.length.toString());
-                        return
-                          Column(children: <Widget>[
-                            Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 0.0,
-                                offset: Offset(
+                          if (value.data.length>0){
+                            print("STREM PEDIDO "+value.data.toString());
+
+                            return
+                             Column(children: <Widget>[
+
+                               Container( decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 0.0,
+                                  offset: Offset(
                                   0.0, // horizontal, move right 10
                                   0.0, // vertical, move down 10
-                                ),
-                              )
-                            ]),height: 45,
+                                    ),
+                                  )
+                                 ]),height: 45,
                                 margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
                                 child:
                                 Container(decoration: BoxDecoration(color: Colors.transparent,boxShadow: [
@@ -338,7 +337,8 @@ var show_cesta=false;
                                 )
                             ),
                             Visibility(visible: view_listaPedidos,child:
-                            Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
+                      LimitedBox(maxHeight: MediaQuery.of(context).size.height*.8,child:
+                      Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
                             ListView.builder(
                                 padding: EdgeInsets.all(0),
                                 shrinkWrap: true,
@@ -354,9 +354,9 @@ var show_cesta=false;
                                   if (selecPedido=="" || ctrol){
                                     if ( Usuario != null ) {
                                       if ( value.data[index].status != "cancelado_user" &&
-                                          value.data[index].status != "cancelado_user_reembolso" &&
-                                          value.data[index].status != "nao_aceito_visto" &&
-                                          value.data[index].status != "finalizado") {
+                                           value.data[index].status != "cancelado_user_reembolso" &&
+                                           value.data[index].status != "nao_aceito_visto" &&
+                                           value.data[index].status != "desativado_finalizado") {
                                         if (pedidoAtivo==false)
                                           pedidoAtivo=true;
                                         return
@@ -376,21 +376,60 @@ var show_cesta=false;
                                       return Container();}
                                   }else {
                                     return Container();}
-                                })))
-                          ]);
+                                }))))
+                          ]);}else
+                            {
+                              print("STREM PEDIDO null ");
+//                              bloc.getCesta();
+                              return Container();
+                            }
 
                       }else
                         return Container();
-                    })),
-
+                 })),
+      Positioned(
+        bottom: 45,
+        width: MediaQuery.of(context).size.width,
+        child:
+      StreamBuilder<List<dynamic>>(
+        stream: bloc.check,
+        builder: (context,value) {
+            listaCesta.clear();
+            if (value.connectionState==ConnectionState.active) {
+              if (value.data.length>0){
+                distanciaLoja d;
+                for (var i=0;i<listaDist.length;i++){
+                  if (listaDist[i].idloja==value.data[0].idloja){
+                    d = listaDist[i];
+                  }
+                }
+                cestaAtiva=true;
+                listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
+return
+                Visibility(visible:show_cesta ,child:
+                barCesta(false,Usuario, value.data, d,
+                            (value) {return showhide_bg(value);},
+                            (value){return show_btn_cesta_float();}));
+              }else{
+                cestaAtiva=false;
+                v_bg=false;
+                return Container();
+              }
+            } else {
+              cestaAtiva=false;
+              return Container();
+            }
+          })
+        ),
 
             Positioned(
-                width: MediaQuery.of(context).size.width,
-                bottom:45,
-                child:
+                  bottom: 45,
+                  width: MediaQuery.of(context).size.width,
+                  child:
                 StreamBuilder<List<dynamic>>(
                     stream: bloc.check,
                     builder: (context,value) {
+                      listaCesta.clear();
                       if (value.connectionState==ConnectionState.active) {
                         if (value.data.length>0){
                           distanciaLoja d;
@@ -400,22 +439,15 @@ var show_cesta=false;
                             }
                           }
                           cestaAtiva=true;
-
                           listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
                           if (Usuario!=null) {
-                            if (bloc.getPedidoExist()) {
-                              bottomBarPedido=45.0;
-                              return
-                                  Visibility(visible: show_cesta ,child:
-                                  barCesta(false,Usuario, value.data, d,
-                                          (value) {return showhide_bg(value);},
-                                          (value){return show_btn_cesta_float();}));
-                            }
-                               else
+
+                            print("view barra bottom");
                             return
+                            Visibility(visible:!bloc.getPedidoExist() ,child:
                               barCesta(true,Usuario, value.data, d, (value) {
                                 return showhide_bg(value);
-                              },null);
+                              },null));
                           } else{
                             cestaAtiva=false;
                             return Container();}
@@ -430,26 +462,32 @@ var show_cesta=false;
                         return Container();
                       }
                     })),
+    Positioned(
+    bottom: 45,
+    width: MediaQuery.of(context).size.width,
+    child:
+    StreamBuilder<List<dynamic>>(
+    stream: bloc.check,
+    builder: (context,value) {
+    listaCesta.clear();
+    if (value.connectionState==ConnectionState.active) {
+      return Visibility(
+        visible: bloc.getPedidoExist() && btnfloat && bloc.getCestaExist()  ,child:
+       Positioned(
+         bottom: 110,
+         right: 20,
+         child:FloatingActionButton (
+          onPressed: (){
+            setState(() {
+                      btnfloat=false;
+              show_cesta=true;
+            });
+          },
+          backgroundColor: Colors.orange,
+          child:
+          Icon(Icons.shopping_basket),
+          )));}else return Container();})),
 
-
-            Visibility(visible: bloc.getPedidoExist() && cestaAtiva && !btnfloat && !view_listaPedidos,child:
-            Positioned(
-                bottom: 110,
-                right: 20,
-                child:FloatingActionButton (
-                  onPressed: (){
-                    setState(() {
-                      if (show_cesta) {
-                        show_cesta = false;
-                      }  else{
-                        btnfloat=true;
-                        show_cesta=true;}
-                    });
-                  },
-                  backgroundColor: Colors.orange,
-                  child:
-                  Icon(Icons.shopping_basket),
-                ))),
 
         Visibility( visible:view_dialogGps , child:
 
@@ -500,17 +538,17 @@ var show_cesta=false;
               ],))
            ],)
         )),
-    ]))
+    ])));
 
 
-      );
  }
 
 
  show_btn_cesta_float(){
     setState(() {
+//      bloc.control_check.sink.add([]);
       show_cesta=false;
-      btnfloat=false;
+      btnfloat=true;
     });
  }
 
@@ -520,9 +558,11 @@ var show_cesta=false;
       GestureDetector(onTap: () {
         setState(() {
           if (view_listaPedidos) {
+            btnfloat=true;
             view_listaPedidos = false;
           } else{
             view_listaPedidos=true;
+            btnfloat=false;
           }
         });
       }, child: Container(
@@ -568,20 +608,6 @@ var show_cesta=false;
     setState(() {
       show_pop_final_pedido=true;
     });
-  }
-
-  Future<File> _capturePng() async {
-    print("CAPTURE WIDGET");
-    RenderRepaintBoundary boundary = scr.currentContext.findRenderObject();
-    print("CAPTURE WIDGET 2");
-    ui.Image image = await boundary.toImage();
-    print("CAPTURE WIDGET 3");
-    ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List pngBytes = byteData.buffer.asUint8List();
-    print("CAPTURE WIDGET");
-    img = Io.File("decodedBezkoder.png");
-    img.writeAsBytesSync(pngBytes);
-    return img;
   }
 
 
@@ -770,7 +796,7 @@ void getEnderecoUser() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     var uid = user.uid;
     var document = await Firestore.instance.collection('Usuarios').document(uid);
-    document.collection("endereco").document("Entrega_temp").snapshots()
+    document.collection("endereco").document("automatico").snapshots()
         .listen((data) => {
       setUiEndereco_Temp(data)
     });
@@ -887,18 +913,18 @@ void getEnderecoUser() async {
             case ConnectionState.done:
               return  Container();
               break;
+            default:
+              break;
           }
         }
-    )
+      )
     );
   }
 
 
   listaviewProd(snapshot){
 
-
     return new
-
     Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 100),child:
     ListView.builder(
         primary: false,
@@ -1129,9 +1155,10 @@ void getEnderecoUser() async {
 
 
   setllocal(var data){
+    print("set local update");
     distanciaLoja d;
+    listaDist = new List<distanciaLoja>();
     if (!data.isEmpty){
-        listaDist = new List<distanciaLoja>();
         for(int i=0;i<data.length;i++){
          d = new distanciaLoja(data[i]['loja'],data[i]['distancia'],data[i]['duracao'],data[i]['idloja']);
             listaDist.add(d);
@@ -1249,7 +1276,7 @@ checkDistanceAtual(produto) async {
       var uid = user.uid;
       await refData.collection("Usuarios")
           .document(uid)
-          .collection("endereco").document("Entrega_temp")
+          .collection("endereco").document("automatico")
           .setData(endereco.getenderecoUser());
     }else
       {print("erro send end_temp");

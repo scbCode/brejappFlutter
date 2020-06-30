@@ -73,11 +73,19 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   var view_ajuda=false;
   var view_ajuda_pedido=false;
   var view_ocorreu_um_problema=false;
+  var avaliado=false;
+  var notaAvaliacao=-1;
+  var star1=Colors.grey[200];
+  var star2=Colors.grey[200];
+  var star3=Colors.grey[200];
+  var star4=Colors.grey[200];
+  var star5=Colors.grey[200];
   var view_botoes_fazer_denuncia=false;
   var bottompop=0.0;
   var bottompopchat=0.0;
   TextEditingController control_chattext = new TextEditingController();
   var view_field_pedidoerrado=false;
+  var view_btn_pedidoerradoo=true;
   var view_field_denuncia=false;
   var view_denunc_btn_prodeng=false;
   var view_denunc_btn_preceeng=false;
@@ -99,17 +107,20 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   var bloc = BlocAll();
   var bloc_financeiro = Bloc_financeiro();
   var view_chat=false;
+  var view_chat_msgs=false;
   var pop_chat_;
   var diff_hora;
   var view_btn_confirm_cancel=false;
   var view_btn_reebolso=true;
   var view_btn_reebolso_confirma=false;
   var tellloja;
+  var nomeloja="";
   GoogleMapController mapController;
   Animation<RelativeRect> rectAnimation;
   Animation<Offset> animation;
   var pop_final=false;
   var pedido_nao_aceito=true;
+  var pedido_finalizado_sucesso=false;
   var view_resumo_pedido=true;
   var listachat;
   var pedidoOpenView;
@@ -156,6 +167,13 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     
     if (diff_hora>=2){
 
+    }
+    if (widget.pedido.status=="finalizado") {
+
+       setState((){
+         pedido_finalizado_sucesso=true;
+         pedido_nao_aceito=false;
+       });
     }
     if (widget.pedido.status=="aguardando") {
         setState(() {
@@ -214,9 +232,9 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
             controller:_scrollController_pop,
             child:
         Container(
-          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+          padding: EdgeInsets.fromLTRB(0, 0, 0, 2),
           margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-          decoration: BoxDecoration(color: Colors.grey[200],
+          decoration: BoxDecoration(color: Colors.orange[100],
             boxShadow: [
           BoxShadow( color: Colors.grey,
           offset: Offset(0.0,0.0,  ),)
@@ -228,6 +246,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               visible:true,
               child:
           Column(
+            mainAxisAlignment: MainAxisAlignment.center
+              ,
            children: <Widget>[
            Container(
               decoration: BoxDecoration(
@@ -249,16 +269,15 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 //          if (view_resumo_pedido)view_resumo_pedido=false;else view_resumo_pedido=true;});
             });} ,child:
             Container(
-                margin: EdgeInsets.fromLTRB(0, 0, 0,10),
+                margin: EdgeInsets.fromLTRB(0, 0, 0,0),
                 decoration: BoxDecoration(color:Colors.white,
-                    borderRadius:BorderRadius.all(Radius.circular(20)),
                     boxShadow: [BoxShadow(color: Colors.grey[500],offset: Offset(0,0.0) ),
                     ]),
                 child:
                     
               Column(children: [
 
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceAround ,
+                  Row(mainAxisAlignment: MainAxisAlignment.start ,
                       children: [
                         Container(padding: EdgeInsets.all(5),
                             child:Text("Loja xxyy",style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.black),)),
@@ -271,7 +290,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                 ]),
 
               Container(padding: EdgeInsets.fromLTRB(10, 0, 0, 0),child:
-              Row(mainAxisAlignment: MainAxisAlignment.start,
+              Row(mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       
                     Column( children: [
@@ -413,17 +432,22 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       ),
            ],)),
            Visibility(
-                  visible:status_entrega ,
+                  visible:true,
                   child:
                 Container(
-                margin: EdgeInsets.fromLTRB(0,15,0,0),
+                margin: EdgeInsets.fromLTRB(0,5,0,15),
                     child:
                 Text( infoDistanciaTime(),style:TextStyle(fontFamily: 'BreeSerif')))),
               ])))),
             ],)),
-
+            Visibility(
+                visible: !pedido_nao_aceito && pedido_finalizado_sucesso,
+                child:
+             pedidoFinalizado_avaliacao()),
+           
+           
            Visibility(
-               visible:!pedido_nao_aceito,
+               visible:!pedido_nao_aceito && !pedido_finalizado_sucesso,
                child:
                Container(
                    margin: EdgeInsets.fromLTRB(0, 0, 0,10),
@@ -530,13 +554,11 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                                  Text(txt_time_entrega ,style: TextStyle(fontSize: 10,color:Colors.grey)),])
                            ),
 
-
-
                          ],),
-
-                       
                
                        ],)),
+
+
                      Visibility(
                          visible: !pedido_nao_aceito ,
                          child:
@@ -617,20 +639,24 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               Column(children: [
 
               Stack(children: [
-               Column(children: [
+               Column(
+                   crossAxisAlignment: CrossAxisAlignment.end,
+                   mainAxisAlignment: MainAxisAlignment.end,
+
+                   children: [
 
               Container(
                       width: MediaQuery.of(context).size.width,
                       padding: EdgeInsets.fromLTRB(10, 10,10,0),
                   child:    Text("Endereço de entrega",
-                    style: TextStyle(color:Colors.black,fontSize: 12,
+                    style: TextStyle(color:Colors.black,fontSize: 16,
                       fontFamily: 'BreeSerif'),)),
 
                 Container(
                     width: MediaQuery.of(context).size.width,
                     padding: EdgeInsets.fromLTRB(10, 0,10,0),
                     child:    Text( getEnderecoText(),
-                      style: TextStyle(color:Colors.black,fontSize: 14,
+                      style: TextStyle(color:Colors.black,fontSize: 16,
                           fontFamily: 'RobotoLight'),)),
 
 
@@ -638,13 +664,13 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     width: MediaQuery.of(context).size.width,
                     padding: EdgeInsets.fromLTRB(10, 10,10,0),
                     child:    Text("Forma de pagamento",
-                      style: TextStyle(color:Colors.black,fontSize: 12,
+                      style: TextStyle(color:Colors.black,fontSize: 16,
                           fontFamily: 'BreeSerif'),)),
                 Container(
                     width: MediaQuery.of(context).size.width,
                     padding: EdgeInsets.fromLTRB(10, 0,10,10),
                     child:    Text(getTipoPag(),
-                      style: TextStyle(color:Colors.black,fontSize: 14,
+                      style: TextStyle(color:Colors.black,fontSize: 16,
                           fontFamily: 'RobotoLight'),)),
 
 
@@ -652,12 +678,12 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     width: MediaQuery.of(context).size.width,
                     padding: EdgeInsets.fromLTRB(10, 0,10,0),
                     child:    Text("Lista de produtos",
-                      style: TextStyle(color:Colors.black,fontSize: 12,
+                      style: TextStyle(color:Colors.black,fontSize: 16,
                           fontFamily: 'BreeSerif'),)),
 
                   Container(
 
-                    decoration:BoxDecoration(color:Colors.grey[200]),
+                    decoration:BoxDecoration(color:Colors.orange[200]),
                       padding: EdgeInsets.fromLTRB(10, 0,10,0),
                   width: MediaQuery.of(context).size.width,
                   height: 60,
@@ -680,15 +706,28 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                 Visibility(visible: !view_chat,child:
                 GestureDetector(onTap:(){
                       setState(() {
+                        view_chat_msgs=false;
                         view_chat=true;
                         view_ajuda=false;
                       });
                     },child:
                     Container(
                         padding: EdgeInsets.fromLTRB(10, 5,10,10),
-                        child:    Text("Chat",textAlign: TextAlign.left,
+                        child:
+                       Column(
+                           crossAxisAlignment: CrossAxisAlignment.end,
+
+                           children:[
+                           Visibility(visible: view_chat_msgs,child:
+                         Container(alignment:Alignment.centerRight,width:10,height:10 ,decoration:BoxDecoration(color:Colors.orange,
+                         borderRadius:BorderRadius.all(Radius.circular(20))))),
+                        Text("Chat",textAlign: TextAlign.left,
                           style: TextStyle(color:Colors.blue,fontSize: 16,
-                              fontFamily: 'BreeSerif'),)))),
+                              fontFamily: 'BreeSerif'),),
+                       
+
+                       ])
+                    ))),
 
                     Visibility(visible: view_chat,child:
                     GestureDetector(onTap:(){
@@ -700,23 +739,22 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     },child:
                     Container(
                         decoration:BoxDecoration(color:Colors.blue,borderRadius: BorderRadius.all(Radius.circular(20))),
-                        padding: EdgeInsets.fromLTRB(10, 5,10,10),
+                        padding: EdgeInsets.fromLTRB(10, 0,10,0),
                         child:    Text("Chat",textAlign: TextAlign.left,
                           style: TextStyle(color:Colors.white,fontSize: 16,
                               fontFamily: 'BreeSerif'),)))),
 
                     Container(
-                        padding: EdgeInsets.fromLTRB(10, 5,10,10),
+                        padding: EdgeInsets.fromLTRB(10, 0,10,0),
                         child: new FlatButton(
                         onPressed: () => UrlLauncher.launch("tel://"+tellloja),
                         child:   Text("Ligar",textAlign: TextAlign.left,
                                               style: TextStyle(color:Colors.green[400],fontSize: 16,
                               fontFamily: 'BreeSerif'),))),
 
+                   Visibility(visible:status_entrega,child:
                    GestureDetector(
-
                        onTap:(){
-
                          bloc.jachego(widget.user.uid,widget.pedido.idPedido);
                        },
                        child:
@@ -726,7 +764,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                         padding: EdgeInsets.fromLTRB(10, 2,10,5),
                         child:    Text("Já chegou!",textAlign: TextAlign.left,
                           style: TextStyle(color:Colors.green[400],fontSize: 16,
-                              fontFamily: 'BreeSerif'),))),
+                              fontFamily: 'BreeSerif'),)))),
                   ],),
 
                 Container(
@@ -757,7 +795,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                         });
                       },
                       child:Container(
-                        margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                        margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
                       padding: EdgeInsets.fromLTRB(10, 10,10,10),
                       decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
                       child:   Text("AJUDA")))
@@ -786,8 +824,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       child:
                   Container(
                     alignment: Alignment.center ,
-                    margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                    padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    padding: EdgeInsets.fromLTRB(10, 15,10,15),
                     decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
                     child:  Text("OCORREU UM PROBLEMA")))),
 
@@ -814,8 +852,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     child:
                 Container(
                     alignment: Alignment.center ,
-                    margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                    padding: EdgeInsets.fromLTRB(10, 10,10,10),
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    padding: EdgeInsets.fromLTRB(10, 15,10,15),
                     decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
                     child:    Text("FAZER DENÚNCIA")))),
           ])))),
@@ -867,7 +905,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
           bottom:20,
           child:
         Container(
-          padding: EdgeInsets.fromLTRB(10, 10,0,20),
+          padding: EdgeInsets.fromLTRB(0, 10,0,20),
           child:
         Container(
                   margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -1003,7 +1041,6 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     return
       ListView.builder(
           padding: EdgeInsets.all(0),
-          shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           itemCount: widget.pedido.lista_produtos.length,
           itemBuilder: (context, index) {
@@ -1077,10 +1114,12 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     GestureDetector(
         onTap:(){
           setState((){
-            if (!bg_pop_end_view)
-               bg_pop_end_view=true;
-            else
-              bg_pop_end_view=false;
+            if (!view_field_pedidoerrado) {
+              view_btn_pedidoerradoo=false;
+              view_field_pedidoerrado = true;
+            }else{
+              view_btn_pedidoerradoo=true;
+              view_field_pedidoerrado=false;}
           });
         },
         child:
@@ -1093,7 +1132,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
         style:TextStyle())))),
 
 
-     Visibility(visible: bg_pop_end_view,child:
+     Visibility(visible: false,child:
         enderecoView_()),
 
 //TROCAR FORMA DE PAGAMENTO
@@ -1114,7 +1153,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                   style:TextStyle())))),
 
 //MEU PEDIDO VEIO ERRADO
-      Visibility(visible: true,child:
+      Visibility(visible:  view_btn_pedidoerradoo,child:
       GestureDetector(
           onTap:(){
 
@@ -1187,9 +1226,9 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
       GestureDetector(
           onTap:(){
-            if(testAjudamsn!="")
-            sendMsgAjuda(widget.user.uid,widget.pedido.idPedido,testAjudamsn);
 
+            if(testAjudamsn!="")
+               sendMsgAjuda(widget.user.uid,widget.pedido.idPedido,testAjudamsn);
           },
           child:
           Container(
@@ -1240,11 +1279,12 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
             decoration: BoxDecoration(color:Colors.white,borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
             child:   Text("MEU PEDIDO NÃO CHEGOU")),)),
 
-      Visibility(visible: true,child:
+      Visibility(visible: view_btn_pedidoerradoo && !view_field_pedidoerrado
+          ,child:
       GestureDetector(
           onTap:() {
             setState(() {
-              FlutterOpenWhatsapp.sendSingleMessage("+559189950036", "Olá, preciso de ajuda.\n Meu nome: "+widget.user.nome+"\nMeu email: "+widget.user.email );
+              FlutterOpenWhatsapp.sendSingleMessage("+55"+tellloja, "Olá, preciso de ajuda.\n Meu nome: "+widget.user.nome+"\nMeu email: "+widget.user.email );
             });
           },
           child:
@@ -1296,11 +1336,11 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
             setState((){
               bg_pop_pedido=false;
+
               if(!view_ocorreu_um_problema) {
                 view_ocorreu_um_problema = true;
               } else{
                 bottompop=0.0;
-                view_field_pedidoerrado=false;
                 view_ocorreu_um_problema=false;
               }
             });
@@ -1497,31 +1537,34 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   popChat(){
    return
 
-     Column(children:[
+     Column(
+         crossAxisAlignment: CrossAxisAlignment.end,
+         mainAxisAlignment: MainAxisAlignment.end,
+         children:[
 
+       LimitedBox(maxHeight: 270, child:
      Container(
+      
        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
          decoration:BoxDecoration(
               boxShadow: [BoxShadow(color:Colors.black45)],
               borderRadius: BorderRadius.all(Radius.circular(2))),
-          height: 280,
           child:
           Container(
+            
           margin: EdgeInsets.fromLTRB(0, 0, 0,0),
     child:
     ClipRect(
-    child:  BackdropFilter(
-    filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
-    child:  Container(
-    width: double.infinity,
-    height:  double.infinity,
-    decoration:  BoxDecoration(color: Colors.transparent),
-    child:
+        child:  BackdropFilter(
+        filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
+        child:  Container(
+        width: double.infinity,
+        decoration:  BoxDecoration(color: Colors.transparent),
+        child:
           SingleChildScrollView(
               controller: _scrollController,
               child:
-
-    Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.end,
         children:[
@@ -1532,15 +1575,13 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.end,
             children:[
-
-      listachat
-
-
+          listachat
           ])
     ),
 
 
-    ])))))),
+    ]))
+        ))))),
 
 
 
@@ -1598,7 +1639,6 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
           controller: _scrollController_listchar,
           primary: false,
           shrinkWrap: true,
-          reverse: true,
           scrollDirection: Axis.vertical,
           itemCount: snapshot.data.documents.length,
           itemBuilder: (context, index) {
@@ -1612,7 +1652,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
             if (snapshot.data.documents[index]['remetente']!="user" && snapshot.data.documents[index]['remetente']!="user-auto-pedidoErrado")
               return
                 Container(
-                    margin:EdgeInsets.fromLTRB(5, 0, 0, 0),
+                    margin:EdgeInsets.fromLTRB(50, 0,0, 0),
                     alignment: Alignment.centerRight,
                     child:
                     Container(
@@ -1633,20 +1673,19 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       margin:EdgeInsets.fromLTRB(5, 0, 0, 0),
                       alignment: Alignment.center,
                       child:  Container(
-                          decoration:BoxDecoration(color:Colors.red,
+                          decoration:BoxDecoration(color:Colors.yellow,
                             borderRadius: BorderRadius.all(Radius.circular(20)),),
                           padding:EdgeInsets.fromLTRB(20,15, 20, 15),
                           margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
                           child:
-                          Text("Aviso! Meu pedido veio errado: "+
-                              snapshot.data.documents[index]['msg'],style: TextStyle(fontFamily: 'BreeSerif'),))
+                          Text(""+
+                              snapshot.data.documents[index]['msg'],style: TextStyle(fontFamily: 'BreeSerif',fontSize: 16),))
                   )));
              else
               return
                 LimitedBox(maxWidth:MediaQuery.of(context).size.width*.8,child:
-            IntrinsicWidth(child:
                Container(
-                    margin:EdgeInsets.fromLTRB(5, 0, 0, 0),
+                    margin:EdgeInsets.fromLTRB(0, 0, 50, 0),
                     alignment: Alignment.centerLeft,
                     child:  Container(
                         decoration:BoxDecoration(color:Colors.white,
@@ -1655,7 +1694,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                         padding:EdgeInsets.fromLTRB(20,15, 20, 15),
                         margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
                         child:
-                        Text(snapshot.data.documents[index]['msg'],style: TextStyle(fontFamily: 'BreeSerif'),)))));
+                        Text(snapshot.data.documents[index]['msg'],style: TextStyle(fontFamily: 'BreeSerif'),))));
           });
 
             }else
@@ -1726,7 +1765,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                         padding: EdgeInsets.fromLTRB(20, 0, 20,20),
                         child:Column(mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            form_endereco_user(end_user_,widget.pedido.idPedido,null,(){  hidepop_end();})
+                            form_endereco_user(end_user_,widget.pedido.idPedido,null,null,(){  hidepop_end();})
                           ],)
                     ),
 
@@ -1962,15 +2001,14 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
    print("total itens "+ widget.pedido.lista_produtos[index]['img'].toString());
    var text = widget.pedido.lista_produtos[index]['quantidade'].toString()
-       +"x "+widget.pedido.lista_produtos[index]['nome'].toString()
-    +"\n"+widget.pedido.lista_produtos[index]['vol'].toString();
+       +"x\n "+widget.pedido.lista_produtos[index]['nome'].toString()
+    +"\n "+widget.pedido.lista_produtos[index]['vol'].toString();
 
     return   Row(children: [
-
-      Text(text,textAlign: TextAlign.right,
+      Image.network(widget.pedido.lista_produtos[index]['img'].toString(),height: 50,),
+      Text(text,textAlign: TextAlign.left,
       style: TextStyle(color:Colors.black,fontSize: 14,
           fontFamily: 'RobotoLight'),),
-    Image.network(widget.pedido.lista_produtos[index]['img'].toString(),height: 50,)
     ],);
   }
 
@@ -2069,23 +2107,140 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
   getLoja() async{
     Loja loja = await bloc.getLojaPedido(widget.pedido.idloja);
-    if (loja!=null)
-      tellloja=loja.tell;
-
+    if (loja!=null) {
+      setState((){
+      tellloja = loja.tell;
+      nomeloja = loja.nome;
+      });
+    }
     print("loja xxxy "+loja.tell);
   }
 
   sendMsgAjuda  (var uid,var idpedido,var msg)async{
+      var msg_ = "";
+    if (view_btn_pedidoerradoo)
+       msg_ = "Atenção! Meu pedido veio errado\n"+msg;
+    else
+      msg_ = "Aviso! Mudança do local da entrega!\n"+msg;
 
-    var b = await bloc.sendMsgAjuda(uid, idpedido,msg);
+    var b = await bloc.sendMsgAjuda(uid, idpedido,msg_);
     if (b==true){
+      setState(() {
       bottompop=0.0;
-      view_field_pedidoerrado=false;
+      bg_pop_pedido=false;
+      view_field_pedidoerrado=true;
       view_ocorreu_um_problema=false;
+      });
     }
 
   }
 
+
+  finalizarPedido( ) async{
+    var resultAvaliacao = false;
+    bloc.finalizarPedidoDesativado(widget.user.uid,widget.pedido.idPedido);
+    if (avaliado && notaAvaliacao!= -1)
+      resultAvaliacao= await bloc.envarAvaliacao(widget.pedido.idloja,widget.pedido.emailUser,notaAvaliacao);
+
+    var result = bloc.finalizarPedidoDesativado(widget.user.uid,widget.pedido.idPedido);
+  }
+
+
+
+  pedidoFinalizado_avaliacao(){
+    return Visibility(
+        visible:true,
+        child:
+        Container(
+          width: MediaQuery.of(context).size.width ,
+            margin: EdgeInsets.fromLTRB(0, 0, 0,10),
+            decoration: BoxDecoration(color:Colors.white,
+                boxShadow: [BoxShadow(color: Colors.grey[500],offset: Offset(0,0.0) ),
+                ]),
+            child:
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+              Container(padding: EdgeInsets.all(5),
+                  margin: EdgeInsets.fromLTRB(10, 15, 0, 0),
+                  child:
+                  Text("Avalie o pedido",
+                    style: TextStyle(fontFamily: 'BreeSerif',fontSize: 20,color: Colors.black),)),
+                Container(padding: EdgeInsets.all(5),
+                    margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child:
+                    Text(nomeloja,
+                      style: TextStyle(fontFamily: 'BreeSerif',fontSize: 18,color: Colors.red),)),
+                Container(
+                    margin: EdgeInsets.fromLTRB(0, 15, 0, 5),
+                    child  :Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children:[
+                          GestureDetector(onTap: (){avaliar(0);} ,child:
+                          Container(child:Icon(Icons.star,color: star1,size: 35,))),
+        GestureDetector(onTap: (){avaliar(1);} ,child:
+
+        Container(child:Icon(Icons.star,color: star2,size: 35))),
+        GestureDetector(onTap: (){avaliar(2);} ,child:
+        Container(child:Icon(Icons.star,color: star3,size: 35))),
+            GestureDetector(onTap: (){avaliar(3);} ,child:
+            Container(child:Icon(Icons.star,color: star4,size: 35))),
+            GestureDetector(onTap: (){avaliar(4);} ,child:
+            Container(child:Icon(Icons.star,color: star5,size: 35))),
+                    ])),
+
+                    Container(
+                      margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                      child  : OutlineButton(onPressed:(){ finalizarPedido();}, child: Text("FINALIZAR",style:TextStyle(fontFamily: 'RobotoRegular')))
+                    )
+                  ],),
+          ));
+  }
+
+
+  avaliar(var i){
+
+      avaliado=true;
+      notaAvaliacao=i+1;
+      setState((){
+        if (i==0) {
+          star1 = Colors.yellow;
+          star2=Colors.grey[200];
+          star3=Colors.grey[200];
+          star4=Colors.grey[200];
+          star5=Colors.grey[200];
+        }
+        if (i==1)
+         {
+           star1 = Colors.yellow;
+         star2=Colors.yellow;
+         star3=Colors.grey[200];
+         star4=Colors.grey[200];
+         star5=Colors.grey[200];}
+        if (i==2)
+         {   star1 = Colors.yellow;
+         star2=Colors.yellow;
+         star3=Colors.yellow;
+         star4=Colors.grey[200];
+         star5=Colors.grey[200];}
+        if (i==3)
+         {   star1 = Colors.yellow;
+         star2=Colors.yellow;
+         star3=Colors.yellow;
+         star4=Colors.yellow;
+         star5=Colors.grey[200];}
+        if (i==4) {
+          star1 = Colors.yellow;
+          star2=Colors.yellow;
+          star3=Colors.yellow;
+          star4=Colors.yellow;
+          star5=Colors.yellow;
+        }
+
+      });
+
+  }
 
   getChat(){
     Firestore.instance.collection('Usuarios').document(widget.user.uid)
@@ -2094,7 +2249,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
           if (event.documentChanges.length>0)
             setState(() {
-              view_chat=true;
+              view_chat_msgs=true;
             });
     });
   }

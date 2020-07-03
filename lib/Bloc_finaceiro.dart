@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_firestore/animator.dart';
 
 import 'Loja.dart';
 import 'Produto_cesta.dart';
@@ -51,33 +52,83 @@ class Bloc_financeiro {
     return resp.data;
   }
 
+  pagamentoCatao(var CustomerName,var idPedido,var idcard, var idLoja) async {
 
+    print("pagamentoCatao "+idPedido);
+    final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
+      functionName: 'pagamentoCredito',
+    );
+    dynamic resp = await callable.call(<String, dynamic>{
+      'nomeComprador': CustomerName,
+      'idPedido': idPedido,
+      'idCard': idcard,
+      'idLoja':idLoja,
+      'time':""
+    });
+    print("pagamentoCatao data");
+    print(resp.data);
+    if (resp.data!=null){
+      print("pagamentoCatao data 1");
+
+      var body = resp.data['body'];
+      var result =  resp.data['resp'];
+      print("pagamentoCatao data 2 "+result);
+
+      if (result!=null && result == 'Sucesso'){
+
+        if (body['ReturnCode']=="4")
+          return  true;
+        else
+        if (body['ReturnCode']=="6")
+          return  true;
+        else
+        if (body['ReturnCode']=="05")
+        return  false;
+        else
+        if (body['ReturnCode']=="57")
+        return  false;
+        else
+        if (body['ReturnCode']=="78")
+        return  false;
+        else
+          return  true;
+
+
+      }else
+        return  false;
+
+    }else
+      return  false;
+  }
 
 
 
   callTokenrizarCartao(var CustomerName,var CardNumber,var Holder,var ExpirationDate,var Brand) async {
 
-    final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
-      functionName: 'criarToken',
-    );
-    dynamic resp = await callable.call(<String, dynamic>{
-      'CustomerName': CustomerName,
-      'CardNumber': CardNumber.toString().trim(),
-      'Holder': Holder,
-      'ExpirationDate': ExpirationDate,
-      'Brand': Brand
-    });
-    return resp.data;
+      final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
+        functionName: 'criarToken');
+
+      dynamic resp = await callable.call(<String, dynamic>{
+        'CustomerName': CustomerName,
+        'CardNumber': CardNumber.toString().trim(),
+        'Holder': Holder,
+        'ExpirationDate': ExpirationDate,
+        'Brand': Brand
+      });
+      return resp.data;
+
   }
 
 
 
-  Future<bool> saveTokenCartaoUser(var uid, var token) async {
+  Future<bool> saveTokenCartaoUser(var uid, var token,var nome) async {
         var refData = Firestore.instance;
         var ctrol=false;
         await refData.collection("Usuarios")
             .document(uid).collection('cartoes')
-            .add({'token':token,'criado':FieldValue.serverTimestamp(),'tipo':'credito','bandeira':'Master','maskNumb':'9876'  })
+            .add({'token':token,'criado':FieldValue.serverTimestamp(),
+          'nome':nome,
+          'tipo':'credito','bandeira':'Master','maskNumb':'9876'  })
             .then((v){
               print("SAVE CARD");
               ctrol=true;

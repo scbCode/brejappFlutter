@@ -24,6 +24,7 @@ import 'BlocAll.dart';
 import 'dart:ui';
 import 'dart:async';
 
+import 'Bloc_finaceiro.dart';
 import 'CardUser.dart';
 import 'Loja.dart';
 import 'Produto_cesta.dart';
@@ -64,10 +65,13 @@ class barCestaState extends State<barCesta>   {
   var view_remove=false;
   var totaltxt="";
   var total=0.0;
-  var frete;
+  var frete; 
+  TextEditingController c_cvv = TextEditingController();
+
   var listaProdutos;
   double initial=0.0;
   var bloc = BlocAll();
+  var bloc_financeiro = Bloc_financeiro();
   var view_resumo_cesta=false;
   var fazerpedido=false;
   var view_cestadetalhes=false;
@@ -82,7 +86,7 @@ class barCestaState extends State<barCesta>   {
   var alturaBarra=0.0;
   var barra_;
   var cor_endereco=Colors.white;
-  var ctrol_view_btnEnd=true;
+  var ctrol_view_btnEnd=false;
   var confirmarEndereco=false;
   var confirmarFormaPag=false;
   var confirmarEnderecoviewbtn=false;
@@ -93,15 +97,19 @@ class barCestaState extends State<barCesta>   {
   var iconCheckPagamento=Icons.radio_button_unchecked;
   var cartaoselect=-1;
   var cardSelecionado;
+  var view_cvv_pop=false;
+  var idcardselecionado;
   var tipoPagSelectItem;
   var pagSelect=false;
   var pagSelectfinal=false;
   var show_popprocessando=false;
+  var show_popprocessando_erro=false;
   var tipoPag="";
   var view_troco=false;
   var view_deb_maq=false;
   var view_cred_maq=false;
   var view_card_form = false;
+  var idCartao;
   enderecoUserSnapShot end_user;
   enderecoUser end_user_;
   var view=false;
@@ -126,8 +134,9 @@ class barCestaState extends State<barCesta>   {
     _checkreresult();
 
    if (widget.view_barra_ctrol==false){
-     listaCesta_=listaCesta();
+     //listaCesta_=listaCesta();
    }
+
    if (widget.listaCesta!=null)
       if (widget.listaCesta.length==0)
         setState(() {
@@ -151,7 +160,7 @@ class barCestaState extends State<barCesta>   {
     if (confirmarEndereco==false){
       setState(() {
         cor_endereco=Colors.white;
-        ctrol_view_btnEnd=true;
+//        ctrol_view_btnEnd=true;
         iconCheckPagamento_dinheiro=Icons.radio_button_unchecked;
         iconCheckPagamento_maquina=Icons.radio_button_unchecked;
       });
@@ -228,8 +237,14 @@ class barCestaState extends State<barCesta>   {
                     Column(children: [
                       aguardarresppagamento()
                     ],)),),
+                  Visibility(visible:show_popprocessando_erro, child:
+                    Container(child:
+                    Column(children: [
+                      returnoErroPagamentoCartao()
+                    ],)),),
                   Visibility(visible: (pagSelectfinal), child:
                   viewcomprapagamento_,),
+
 //                  Visibility(visible:pagSelect, child:
 //                  ColorFiltered(
 //                    colorFilter: ColorFilter.mode(
@@ -334,13 +349,12 @@ class barCestaState extends State<barCesta>   {
                             GestureDetector(onTap: (){
                               setState(() {
                                 if (view_cestadetalhes){
-                                  confirmarEndereco=false;
-                                  view_resumo_compra=false;
-                                  tipoPag="";
-                                  pagSelect=false;
-                                  view_formpag=false;
-                                  view_cestadetalhes=false;
-
+                                    confirmarEndereco=false;
+                                    view_resumo_compra=false;
+                                    tipoPag="";
+                                    pagSelect=false;
+                                    view_formpag=false;
+                                    view_cestadetalhes=false;
                                 }
                                 else{
                                   view_cestadetalhes=true;}
@@ -423,7 +437,7 @@ class barCestaState extends State<barCesta>   {
                                   ),
 
                                   Visibility(
-                                      visible: ctrol_view_btnEnd ,
+                                      visible: false ,
                                       child:
                                       GestureDetector(onTap: (){
                                         setState(() {
@@ -465,23 +479,107 @@ class barCestaState extends State<barCesta>   {
                               Container(
                                   margin: EdgeInsets.fromLTRB(25, 10,0,10),
                                   alignment: Alignment.centerLeft, child:Text("Seus cartões",
-                                  style:TextStyle(fontFamily: 'BreeSerif'))),
+                                  style:TextStyle(fontFamily: 'BreeSerif',fontSize:18,color:Colors.grey))),
                               //LISTA SEUS CARTOES
                               view_cards_,
                               //BTN ADD CARTOES
                               pagamentoCartaoVazio(),
 
                             ])),
-
-
-
-
-                          ])
+                      ])
                   )
-                  )),),
+            )),),
 
-                ]),
+          ]),
 
+            Visibility(visible: view_cvv_pop  ,child:
+            Column(
+                children: <Widget>[
+                  Container(
+                      child: ClipRect(
+                        child:  BackdropFilter(
+                          filter:  ImageFilter.blur(sigmaX:1, sigmaY:1),
+                          child:  Container(
+                            width:MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            decoration:  BoxDecoration(color: Colors.grey.withOpacity(0.5)),
+                            child:  Container(
+                                width:MediaQuery.of(context).size.width,
+                                padding: EdgeInsets.all(4),
+                                margin: EdgeInsets.fromLTRB(0, 0, 0, 30),
+                                child:Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration:
+                                        BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                                            boxShadow: [BoxShadow(color:Colors.grey,blurRadius: 2)] ,color:Colors.white),child:
+                                    Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+
+                                          GestureDetector(
+                                              onTap:(){
+
+                                                setState((){
+                                                  view_cvv_pop=false;
+                                                  show_popprocessando=true;
+                                                  pagSelectfinal=false;
+                                                });
+                                              },
+                                              child:
+                                    Container(
+                                    margin: EdgeInsets.fromLTRB(10, 15, 10, 0),
+                                    child: Icon(Icons.close) )),
+
+
+                                          Container(
+                                              margin: EdgeInsets.fromLTRB(10, 15, 10, 0),
+
+                                              child:Text("Envie o códio de\nsegurança do cartão",textAlign: TextAlign.center ,
+                                                  style: TextStyle(fontSize: 16,fontFamily: 'BreeSerif'))),
+                                          Container(
+                                              margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                              child:Text("CVV",style: TextStyle(fontFamily: 'RobotoBold'),)),
+                                          Container(width: 60, child:
+                                          TextFormField(controller: c_cvv, textAlign: TextAlign.center,autofocus: true,
+                                            decoration:
+                                            InputDecoration(hintText: "000",hintStyle:
+                                            TextStyle(color:Colors.grey)),)),
+                                          GestureDetector(
+                                              onTap:(){
+                                                if (c_cvv.text.length==3) {
+                                                  enviarPedido();
+                                                  setState((){
+                                                    view_cvv_pop=false;
+                                                    show_popprocessando=true;
+                                                    show_popprocessando_erro=false;
+                                                    pagSelectfinal=false;
+                                                  });
+
+                                                } else
+                                                  _snackbar("Digite o CVV, código de segurança do cartão .");
+                                              },
+                                              child:
+                                              Container(
+                                                decoration:BoxDecoration(color: Colors.green,borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                  margin: EdgeInsets.fromLTRB(20, 25, 20, 10),
+                                                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                                                  child: Text("PAGAR",
+                                                      style: TextStyle(fontSize: 16,
+                                                          fontFamily: 'BreeSerif',color: Colors.white))))
+                                        ])
+
+                                    ),
+
+                                  ],)
+                            ),
+                          ),
+                        ),
+                      ))
+                ])),
 
             Container(decoration:BoxDecoration(borderRadius: BorderRadius.circular((20))),child:
 
@@ -494,6 +592,88 @@ class barCestaState extends State<barCesta>   {
                 formularioCartao(),visible: view_card_form,)),
 
           ]));
+  }
+
+  returnoErroPagamentoCartao() {
+
+    return
+      LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
+      SingleChildScrollView(child:
+      Container(
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+          margin: EdgeInsets.fromLTRB(0, 0, 0, bttmResumo),
+          decoration: BoxDecoration(color: Colors.white,boxShadow: [
+            BoxShadow( color: Colors.black12,blurRadius:4.0,
+              offset: Offset(0.0,45.0,  ),)
+          ],),
+          child:
+          Column(
+              children: <Widget>[
+                Container(
+                    alignment: Alignment.centerLeft,
+                    width: MediaQuery.of(context).size.width,
+                    child:
+                    Stack(
+                        children: <Widget>[
+                          Container(
+                              alignment: Alignment.center,
+                              margin:EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              child:Text("Ocorreu um erro\n no pagamento :(",style: TextStyle(fontSize: 20,fontFamily: 'BreeSerif',letterSpacing: 0.4),)),
+                        ])),
+
+                Container(
+                    padding:EdgeInsets.all(10),
+                    margin:EdgeInsets.fromLTRB(0, 15, 0, 0),
+                    child:
+                    Column(
+                        children: <Widget>[
+                          Icon(Icons.error,size: 50,color:Colors.red),
+                        ])),
+
+                GestureDetector(
+                    onTap:(){
+                      if (c_cvv.text.length==3) {
+                        enviarPedido();
+                        setState(() {
+                          view_cvv_pop = false;
+                          show_popprocessando = true;
+                          show_popprocessando_erro = false;
+                          pagSelectfinal = false;
+                        });
+                      }
+                      } ,
+                    child:
+                Container(
+                    padding:EdgeInsets.all(10),
+                    margin:EdgeInsets.fromLTRB(0, 10, 0, 10),
+                    child:Text("Tentar novamente",
+                      style: TextStyle(color:Colors.orange,fontSize: 20,
+                          fontFamily: 'BreeSerif',letterSpacing: 0.4),))),
+
+          GestureDetector(
+              onTap:(){
+                if (c_cvv.text.length==3) {
+                  setState(() {
+                    view_cvv_pop = false;
+                    show_popprocessando = false;
+                    show_popprocessando_erro = false;
+                    pagSelectfinal = true;
+                  });
+                }
+              } ,
+              child:   Container(
+                    padding:EdgeInsets.all(10),
+                    margin:EdgeInsets.fromLTRB(0, 10, 0, 10),
+                    child:Text("Voltar",
+                      style: TextStyle(color:Colors.grey,fontSize: 20,
+                          fontFamily: 'BreeSerif',letterSpacing: 0.4),))),
+
+
+
+
+              ])
+      )));
   }
 
 
@@ -547,10 +727,28 @@ class barCestaState extends State<barCesta>   {
   }
 
 
+  getBandeira(var b){
+    if (b == "Visa")
+    return  Image.asset("visa.png",width: 40,height: 60,);
+    if (b == "Master")
+      return  Image.asset("visa.png",width: 40,height: 60,);
+    else
+      return  Image.asset("cardcredit.png",width: 40,height: 60,);
+
+  }
+
+
 
   viewresumopagamento (){
 
     listaCesta_=listaCesta();
+
+    String textbtnFinalPedido;
+    if (tipoPag=="cartao")
+      textbtnFinalPedido="Fazer pagamento";
+    else
+      textbtnFinalPedido="Finalizar pedido";
+
 
     return
 
@@ -566,7 +764,10 @@ class barCestaState extends State<barCesta>   {
   offset: Offset(0.0,45.0,  ),)
   ],),
   child:
-  Column(
+  Stack(
+      children: <Widget>[
+
+   Column(
   children: <Widget>[
 
 
@@ -688,6 +889,7 @@ class barCestaState extends State<barCesta>   {
                   setState(() {
                     show_popprocessando=true;
                     pagSelectfinal=false;
+
                   });
 
                 },
@@ -696,18 +898,45 @@ class barCestaState extends State<barCesta>   {
                 padding:EdgeInsets.all(10),
                 margin:EdgeInsets.fromLTRB(0, 20, 0, 0),
                 decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),
-                    boxShadow: [BoxShadow(color: Colors.grey[400],blurRadius: 1)],color:Colors.orange[400]),
+                    boxShadow: [BoxShadow(color: Colors.grey[400],blurRadius: 1)],color:Colors.white),
                 child:
                 Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
 
+                      GestureDetector(
+                          onTap:(){
+                              if (tipoPag=="cartao") {
+                                setState(() {
+                                  view_cvv_pop = true;
+                                });
+                              }
+                              else{
+                              setState(() {show_popprocessando=true;
+                              pagSelectfinal=false;
+                              });
+                              enviarPedido();
+                              }
+
+                          },
+                          child:
                       Container(
                           margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          child:  Container(child:Text("Finalizar pedido",style: TextStyle(color:Colors.white,fontFamily: 'BreeSerif',fontSize: 20),))),
+                          child:  Container(
+                              child:Text( textbtnFinalPedido,
+                                style: TextStyle(color:Colors.orange,
+                                    fontFamily: 'BreeSerif',fontSize: 20),)))),
                     ]))),
 
-  ])
+  ]),
+
+
+
+
+
+      ]),
+
+
   ))));
   }
 
@@ -715,25 +944,25 @@ class barCestaState extends State<barCesta>   {
     if (cartaoselect!=-1){
       return  Container(
           width: MediaQuery.of(context).size.width,
-          margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
+          margin: EdgeInsets.fromLTRB(15, 10, 15, 10),
           padding: EdgeInsets.fromLTRB(0, 0, 0, 3),
           decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),
               boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
           child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,mainAxisSize: MainAxisSize.max, children: <Widget>[
+            Row(mainAxisAlignment: MainAxisAlignment.center,mainAxisSize: MainAxisSize.max, children: <Widget>[
               Container(
                   padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                  margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
                   child:
-                  Image.asset("visa.png",width: 40,height: 60,)),
+                  getBandeira(cardSelecionado['bandeira'])),
               Container(
-                  margin: EdgeInsets.fromLTRB(25, 10,0, 10),
+                  margin: EdgeInsets.fromLTRB(10, 10,10, 10),
                   alignment: Alignment.center, child:
-              Text(cardSelecionado['bandeira']+"  **** "+cardSelecionado['maskNumb'],
+              Text("  **** "+cardSelecionado['maskNumb'],
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style:
-                TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
+                TextStyle(color: Colors.black87,fontFamily: 'RobotoLight',fontSize: 20),)),
           ],));
       }else
         {
@@ -808,7 +1037,7 @@ class barCestaState extends State<barCesta>   {
                 .collection("cartoes").snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState== ConnectionState.active){
-                return  itemCarduser(snapshot, (value,cartao){selectitem(value,cartao);});
+                return  itemCarduser(snapshot, (value,cartao,idcartao){selectitem(value,cartao,idcartao);});
               } else
                 return Container(height: 50,);
 
@@ -816,7 +1045,7 @@ class barCestaState extends State<barCesta>   {
     );
   }
 
-  selectitem(var resp,var cartao){
+  selectitem(var resp,var cartao,var idcartao){
     setState((){
       iconCheckPagamento_dinheiro=Icons.radio_button_unchecked;
       iconCheckPagamento_maquina=Icons.radio_button_unchecked;
@@ -825,6 +1054,8 @@ class barCestaState extends State<barCesta>   {
       tipoPag="cartao";
       cartaoselect=resp;
       cardSelecionado=cartao;
+      idcardselecionado=idcartao;
+
     });
   }
 
@@ -859,7 +1090,7 @@ class barCestaState extends State<barCesta>   {
                             padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                             margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                             child:
-                            Image.asset("visa.png",width: 40,height: 60,)),
+                            getBandeira(cardSelecionado['bandeira'])),
                         Container(
                             margin: EdgeInsets.fromLTRB(25, 10,0, 10),
                             alignment: Alignment.center, child:
@@ -923,7 +1154,8 @@ class barCestaState extends State<barCesta>   {
         builder: (context, snapshot) {
           if (snapshot.connectionState==ConnectionState.active){
             if (snapshot.data.documents.length > 0) {
-              enderecoTemp_=false;
+                enderecoTemp_=false;
+                print("endereco principal");
               return
                 enderecoUserView(snapshot.data.documents[0]);
             }
@@ -935,7 +1167,6 @@ class barCestaState extends State<barCesta>   {
                     builder: (context, snapshot1) {
                       if (snapshot1.connectionState==ConnectionState.active){
                         if (snapshot1.data.documents.length > 0) {
-                          ctrol_view_btnEnd=false;
                           enderecoTemp_=true;
                           return
                             enderecoTemp(snapshot1.data.documents[0]);
@@ -1091,6 +1322,38 @@ class barCestaState extends State<barCesta>   {
               Text("Atualizar",style:
               TextStyle(color: Colors.red,fontFamily: 'RobotoBold'),)))),
 
+              Visibility(
+                  visible:!confirmarEndereco,
+                  child:
+              Container(
+                  padding: EdgeInsets.fromLTRB(0, 15, 0, 20),
+                  margin: EdgeInsets.fromLTRB(15, 20, 15, 20),
+                  decoration: BoxDecoration(
+                      borderRadius:BorderRadius.all(Radius.circular(20)),
+                      boxShadow: [BoxShadow(color: Colors.black26,blurRadius: 3)],color:Colors.white),
+                  child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center,mainAxisSize: MainAxisSize.max, children: <Widget>[
+                    Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        GestureDetector(onTap: (){
+                          setState(() {
+                            confirmarEndereco=true;
+                            view_formpag=true;
+                            ctrol_view_btnEnd=false;
+                            enderecoView = enderecoView_();
+                          }); },child:
+                        Container(
+                            margin: EdgeInsets.fromLTRB(0, 5,0, 0),
+                            alignment: Alignment.center, child:
+                        Text("CONFIRMAR ENDEREÇO",style:
+                        TextStyle(color: Colors.orange,fontFamily: 'RobotoBold',
+                            fontSize: 16),))),
+                      ],),
+                  ],))),
+
+
+
             ],));
   }
   getLocal(var data){
@@ -1142,7 +1405,6 @@ class barCestaState extends State<barCesta>   {
                     child:
                     Icon(Icons.location_searching,size: 20,),),
 
-
                   Column(
 
                     children: <Widget>[
@@ -1155,8 +1417,6 @@ class barCestaState extends State<barCesta>   {
                         overflow: TextOverflow.ellipsis,
                         style:
                         TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
-
-
                     ],),
 
                 ],)),
@@ -1683,6 +1943,7 @@ class barCestaState extends State<barCesta>   {
 
                           return item_cesta(snapshot.data.documents[index],null,(value){return selectItemCestaList(value);});
                         }
+
                     );
                     // TODO: Handle this case.
                     break;
@@ -1738,6 +1999,7 @@ class barCestaState extends State<barCesta>   {
 
 
   selectItemCestaList(var prod){
+    ctrolControls=true;
     setState(() {
       if (prod==null)
         ctrolControls=false;
@@ -1823,17 +2085,34 @@ class barCestaState extends State<barCesta>   {
     pedido_.time=time;
     pedido_.idloja=idloja;
     pedido_.emailUser=widget.user.email;
-    pedido_.statusPagamento=status;
+    pedido_.statusPagamento=false;
     Random random = new Random();
     int randomNumber = random.nextInt(1000000) + 10000;
     pedido_.idPedido=idloja+""+ randomNumber.toString();
     pedido_.timeAguardando=FieldValue.serverTimestamp();
 
+
     if (tipoPag=="cartao"){
-        var resultEnvioPedido = await bloc.savePrePedido(widget.user.uid,pedido_);
+        var resultEnvioPedido = await bloc.savePrePedido(widget.user.uid,pedido_,widget.user.nome,idcardselecionado,idloja);
         if (resultEnvioPedido){
-          //show pop card cvv || se pag for dinheiro ou maquina enviar pedido direto
-        }
+            pedido_.statusPagamento=true;
+            var resultEnvioPedidofinal = await bloc.savePedidoFinal(widget.user.uid,pedido_);
+            if (resultEnvioPedidofinal){
+              print("sucesso pedido pago");
+              //hide barCesta; show  barPedido
+            }else
+            {
+              pagSelectfinal=true;
+            }
+
+        }else
+          {
+            setState((){
+              show_popprocessando_erro=true;
+              show_popprocessando=false;
+              view_cvv_pop=false;
+            });
+          }
     }else
       {
         widget.call_back_show_bg(false);

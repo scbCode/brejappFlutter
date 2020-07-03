@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_firestore/Bloc_finaceiro.dart';
 import 'package:flutter_firestore/prePedido.dart';
 import 'package:rxdart/rxdart.dart';
 import 'Loja.dart';
@@ -18,15 +19,20 @@ class BlocAll {
   enderecoUserSnapShot enderecoUser_temp;
   int get total => _total;
 
+  Bloc_financeiro bloc_f= new Bloc_financeiro();
+
   List<Produto_cesta> listaCesta= new List<Produto_cesta> ();
+  final List<String> listaLojasOn= new List<String > ();
   final control_check = StreamController< List<Produto_cesta> >.broadcast();
   final  control_get_loja  = StreamController< Loja>.broadcast();
   final  control_get_endereco_rua  = StreamController< String>.broadcast();
   final  control_get_endereco_salvo  = StreamController< enderecoUserSnapShot>.broadcast();
   final  streamControl_Pedidos  = StreamController< List<Pedido>>.broadcast();
   final  streamControl_PrePedidos  = StreamController< Pedido>.broadcast();
+  final  streamControl_LojasOn  = StreamController<List<String>>.broadcast();
   final  control_get_endereco_temp  = StreamController< enderecoUserSnapShot>.broadcast();
   Stream <List<Produto_cesta>> get check => control_check.stream;
+  Stream <List<String>> get lojasOn => streamControl_LojasOn.stream;
   Stream <List>  check2 ;
   Stream <Loja> get get_loja => control_get_loja.stream;
   Stream <String> get get_rua_end => control_get_endereco_rua.stream;
@@ -207,25 +213,32 @@ class BlocAll {
   }
 
 
-  Future<bool> savePrePedido(var uid, var pedido) async {
+ savePrePedido(var uid, var pedido,var nomeUser,var idcard, var idLoja) async {
+
       var refData = Firestore.instance;
       var ctrol=false;
       await refData.collection("Usuarios")
-          .document(uid).collection('prePedidos')
-          .add(pedido)
+          .document(uid).collection('prePedidosCartao')
+          .add(pedido.getPedidoMap())
           .then((v){
-        print("SAVE PRE-PEDIDO");
-        ctrol=true;
-        return  true;
+          print("SAVE PRE-PEDIDO");
       }).catchError((erro){
-        print("SAVE PRE-PEDIDO - ERROR");
+        print("SAVE PRE-PEDIDO - ERROR "+erro.toString());
       });
 
-      return ctrol;
+      var res = await bloc_f.pagamentoCatao(nomeUser,pedido.idPedido,idcard, idLoja);
+      if (res){
+        print("SUCESSO PAGAMENTO");
+        return true;
+      }else
+      {
+        print("ERRO PAGAMENTO");
+        return false;
+      }
 
     }
 
-  Future<bool> jachego(var uid, var pedido) async {
+ Future<bool> jachego(var uid, var pedido) async {
     var refData = Firestore.instance;
     var ctrol=false;
     await refData.collection("Usuarios")
@@ -238,12 +251,10 @@ class BlocAll {
     }).catchError((erro){
       print("SAVE CANCEL-PEDIDO - ERROR");
     });
-
     return ctrol;
+ }
 
-  }
-
-  Future<bool> cancelPedido_nao_aceito(var uid, var pedido) async {
+ Future<bool> cancelPedido_nao_aceito(var uid, var pedido) async {
     var refData = Firestore.instance;
     var ctrol=false;
     await refData.collection("Usuarios")
@@ -489,7 +500,44 @@ class BlocAll {
   }
 
 
+ getListaLojasOn() async {
+      var document = await Firestore.instance.collection('Lojas_ON');
+      document.orderBy('idloja').snapshots()
+          .listen((data) => {
+           setStatusLojasOn(data)
+      });
+ }
 
+
+ setStatusLojasOn(var data){
+
+    List<String> lojas = new List<String > ();;
+
+    if (data!=null) {
+      if (data.documents.isEmpty==false) {
+          data.documents.forEach((p) {
+            print("GET LOJAS ON lista");
+            lojas.add(p['idloja']);
+            streamControl_LojasOn.sink.add(lojas);
+          });
+          if (lojas.length>0)
+            listaLojasOn.addAll(lojas);
+      }else
+        {
+          getListaLojasOn();
+        }
+    } else {
+      streamControl_LojasOn.sink.add(null);
+      getListaLojasOn();
+    }
+
+  }
+
+
+ List<String> getLojasOn(){
+    print('return lojason '+listaLojasOn.length.toString());
+    return listaLojasOn;
+ }
   void StreamPrePedidos() async {
 
     FirebaseUser user = await FirebaseAuth.instance.currentUser();

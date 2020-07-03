@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-typedef SeletItem = Function(int,dynamic);
+typedef SeletItem = Function(int,dynamic,dynamic);
 
 class itemCarduser extends StatefulWidget{
 
@@ -51,7 +51,8 @@ class itemCardState extends State<itemCarduser>  {
           setState(() {
             print("click cartao");
             cartaoselect=index;
-            widget.seletItem(cartaoselect,data);
+            var idcard=widget.snapshot.data.documents[index].documentID;
+            widget.seletItem(cartaoselect,data,idcard);
           });
         },
         child:

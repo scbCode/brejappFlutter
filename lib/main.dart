@@ -119,6 +119,10 @@ var show_cesta=false;
   ];
   Color corTextPadrao = Color.fromARGB(190, 100, 100, 100);
   Color corTextPadraoDesable = Color.fromARGB(0, 100, 100, 100);
+  TextEditingController c_nome = TextEditingController();
+  TextEditingController c_tell = TextEditingController();
+  TextEditingController c_email = TextEditingController();
+
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
   var user_logado = false;
   var ruanometemp="...";
@@ -149,12 +153,13 @@ var show_cesta=false;
   var view_dialogGps=false;
   var local_user_cancel=false;
   var viewLoad_local=false;
-  var scr= new GlobalKey();
+  var scr= new GlobalKey<ScaffoldState>();
   File img = new File('');
   var controller;
   var show_pop_final_pedido=false;
   var modo_teste=false;
   var selecPedido="";
+  var view_pop_cadastrodados=false;
 
   var hist_pedidoexist=false;
   @override
@@ -169,8 +174,11 @@ var show_cesta=false;
         v_bg=false;
     }
 
+
+
    return
    Scaffold(
+     key:scr,
           resizeToAvoidBottomInset : false,
           body:
           Container(child:
@@ -270,10 +278,11 @@ var show_cesta=false;
     margin: EdgeInsets.fromLTRB(0, 0, 0,0.2),   child:
     ClipRect(
       child:  BackdropFilter(
-      filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
+      filter:  ImageFilter.blur(sigmaX:5, sigmaY:5),
       child:  Container(
-      decoration:  BoxDecoration(color: Colors.orange[100].withOpacity(.50)),child:
-      Container(alignment: Alignment.center, child: autenticacao("login",(value){return _hidepop_login(value);}),))))))),),
+      decoration:  BoxDecoration(color: Colors.grey[400].withOpacity(.50)),child:
+      Container(alignment: Alignment.center, child: autenticacao("login",(){restartuser();},
+              (value){return _hidepop_login(value);}),))))))),),
         Positioned(
               width: MediaQuery.of(context).size.width,
               bottom:45,
@@ -345,7 +354,7 @@ var show_cesta=false;
                                 scrollDirection: Axis.vertical,
                                 itemCount: value.data.length,
                                 itemBuilder: (context, index) {
-                                  print("STREM PEDIDO "+ selecPedido);
+                                  print("STREM PEDIDO "+ selecPedido+" "+value.data[index].idPedido);
                                   v_bg_load=false;
                                   var ctrol = false;
                                   if (selecPedido==value.data[index].idPedido)
@@ -405,7 +414,7 @@ var show_cesta=false;
                 }
                 cestaAtiva=true;
                 listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
-return
+              return
                 Visibility(visible:show_cesta ,child:
                 barCesta(false,Usuario, value.data, d,
                             (value) {return showhide_bg(value);},
@@ -413,9 +422,12 @@ return
               }else{
                 cestaAtiva=false;
                 v_bg=false;
+                selecPedido="";
+
                 return Container();
               }
             } else {
+              selecPedido="";
               cestaAtiva=false;
               return Container();
             }
@@ -441,8 +453,6 @@ return
                           cestaAtiva=true;
                           listaCesta.addAll(value.data);//adiciona lista de itens da CESTA
                           if (Usuario!=null) {
-
-                            print("view barra bottom");
                             return
                             Visibility(visible:!bloc.getPedidoExist() ,child:
                               barCesta(true,Usuario, value.data, d, (value) {
@@ -462,31 +472,30 @@ return
                         return Container();
                       }
                     })),
-    Positioned(
-    bottom: 45,
-    width: MediaQuery.of(context).size.width,
-    child:
-    StreamBuilder<List<dynamic>>(
-    stream: bloc.check,
-    builder: (context,value) {
-    listaCesta.clear();
-    if (value.connectionState==ConnectionState.active) {
-      return Visibility(
-        visible: bloc.getPedidoExist() && btnfloat && bloc.getCestaExist()  ,child:
-       Positioned(
-         bottom: 110,
-         right: 20,
-         child:FloatingActionButton (
-          onPressed: (){
-            setState(() {
-                      btnfloat=false;
-              show_cesta=true;
-            });
-          },
-          backgroundColor: Colors.orange,
-          child:
-          Icon(Icons.shopping_basket),
-          )));}else return Container();})),
+//              Positioned(
+//              bottom: 45,
+////              width: MediaQuery.of(context).size.width,
+//              child:
+              StreamBuilder<List<dynamic>>(
+              stream: bloc.check,
+              builder: (context,value) {
+              if (value.connectionState==ConnectionState.active) {
+                return Visibility(
+                  visible: bloc.getPedidoExist() && btnfloat && bloc.getCestaExist()  ,child:
+                 Positioned(
+                   bottom: 110,
+                   right: 20,
+                   child:FloatingActionButton (
+                    onPressed: (){
+                      setState(() {
+                        show_cesta=true;
+                        btnfloat=false;
+                      });
+                    },
+                    backgroundColor: Colors.orange,
+                    child:
+                    Icon(Icons.shopping_basket),
+                    )));}else return Container();}),
 
 
         Visibility( visible:view_dialogGps , child:
@@ -525,20 +534,29 @@ return
                             boxShadow: [BoxShadow(blurRadius:1,color: Colors.grey[300])],color:Colors.white),
                         margin: EdgeInsets.fromLTRB(0, 0, 20, 0),alignment: Alignment.center, child:
                     Text("Ativar", style: TextStyle(fontFamily: 'RobotoBold')))),
-                GestureDetector(onTap: (){setState(() {
+            Visibility(visible:false,child:
+            GestureDetector(onTap: (){
+              setState(() {
                   local_user_cancel=true;
-                view_dialogGps=false;v_bg_load=false;});},child:
+                  view_dialogGps=false;v_bg_load=false;
+              });},child:
                 Container(
                       padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
                       decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(15)),
                           boxShadow: [BoxShadow(blurRadius:1,color: Colors.grey[300])],color:Colors.white),
                       margin: EdgeInsets.fromLTRB(20, 0, 0, 0),alignment: Alignment.center, child:
-                  Text("Agora não", style: TextStyle(fontFamily: 'RobotoLight')))),
+                  Text("Agora não", style: TextStyle(fontFamily: 'RobotoLight'))))),
                 ],)))
               ],))
            ],)
         )),
-    ])));
+
+
+
+        Visibility( visible:view_pop_cadastrodados , child:
+            view_pop_completaCad()),
+
+          ])));
 
 
  }
@@ -707,6 +725,9 @@ checkStateUser() async {
 
           print("checkstateuser user 0");
           user_logado = true;
+          Usuario = new User(null,null,null,null,null);
+          Usuario.uid=user.uid;
+          Usuario.email=user.email;
           getDadosUser(user.uid);
 
    }else{
@@ -747,17 +768,115 @@ checkStateUser() async {
 
 }
 
-void getUser(var data,var documentID){
+void getUser(var data,var documentID)async{
 
-    setState(() {
-      Usuario = new User(data['nome'],data['tell'],data['email'],data['uid'],data['localizacao']);
-    });
+    if (data.data!=null) {
+      setState(() {
+        Usuario = new User(
+            data['nome'], data['tell'], data['email'], data['uid'],
+            data['localizacao']);
+      });
+      view_pop_cadastrodados=false;
 
-    print("user recuperado "+Usuario.email);
-
-    getEnderecoUser();
+      print("user recuperado " + Usuario.email);
+      bloc.getCesta();
+      getEnderecoUser();
+    }else
+      {
+        FirebaseUser user = await FirebaseAuth.instance.currentUser();
+        setState(()  {
+          c_email.text=user.email;
+          view_pop_cadastrodados=true;
+        });
+      }
 }
 
+
+view_pop_completaCad(){
+return
+  Container(
+      margin:EdgeInsets.all(20),
+      padding:EdgeInsets.all(10),
+      child:
+      Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+      IntrinsicHeight(child:
+      Container(
+          decoration: BoxDecoration(color:Colors.white, boxShadow:[BoxShadow(color:Colors.grey)]),
+          child:
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+
+        Container(height: 30, margin: EdgeInsets.fromLTRB(30, 20, 30, 0),
+        child:Text("Complete seu cadastro",style: TextStyle(fontSize: 18,color:Colors.black,
+            fontFamily: 'BreeSerif'),)),
+
+        Container(height: 30, margin: EdgeInsets.fromLTRB(30, 20, 30, 10),
+          child:
+          TextField(decoration: InputDecoration(hintText: "EMAIL"),
+            controller: c_email,
+            keyboardType: TextInputType.emailAddress ,
+            style: TextStyle(fontSize: 16,color:Colors.orange,
+                fontFamily: 'RobotoLight'),),),
+        Container(height: 30, margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
+          child:
+          TextField(
+            controller: c_nome,
+            decoration: InputDecoration(hintText: "NOME"),
+            keyboardType: TextInputType.text ,
+            style: TextStyle(fontSize: 16,color:Colors.orange,
+                fontFamily: 'RobotoLight'),),),
+        Container(height: 30, margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
+          child:
+          TextField(decoration: InputDecoration(hintText: "TELL"),
+            controller: c_tell,
+            keyboardType: TextInputType.phone ,
+            style: TextStyle(fontSize: 16,color:Colors.orange,
+                fontFamily: 'RobotoLight'),),),
+        Container(
+            margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
+            padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
+            decoration: BoxDecoration(color: Colors.orange),
+            child:FlatButton(onPressed: (){criarUser();},color: Colors.transparent,
+              child: Text("SALVAR",style:TextStyle(color:Colors.white)),) ),
+          Visibility(visible: view_pop_cadastrodados,child:
+          Container(height: 45)),
+      ],)))
+  ]));
+
+}
+
+  void criarUser() async {
+    FocusScope.of(context).requestFocus(FocusNode());
+    var refData = Firestore.instance;
+    var email = c_email.text;
+    var tell = c_tell.text;
+    var nome = c_nome.text;
+    var nomeSplit = nome.split(" ");
+    var ctrol=false;
+    if (email.length < 7 || email.contains("@")==false || email.contains(".com")==false
+    ){
+      ctrol=true;
+    }
+    if (tell.length < 8){ ctrol=true; _snackbar("Telefone incorreto");}
+    if (nome.length < 3){ctrol=true;_snackbar("Nome incompleto");}
+    if (nomeSplit.length==1){ctrol=true;_snackbar("Coloque um sobrenome"); }
+
+    if (!ctrol) {
+      await refData.collection("Usuarios")
+          .document(Usuario.uid)
+          .setData({"nome": c_nome.text, "tell": c_tell.text,
+        "email": c_email.text, 'uid': Usuario.uid});
+    }
+  }
+
+  _snackbar(text){
+    final snackBar = SnackBar(content: Text(text));
+    scr.currentState..showSnackBar(snackBar);
+
+  }
 
 void getEnderecoUser() async {
 
@@ -894,7 +1013,8 @@ void getEnderecoUser() async {
     return Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
     StreamBuilder(
         stream: Firestore.instance
-            .collection("Produtos_On").orderBy("preco",descending: false).orderBy("marca",descending: false)
+            .collection("Produtos_On").orderBy("preco",descending: false)
+            .orderBy("marca",descending: false)
             .snapshots(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
@@ -932,79 +1052,118 @@ void getEnderecoUser() async {
         scrollDirection: Axis.vertical,
         itemCount: snapshot.data.documents.length,
         itemBuilder: (context, index) {
+          if (index == snapshot.data.documents.length-1)
+              v_bg=false;
 
-        if (index == snapshot.data.documents.length-1)
-            v_bg=false;
 
-          print ("CRIAR LISTA -");
           Produto_cesta produto =  new Produto_cesta(snapshot.data.documents[index]);
           var ctrl=false;
           double di = 0.0;
-          if (local_user==null){
-            print ("CRIAR LISTA - LOCAL USER NULL");
-            return  itemListProd(produto,null,[],null,(){return _showpop_gps();});
-          }
-          else {
-            if (local_user_cancel == false)
-              if (!listaDist.isEmpty) {
-                print("CRIAR LISTA - USER OK - LISTADista");
-                for (int i = 0; i < listaDist.length; i++) {
-                  if (listaDist[i].distancia != null) {
-                    di = double.parse(listaDist[i].distancia) / 1000.0;
-                    print("distancia xxx " + (di).toString() + "-" +
-                        (produto.distanciaMaxKm).toString());
-                    if (listaDist[i].idloja== produto.idloja)
-                      ctrl = true;
-                  }
-                }
-                if (ctrl == false) {
-                  print("CRIAR LISTA - USER OK - distancia off");
-                  if (local_user_cancel == false)
-                    checkDistanceAtual(produto);
-                }else
-                  {
-                    if (di <= produto.distanciaMaxKm) {
-                      print("CRIAR LISTA - USER OK - distancia ON - GET DISTANCE "+listaCesta.length.toString());
-                      return itemListProd(produto, local_, listaDist,listaCesta, () {
-                        return _showpop_login();
-                      });
-                    }else
-                      return Container();
-                  }
-              } else {
+        return  StreamBuilder(
+          stream:    Firestore.instance.collection('Lojas_ON')
+              .orderBy('idloja',descending: false).snapshots(),
+          builder: (context,value_loja)
+          {
+            if (value_loja.connectionState == ConnectionState.active) {
+              var ctrl=false;
+              if (value_loja.data != null) {
 
-                print("CRIAR LISTA - USER OK - distancia OFF - lista [] ");
-                if (local_user_cancel == false) {
-                  print("CRIAR LISTA - USER OK - distancia off - GET DISTANCE");
-                  checkDistanceAtual(produto);
+            for(int i =0; i < value_loja.data.documents.length;i++){
+
+                if (value_loja.data.documents[i]['idloja']==produto.idloja)
+                    ctrl=true;
                 }
-                else {
-                  print("itemProd -d -f");
-                  return itemListProd(produto, null, null,[], () {
+                if (!ctrl)
+                    return Container();
+                if (ctrl)
+                if (local_user == null) {
+                  print("CRIAR LISTA - LOCAL USER NULL");
+                  return itemListProd(produto, null, [], null, () {
                     return _showpop_gps();
                   });
                 }
-              }
-            if (local_user_cancel == false) {
-              if (di <= produto.distanciaMaxKm) {
-                print("CRIAR LISTA - USER OK - distancia ON - GET DISTANCE");
-                return itemListProd(produto, local_, listaDist,null, () {
-                  return _showpop_login();
-                });
-              }else
+                else {
+                  if (local_user_cancel == false)
+                    if (!listaDist.isEmpty) {
+                      print("CRIAR LISTA - USER OK - LISTADista");
+                      for (int i = 0; i < listaDist.length; i++) {
+                        if (listaDist[i].distancia != null) {
+                          di = double.parse(listaDist[i].distancia) / 1000.0;
+                          print("distancia xxx " + (di).toString() + "-" +
+                              (produto.distanciaMaxKm).toString());
+                          if (listaDist[i].idloja == produto.idloja)
+                            ctrl = true;
+                        }
+                      }
+                      if (ctrl == false) {
+                        print("CRIAR LISTA - USER OK - distancia off");
+                        if (local_user_cancel == false)
+                          checkDistanceAtual(produto);
+                      } else {
+                        if (di <= produto.distanciaMaxKm) {
+                          print(
+                              "CRIAR LISTA - USER OK - distancia ON - GET DISTANCE " +
+                                  listaCesta.length.toString());
+                          return itemListProd(
+                              produto, local_, listaDist, listaCesta, () {
+                            return _showpop_login();
+                          });
+                        } else
+                          return Container();
+                      }
+                    } else {
+                      print(
+                          "CRIAR LISTA - USER OK - distancia OFF - lista [] ");
+                      if (local_user_cancel == false) {
+                        print(
+                            "CRIAR LISTA - USER OK - distancia off - GET DISTANCE");
+                        checkDistanceAtual(produto);
+                      }
+                      else {
+                        print("itemProd -d -f");
+                        return itemListProd(produto, null, null, [], () {
+                          return _showpop_gps();
+                        });
+                      }
+                    }
+                  if (local_user_cancel == false) {
+                    if (di <= produto.distanciaMaxKm) {
+                      print(
+                          "CRIAR LISTA - USER OK - distancia ON - GET DISTANCE");
+                      return itemListProd(produto, local_, listaDist, null, () {
+                        return _showpop_login();
+                      });
+                    } else
+                      return Container();
+                  } else {
+                    print("itemProd -d -f");
+                    return itemListProd(produto, null, [], null, () {
+                      return _showpop_gps();
+                    });
+                  }
+                }
+              } else
                 return Container();
-            } else {
-              print("itemProd -d -f");
-              return itemListProd(produto, null, [],null, () {
-                return _showpop_gps();
-              });
-            }
-          }
+            } else
+              return Container();
+        });
         }
-    ));
+   ));
   }
 
 
+  chekLojaOn(var listaLojasOn, var loja){
+
+   var result = false;
+
+    for (int i = 0; i < listaLojasOn.length;i++){
+      if (listaLojasOn[i]==loja)
+        result = true;
+
+    }
+
+    return result;
+  }
   additem()async{
 
     var refData = Firestore.instance;
@@ -1060,7 +1219,13 @@ void getEnderecoUser() async {
         widget.v_poplogin=true;
     });
   }
-
+  restartuser(){
+    setState(() {
+      widget.v_poplogin=false;
+      bloc.initBloc();
+      checkStateUser();
+    });
+  }
 
   _hidepop_login(bool result){
     setState(() {
@@ -1068,18 +1233,28 @@ void getEnderecoUser() async {
       //returno cadastro realizado
       if (result==true)
         {
-          print("checkstateuser x");
-          if (end_temp!=null){
-            enviarFormEndereco_temp(end_temp);
-          }
-          if (listaDist!=null){
-            for(int i =0;i<listaDist.length;i++) {
-              addDistance(listaDist[i],null);
-            }
-          }
+//          print("checkstateuser x");
+//          if (end_temp!=null){
+//            enviarFormEndereco_temp(end_temp);
+//          }
+//          if (listaDist!=null){
+//            for(int i =0;i<listaDist.length;i++) {
+//              addDistance(listaDist[i],null);
+//            }
+//          }
+//
+//          listaProdutos = listaprod();
 
-          listaProdutos = listaprod();
-
+        Navigator.push(
+          context,
+          PageTransition(
+            curve: Curves.bounceIn,
+            duration: Duration(milliseconds:500),
+            alignment: Alignment.center,
+            type: PageTransitionType.rightToLeft,
+            child: MyHomePage(),
+          ),
+        );
         }
     });
  }
@@ -1103,13 +1278,13 @@ void getEnderecoUser() async {
     if (await Permission.location
         .request()
         .isGranted) {
-
          checkStateUser();
     } else {
       setState(() {
       v_bg_load=false;
       v_bg=false;
       });
+      checkStateUser();
     }
   }
 

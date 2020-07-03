@@ -133,6 +133,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   Widget build(BuildContext context) {
     print(widget.pedido.idloja);
 
+
     return    barCestaCompleta();
 
   }
@@ -902,7 +903,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
     Visibility(visible:pop_pedido_view,child:
       Positioned(
-          bottom:20,
+          bottom:5,
           child:
         Container(
           padding: EdgeInsets.fromLTRB(0, 10,0,20),
@@ -910,7 +911,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
         Container(
                   margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                   padding: EdgeInsets.fromLTRB(0, 10,10,20),
-                  width:  MediaQuery.of(context).size.width-20,
+                  width:  MediaQuery.of(context).size.width,
                   decoration:
                     BoxDecoration(color:Colors.white,
                         boxShadow: [BoxShadow(color:Colors.grey,blurRadius: 3)]),
@@ -919,12 +920,13 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       mainAxisAlignment: MainAxisAlignment.end,
                       children:[
                     Container(
-                          margin: EdgeInsets.fromLTRB(20, 0, 10, 20),
-                          padding: EdgeInsets.fromLTRB(20, 15,10,0),
+
+                          margin: EdgeInsets.fromLTRB(20, 30, 10, 30),
+                          padding: EdgeInsets.fromLTRB(20, 15,10,10),
                           decoration:BoxDecoration(color:Colors.white),
                           child:  Text("Problema com seu pedido?",
                               style:TextStyle(fontSize: 18,fontFamily: 'BreeSerif'))),
-                   Visibility(visible: !view_btn_confirm_cancel || !view_btn_reebolso_confirma,child:
+                   Visibility(visible: (!view_btn_confirm_cancel || !view_btn_reebolso_confirma) && !checkPagCartao() ,child:
                       GestureDetector(
                       onTap:(){
                           setState((){
@@ -937,8 +939,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       child:
                     Container(
                         alignment: Alignment.center ,
-                        margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                        padding: EdgeInsets.fromLTRB(10, 15,10,15),
+                        margin: EdgeInsets.fromLTRB(10, 10, 0, 10),
+                        padding: EdgeInsets.fromLTRB(10, 20,10,20),
                         decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
                         child:    Text("CANCELAR PEDIDO",
                         style:TextStyle())))),
@@ -959,7 +961,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                                 child:    Text("CONFIRMAR CANCELAMENTO",
                                     style:TextStyle(color:Colors.red))))),
 
-                  Visibility(visible:true,child:
+                  Visibility(visible: checkPagCartao()  ,child:
                     GestureDetector(
                       onTap:(){
                           setState(() {
@@ -970,8 +972,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     child:
                         Container(
                             alignment: Alignment.center ,
-                            margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                            padding: EdgeInsets.fromLTRB(10, 15,10,15),
+                            margin: EdgeInsets.fromLTRB(10, 10, 0, 10),
+                            padding: EdgeInsets.fromLTRB(10, 20,10,20),
                             decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),border:Border.all(color:Colors.black)),
                             child:    Text("Solicitar reembolso e cancelar".toUpperCase())))),
 
@@ -1010,7 +1012,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               Container(
                       alignment: Alignment.center ,
                       margin: EdgeInsets.fromLTRB(10, 30, 0, 20),
-                      padding: EdgeInsets.fromLTRB(10, 15,10,15),
+                      padding: EdgeInsets.fromLTRB(10, 20,10,20),
                       width: 100,
                       decoration:
                       BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -1135,8 +1137,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
      Visibility(visible: false,child:
         enderecoView_()),
 
-//TROCAR FORMA DE PAGAMENTO
-      Visibility(visible: checkPagCartao(),child:
+//TROCAR FORMA DE PAGAMENTO - HIDE
+      Visibility(visible: false,child:
       GestureDetector(
           onTap:(){
 
@@ -1536,7 +1538,6 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   
   popChat(){
    return
-
      Column(
          crossAxisAlignment: CrossAxisAlignment.end,
          mainAxisAlignment: MainAxisAlignment.end,
@@ -1544,7 +1545,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
        LimitedBox(maxHeight: 270, child:
      Container(
-      
+       height: 270,
        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
          decoration:BoxDecoration(
               boxShadow: [BoxShadow(color:Colors.black45)],
@@ -1561,59 +1562,43 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
         width: double.infinity,
         decoration:  BoxDecoration(color: Colors.transparent),
         child:
-          SingleChildScrollView(
+      SingleChildScrollView(
               controller: _scrollController,
               child:
-      Column(
+      Column (
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.end,
         children:[
-      Container(
-
+      Container (
           child:
-        Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children:[
-          listachat
-          ])
-    ),
-
-
+              listachat
+        ),
     ]))
         ))))),
-
-
-
    ),
 
-       Container(
-//         width: MediaQuery.of(context).size.width,
-
-           decoration:BoxDecoration(color:Colors.orange,
-               borderRadius: BorderRadius.all(Radius.circular(2))),
-           child:Row(
-               mainAxisAlignment: MainAxisAlignment.spaceBetween ,
-               children:[
-
-                 Container(
-                     margin:EdgeInsets.fromLTRB(5,0,0,0),
-                     width: MediaQuery.of(context).size.width-75
-                     ,child:   TextField(cursorColor: Colors.white,cursorRadius: Radius.circular(20),
-                       style: TextStyle(color:Colors.white,fontFamily: 'BreeSerif'),
-                       controller: control_chattext,
-
-                        decoration: InputDecoration(hintText: "MSG",focusColor: Colors.white,hintStyle: TextStyle(color:Colors.white) ),)),
-                 
-                          GestureDetector(onTap:(){             
-                            bloc_financeiro.enviarMsgChat(control_chattext.text,widget.user.email, widget.user.uid, "user", widget.pedido.idloja, widget.pedido.idPedido,"" );
-                            control_chattext.text="";
-                          },child:
-                          Icon(Icons.send,color:Colors.white,size: 35,)),
-        ])
-       )
-   ])
-    ;
+   Container(
+      decoration:BoxDecoration(color:Colors.orange,
+      borderRadius: BorderRadius.all(Radius.circular(2))),
+      child:Row(
+         mainAxisAlignment: MainAxisAlignment.spaceBetween ,
+         children:[
+           Container(
+               margin:EdgeInsets.fromLTRB(5,0,0,0),
+               width: MediaQuery.of(context).size.width-75
+               ,child:   TextField(cursorColor: Colors.white,cursorRadius: Radius.circular(20),
+               style: TextStyle(color:Colors.white,fontFamily: 'BreeSerif'),
+               controller: control_chattext,
+               decoration: InputDecoration(hintText: "MSG",focusColor: Colors.white,hintStyle: TextStyle(color:Colors.white) ),)),
+               GestureDetector(onTap:(){
+                 FocusScope.of(context).requestFocus(FocusNode());
+                 bloc_financeiro.enviarMsgChat(control_chattext.text,widget.user.email, widget.user.uid, "user", widget.pedido.idloja, widget.pedido.idPedido,"" );
+                 control_chattext.text="";
+               },child:
+               Icon(Icons.send,color:Colors.white,size: 35,)),
+           ])
+         )
+     ]);
     
   }
 
@@ -1637,6 +1622,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
       ListView.builder(
           controller: _scrollController_listchar,
+          reverse:false,
           primary: false,
           shrinkWrap: true,
           scrollDirection: Axis.vertical,
@@ -1792,8 +1778,14 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
       text = "Máquina de cartão";
     if (tipo=="dinheiro")
       text = "Dinheiro";
-    if (tipo=="cartao")
-      text = "Cartão de crédito - "+widget.pedido.statusPagamento;
+    if (tipo=="cartao"){
+     var sp = widget.pedido.statusPagamento;
+     if (sp)
+      text = "Cartão de crédito - PAGO";
+    else
+      text = "Cartão de crédito - NÃO PAGO";
+
+    }
     return text;
 
   }
@@ -2132,6 +2124,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
       view_ocorreu_um_problema=false;
       });
     }
+   _snackbarcor("Msg enviada. Se precisar acesse o chat ou ligue para o estabelecimento", Colors.orange);
 
   }
 

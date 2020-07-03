@@ -43,14 +43,20 @@ class _itemListProdstate extends State<item_cesta> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return
     GestureDetector(
-        onLongPress: (){setState(() {
-//          if(view_remove==false){view_remove=true;color_=Colors.red[50];}else {view_remove=false;color_=Colors.white;}
-        });},
-        onTap: (){setState(() {
-          if(view_remove==false){view_remove=true;if (widget.data['quantidade']>1)view_remove_decrement=true;color_=Colors.red[50];
-          widget.selectItem_(new Produto_cesta(widget.data));
-          }else {view_remove=false;color_=Colors.white;  widget.selectItem_(null);view_remove_decrement=false;}
-          //      if(view_remove==true){view_remove=false;color_=Colors.white;}
+        onTap: (){
+          setState(() {
+          if(view_remove==false){
+            view_remove=true;
+            if (widget.data['quantidade']>1)
+              view_remove_decrement=true;color_=Colors.red[50];
+            widget.selectItem_(new Produto_cesta(widget.data));
+            print("select item lista");
+          }else
+            {
+              view_remove=false;color_=Colors.white;
+              widget.selectItem_(null);
+              view_remove_decrement=false;
+            }
         });},
         child:
     Row(

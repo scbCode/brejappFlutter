@@ -62,13 +62,15 @@ class _itemListProdstate extends State<itemListProd>  {
   var styleTextFreteGratis = TextStyle(letterSpacing: 1.5,color: Colors.red,fontSize: 10,fontStyle: FontStyle.italic,fontFamily: 'RobotoBold');
   var styleTextFrete =TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
   var styleTextFrete_ =TextStyle(color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
-
+  var distTxt="";
   AnimationController _controllerIcon;
-
+  List<String> lista = new List<String > ();
   @override
   Widget build(BuildContext context) {
     if (widget.produto.quantidade==null)
       widget.produto.quantidade=total;
+
+
 
     if (itemOn==true){
       _itemOn();
@@ -76,6 +78,8 @@ class _itemListProdstate extends State<itemListProd>  {
     else{
       _itemOff();
     }
+
+
     return
       animator(
           GestureDetector(
@@ -157,255 +161,259 @@ class _itemListProdstate extends State<itemListProd>  {
     }
 
     return
-      Container(
-          margin: EdgeInsets.fromLTRB(10, 5, 10, 0),
-          alignment: Alignment.topCenter,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 3.0,
-                  offset: Offset(
-                    0.0, // horizontal, move right 10
-                    1.0, // vertical, move down 10
+
+               Container(
+                  margin: EdgeInsets.fromLTRB(10, 5, 10, 0),
+                  alignment: Alignment.topCenter,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 3.0,
+                          offset: Offset(
+                            0.0, // horizontal, move right 10
+                            1.0, // vertical, move down 10
+                          ),
+                        )
+                      ],
+                      color: Colors.white
                   ),
-                )
-              ],
-              color: Colors.white
-          ),
-          child:
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start ,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(width: 50,height: 100, padding: EdgeInsets.fromLTRB(0, 5, 0, 5) , margin: EdgeInsets.fromLTRB(5, 0, 0, 0), alignment: Alignment.centerRight , child:
-                  Image.network(widget.produto.img)),
-                  Expanded(
-                      child:
-                      Container(
-                          margin: EdgeInsets.all(10),
-                          child:
-                          Stack(
-                            children: <Widget>[
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Row(children: <Widget>[
-                                    Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.nome,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 0.0,fontSize:18,fontFamily: 'BreeSerif'))),
-
-                                    Visibility(visible: widget.produto.gelada,child:
-                                    Container(
-                                        decoration: BoxDecoration(border: Border.all(color: Colors.lightBlue[400]),borderRadius: BorderRadius.all(Radius.circular(3))),
-                                        padding: EdgeInsets.fromLTRB(4, 1, 4, 0),
-                                        margin:EdgeInsets.fromLTRB(4, 3, 0, 0),height: 15,child:
-                                    Text("gelada",style: TextStyle(fontSize: 10,color: Colors.lightBlue[400]),)))
-                                  ],),
-                                  Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.descricao,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 0.7, color: Colors.grey[700], fontSize:12,fontFamily: 'RobotoLight'))),
-                                  Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.vol,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 1.9, color: Colors.grey[700], fontSize:12,fontFamily: 'RobotoLight'))),
-                                  Row (mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Container(alignment: Alignment.bottomRight,margin: EdgeInsets.fromLTRB(10, 4, 5, 0), child:Text(widget.produto.loja,textAlign: TextAlign.right, style: TextStyle(letterSpacing: 0.5,color: Colors.orange[300] ,fontSize:12,fontFamily: 'RobotoLight'))),
-                                      Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                                      Visibility(
-                                        visible:view_dist,child:
-                                      Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(distanceTo().toString(),style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
-                                      ),
-                                    ],),
-                                  Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Entrega: "+formatFrete(),style: styleTextFrete),),
-
-                                ],),
-                              Container(
-                                  alignment: Alignment.centerRight,
-                                  margin:EdgeInsets.fromLTRB(0, 15, 5, 0),child:Text("R\u0024 "+_FormatPreco(widget.produto.preco.toString()),textAlign: TextAlign.left, style: TextStyle(color: Colors.deepOrangeAccent,fontSize:24,fontFamily: 'BreeSerif'))),
-                            ],))),
-
-
-                ],),
-              Stack(children: <Widget>[
-                Visibility(
-                  visible: addvisi || itemOn==true,
                   child:
-                  Column(children: <Widget>[Divider(
-                    color: Colors.orange[200],
-                  ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        //btn adicionar
-                        StreamBuilder<List<dynamic>>(
-                            stream: bloc.check,
-                            builder: (context,value) {
-                              if (value.connectionState==ConnectionState.active) {
-                                var ctrol = false;
-                                print("GET CESTA ++++");
-                                widget.listaCesta.clear();
-                                widget.listaCesta.addAll(value.data);
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start ,
+                    children: <Widget>[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(width: 50,height: 100, padding: EdgeInsets.fromLTRB(0, 5, 0, 5) , margin: EdgeInsets.fromLTRB(5, 0, 0, 0), alignment: Alignment.centerRight , child:
+                          Image.network(widget.produto.img)),
+                          Expanded(
+                              child:
+                              Container(
+                                  margin: EdgeInsets.all(10),
+                                  child:
+                                  Stack(
+                                    children: <Widget>[
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Row(children: <Widget>[
+                                            Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.nome,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 0.0,fontSize:18,fontFamily: 'BreeSerif'))),
 
-                                if (value.data.isNotEmpty) {
-                                  return
-                                    Container(
-                                        margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
-                                    OutlineButton(hoverColor: Colors.orange,
-                                        focusColor: Colors.orange,
-                                        textTheme: ButtonTextTheme.normal,
-                                        splashColor: Colors.orange,
-                                        color: Colors.yellow[300],
-                                        onPressed: () {
-                                           print("click");
-                                          _addLista();
-                                        },
-                                        child:
-                                        Row(children: <Widget>[
+                                            Visibility(visible: widget.produto.gelada,child:
+                                            Container(
+                                                decoration: BoxDecoration(border: Border.all(color: Colors.lightBlue[400]),borderRadius: BorderRadius.all(Radius.circular(3))),
+                                                padding: EdgeInsets.fromLTRB(4, 1, 4, 0),
+                                                margin:EdgeInsets.fromLTRB(4, 3, 0, 0),height: 15,child:
+                                            Text("gelada",style: TextStyle(fontSize: 10,color: Colors.lightBlue[400]),)))
+                                          ],),
+                                          Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.descricao,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 0.7, color: Colors.grey[700], fontSize:12,fontFamily: 'RobotoLight'))),
+                                          Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.vol,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 1.9, color: Colors.grey[700], fontSize:12,fontFamily: 'RobotoLight'))),
+                                          Row (mainAxisAlignment: MainAxisAlignment.start,
+                                            children: <Widget>[
+                                              Container(alignment: Alignment.bottomRight,margin: EdgeInsets.fromLTRB(10, 4, 5, 0), child:Text(widget.produto.loja,textAlign: TextAlign.right, style: TextStyle(letterSpacing: 0.5,color: Colors.orange[300] ,fontSize:12,fontFamily: 'RobotoLight'))),
+                                              Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
+                                              Visibility(
+                                                visible:view_dist,child:
+                                              Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(
+                                                distTxt
+                                              ,style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
+                                              ),
+                                            ],),
+                                          Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Entrega: "+formatFrete(),style: styleTextFrete),),
+
+                                        ],),
+                                      Container(
+                                          alignment: Alignment.centerRight,
+                                          margin:EdgeInsets.fromLTRB(0, 15, 5, 0),child:Text("R\u0024 "+_FormatPreco(widget.produto.preco.toString()),textAlign: TextAlign.left, style: TextStyle(color: Colors.deepOrangeAccent,fontSize:24,fontFamily: 'BreeSerif'))),
+                                    ],))),
+
+
+                        ],),
+                      Stack(children: <Widget>[
+                        Visibility(
+                          visible: addvisi || itemOn==true,
+                          child:
+                          Column(children: <Widget>[Divider(
+                            color: Colors.orange[200],
+                          ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                //btn adicionar
+                                StreamBuilder<List<dynamic>>(
+                                    stream: bloc.check,
+                                    builder: (context,value) {
+                                      if (value.connectionState==ConnectionState.active) {
+                                        var ctrol = false;
+                                        print("GET CESTA ++++");
+                                        widget.listaCesta.clear();
+                                        widget.listaCesta.addAll(value.data);
+
+                                        if (value.data.isNotEmpty) {
+                                          return
+                                            Container(
+                                                margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                                            OutlineButton(hoverColor: Colors.orange,
+                                                focusColor: Colors.orange,
+                                                textTheme: ButtonTextTheme.normal,
+                                                splashColor: Colors.orange,
+                                                color: Colors.yellow[300],
+                                                onPressed: () {
+                                                   print("click");
+                                                  _addLista();
+                                                },
+                                                child:
+                                                Row(children: <Widget>[
+                                                  Container(
+                                                    margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                                    child: Icon(
+                                                        Icons.shopping_basket, color: colorBtnAdd,
+                                                        size: 15),),
+                                                  Text(textBtnadd + " R\u0024 " +
+                                                      totalPrecotxt.toStringAsFixed(2).replaceAll(
+                                                          ".", ","), style: TextStyle(
+                                                      color: colorBtnAdd,
+                                                      fontFamily: 'RobotoLight'),)
+                                                ])));
+                                        } else
+                                          return
+                                            Container(
+                                                margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                                            OutlineButton(hoverColor: Colors.orange,
+                                                focusColor: Colors.orange,
+                                                textTheme: ButtonTextTheme.normal,
+                                                splashColor: Colors.orange,
+                                                color: Colors.yellow[300],
+                                                onPressed: () {
+                                                  print("click2");
+                                                  _addLista();
+                                                },
+                                                child:
+                                                Row(children: <Widget>[
+                                                  Container(
+                                                    margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                                    child: Icon(
+                                                        Icons.shopping_basket, color: colorBtnAdd,
+                                                        size: 15),),
+                                                  Text(textBtnadd + " R\u0024 " +
+                                                      totalPrecotxt.toStringAsFixed(2).replaceAll(
+                                                          ".", ","), style: TextStyle(
+                                                      color: colorBtnAdd,
+                                                      fontFamily: 'RobotoLight'),)
+                                                ])));
+                                      }else
+                                        return
                                           Container(
-                                            margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                            child: Icon(
-                                                Icons.shopping_basket, color: colorBtnAdd,
-                                                size: 15),),
-                                          Text(textBtnadd + " R\u0024 " +
-                                              totalPrecotxt.toStringAsFixed(2).replaceAll(
-                                                  ".", ","), style: TextStyle(
-                                              color: colorBtnAdd,
-                                              fontFamily: 'RobotoLight'),)
-                                        ])));
-                                } else
-                                  return
-                                    Container(
-                                        margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
-                                    OutlineButton(hoverColor: Colors.orange,
-                                        focusColor: Colors.orange,
-                                        textTheme: ButtonTextTheme.normal,
-                                        splashColor: Colors.orange,
-                                        color: Colors.yellow[300],
-                                        onPressed: () {
-                                          print("click2");
-                                          _addLista();
+                                              margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                                          OutlineButton(hoverColor: Colors.orange,
+                                              focusColor: Colors.orange,
+                                              textTheme: ButtonTextTheme.normal,
+                                              splashColor: Colors.orange,
+                                              color: Colors.yellow[300],
+                                              onPressed: () {
+                                                widget.listaCesta.add(widget.produto);
+                                                print("click3");
+                                                _addLista();
+                                              },
+                                              child:
+                                              Row(children: <Widget>[
+                                                Container(
+                                                  margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                                  child: Icon(
+                                                      Icons.shopping_basket, color: colorBtnAdd,
+                                                      size: 15),),
+                                                Text(textBtnadd + " R\u0024 " +
+                                                    totalPrecotxt.toStringAsFixed(2).replaceAll(
+                                                        ".", ","), style: TextStyle(
+                                                    color: colorBtnAdd,
+                                                    fontFamily: 'RobotoLight'),)
+                                              ])));
+                                    }),
+
+                                //total qntd
+                                Opacity(
+                                    opacity: 1,
+                                    child:
+                                    Container(margin: EdgeInsets.fromLTRB(10, 15, 10, 0),
+                                      alignment: Alignment.bottomRight,
+                                      child: Text("$total",style: TextStyle(fontSize: 14,color: colorBtnAdd,fontFamily: 'RobotoBold'),),
+                                    )),
+                                //botao + qntd
+                                new GestureDetector(
+                                    onTap: (){
+                                      setState((){
+                                        _incrementQntdItem();
+                                      });
+                                    },
+                                    child: Container(
+                                        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: colorBtnAdd)),
+                                        margin: EdgeInsets.fromLTRB(0, 5, 0, 20),
+                                        child: SizedBox(
+                                            width: 35,
+                                            height: 35,
+                                            child: Icon(Icons.plus_one, color:colorBtnAdd)
+                                        )
+                                    )
+                                ),
+                                Visibility(visible:vbtnremoveitem,child:
+                                Opacity(
+                                    opacity: 1,
+                                    child:   Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
+                                    new GestureDetector(
+                                        onTap: (){
+                                          setState((){
+                                            _removeItemCesta();
+                                          });
                                         },
-                                        child:
-                                        Row(children: <Widget>[
-                                          Container(
-                                            margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                            child: Icon(
-                                                Icons.shopping_basket, color: colorBtnAdd,
-                                                size: 15),),
-                                          Text(textBtnadd + " R\u0024 " +
-                                              totalPrecotxt.toStringAsFixed(2).replaceAll(
-                                                  ".", ","), style: TextStyle(
-                                              color: colorBtnAdd,
-                                              fontFamily: 'RobotoLight'),)
-                                        ])));
-                              }else
-                                return
-                                  Container(
-                                      margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
-                                  OutlineButton(hoverColor: Colors.orange,
-                                      focusColor: Colors.orange,
-                                      textTheme: ButtonTextTheme.normal,
-                                      splashColor: Colors.orange,
-                                      color: Colors.yellow[300],
-                                      onPressed: () {
-                                        widget.listaCesta.add(widget.produto);
-                                        print("click3");
-                                        _addLista();
-                                      },
-                                      child:
-                                      Row(children: <Widget>[
-                                        Container(
-                                          margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                          child: Icon(
-                                              Icons.shopping_basket, color: colorBtnAdd,
-                                              size: 15),),
-                                        Text(textBtnadd + " R\u0024 " +
-                                            totalPrecotxt.toStringAsFixed(2).replaceAll(
-                                                ".", ","), style: TextStyle(
-                                            color: colorBtnAdd,
-                                            fontFamily: 'RobotoLight'),)
-                                      ])));
-                            }),
+                                        child: Container(
+                                            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: Colors.red)),
+                                            margin: EdgeInsets.fromLTRB(10, 5, 0, 10),
+                                            padding: EdgeInsets.fromLTRB(0, 4, 0, 2),
+                                            child: SizedBox(
+                                              width: 35,
+                                              height: 28,
+                                              child
+                                                  :Icon(Icons.remove_shopping_cart,color:Colors.red,size: 18,),
 
-                        //total qntd
-                        Opacity(
-                            opacity: 1,
-                            child:
-                            Container(margin: EdgeInsets.fromLTRB(10, 15, 10, 0),
-                              alignment: Alignment.bottomRight,
-                              child: Text("$total",style: TextStyle(fontSize: 14,color: colorBtnAdd,fontFamily: 'RobotoBold'),),
-                            )),
-                        //botao + qntd
-                        new GestureDetector(
-                            onTap: (){
-                              setState((){
-                                _incrementQntdItem();
-                              });
-                            },
-                            child: Container(
-                                decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: colorBtnAdd)),
-                                margin: EdgeInsets.fromLTRB(0, 5, 0, 20),
-                                child: SizedBox(
-                                    width: 35,
-                                    height: 35,
-                                    child: Icon(Icons.plus_one, color:colorBtnAdd)
-                                )
-                            )
-                        ),
-                        Visibility(visible:vbtnremoveitem,child:
-                        Opacity(
-                            opacity: 1,
-                            child:   Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
-                            new GestureDetector(
-                                onTap: (){
-                                  setState((){
-                                    _removeItemCesta();
-                                  });
-                                },
-                                child: Container(
-                                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: Colors.red)),
-                                    margin: EdgeInsets.fromLTRB(10, 5, 0, 10),
-                                    padding: EdgeInsets.fromLTRB(0, 4, 0, 2),
-                                    child: SizedBox(
-                                      width: 35,
-                                      height: 28,
-                                      child
-                                          :Icon(Icons.remove_shopping_cart,color:Colors.red,size: 18,),
+                                            )
+                                        )
+                                    )
+                                    )
+                                )),
+                                //btn - qntd
+                                Visibility(visible:vbtnRemoveqntd, child:
+                                Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
+                                new GestureDetector(
+                                    onTap: (){
+                                      setState((){
+                                        print("ok");
+                                        _decrementQntdItem();
 
+                                      });
+                                    },
+                                    child: Container(
+                                        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: colorBtnAdd)),
+                                        margin: EdgeInsets.fromLTRB(15, 5, 0, 10),
+                                        padding: EdgeInsets.fromLTRB(0, 7, 0, 0),
+                                        child: SizedBox(
+                                          width: 35,
+                                          height: 28,
+                                          child: Text("-1", textAlign: TextAlign.center,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: colorBtnAdd),),
+
+                                        )
                                     )
                                 )
-                            )
-                            )
-                        )),
-                        //btn - qntd
-                        Visibility(visible:vbtnRemoveqntd, child:
-                        Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
-                        new GestureDetector(
-                            onTap: (){
-                              setState((){
-                                print("ok");
-                                _decrementQntdItem();
-
-                              });
-                            },
-                            child: Container(
-                                decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: colorBtnAdd)),
-                                margin: EdgeInsets.fromLTRB(15, 5, 0, 10),
-                                padding: EdgeInsets.fromLTRB(0, 7, 0, 0),
-                                child: SizedBox(
-                                  width: 35,
-                                  height: 28,
-                                  child: Text("-1", textAlign: TextAlign.center,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: colorBtnAdd),),
-
                                 )
-                            )
-                        )
-                        )
-                        ),
+                                ),
 
-                      ],)],),
-                ),
-              ],)
-            ],)
-      );
+                              ],)],),
+                        ),
+                      ],)
+                    ],)
+              );
+
   }
 
   _decrementQntdItem(){
@@ -654,8 +662,10 @@ class _itemListProdstate extends State<itemListProd>  {
   void initState() {
 
 
+    lista= bloc.getLojasOn();
 
     getUser();
+
     super.initState();
   }
 
@@ -668,6 +678,7 @@ class _itemListProdstate extends State<itemListProd>  {
 
     if (uid!=null)
     bloc.getCesta();
+    distanceTo();
 //    _controllerIcon = AnimationController(duration: Duration(milliseconds: 10000));
 //
 //    setState(() {
@@ -696,7 +707,6 @@ class _itemListProdstate extends State<itemListProd>  {
   String distanceTo() {
 
     var ctrol =false;
-    var distTxt = "...";
     if ( widget.distancias!=[])
       if ( widget.distancias.isNotEmpty)
         if ( widget.distancias!=null){
@@ -711,13 +721,20 @@ class _itemListProdstate extends State<itemListProd>  {
                   valeu=valeu/1000;
                   unidadeMedida = "km";
                 }
+                setState(() {
                 distTxt= valeu.toStringAsFixed(1)+""+unidadeMedida;
+                });
+
                 ctrol=true;
               }
           }
         }else
         {
         }
+
+
+
+
     return distTxt;
 
   }

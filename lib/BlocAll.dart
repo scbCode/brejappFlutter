@@ -30,6 +30,7 @@ class BlocAll {
   final  streamControl_Pedidos  = StreamController< List<Pedido>>.broadcast();
   final  streamControl_PrePedidos  = StreamController< Pedido>.broadcast();
   final  streamControl_LojasOn  = StreamController<List<String>>.broadcast();
+  final  streamControl_ListaProdutos  = StreamController<QuerySnapshot>.broadcast();
   final  control_get_endereco_temp  = StreamController< enderecoUserSnapShot>.broadcast();
   Stream <List<Produto_cesta>> get check => control_check.stream;
   Stream <List<String>> get lojasOn => streamControl_LojasOn.stream;
@@ -40,6 +41,7 @@ class BlocAll {
   Stream <enderecoUserSnapShot> get get_endereco_salvo=> control_get_endereco_temp.stream;
   Stream <List<Pedido>> get stream_pedido => streamControl_Pedidos.stream;
   Stream <Pedido> get stream_Prepedido => streamControl_PrePedidos.stream;
+  Stream <QuerySnapshot> get stream_produtos => streamControl_ListaProdutos.stream;
 
   var pedidoExist=false;
   var cestaExist=false;
@@ -197,6 +199,7 @@ class BlocAll {
     getEnderecoUser();
     StreamPedidos();
     StreamPrePedidos();
+    getListaProdutos("tudo","preco");
   }
 
   callTokenrizarCartao() async {
@@ -299,6 +302,7 @@ class BlocAll {
         .document(pedido).setData({"timecancel":FieldValue.serverTimestamp(),"status":"cancelado_user_reembolso",},merge: true)
         .then((v){
       print("SAVE CANCEL-PEDIDO");
+      StreamPedidos();
       ctrol=true;
       return  true;
     }).catchError((erro){
@@ -407,6 +411,7 @@ class BlocAll {
         .then((v){
       print("SAVE PRE-PEDIDO");
       ctrol=true;
+
 
        refData.collection("Usuarios")
           .document(uid).collection('cesta').orderBy("status").getDocuments().then((event) {
@@ -581,6 +586,54 @@ class BlocAll {
     }
   }
 
+
+
+
+  getListaProdutos(var tag,var busca) async {
+
+      var ref = Firestore.instance
+          .collection("Produtos_On").orderBy("preco",descending: false);
+
+      if (tag=="tags")
+        ref =    Firestore.instance
+            .collection("Produtos_On")
+            .where(tag,arrayContains: busca.toString().toLowerCase()).orderBy("preco",descending: false);
+      else
+      if (tag!="tudo")
+          ref =    Firestore.instance
+          .collection("Produtos_On")
+          .where(tag,isEqualTo: busca).orderBy("preco",descending: false);
+
+      //////////////////////
+      //////////////////////
+      //////////////////////
+      if (tag=="tudo")
+            ref
+            .snapshots()
+            .listen((data) => {
+          listaProdutos(data)
+        });
+
+      if (tag!="tudo")
+          ref
+          .snapshots()
+          .listen((data) => {
+             listaProdutos(data)
+      });
+
+  }
+
+
+  listaProdutos(QuerySnapshot data){
+
+    if (data.documents!=null) {
+        print("listaProdutos 0");
+        streamControl_ListaProdutos.sink.add(data);
+    } else {
+        print("listaProdutos 1");
+        streamControl_ListaProdutos.sink.close();
+    }
+  }
 
 
 }

@@ -10,11 +10,13 @@ class enderecoUserSnapShot {
   var localizacao;
 
   enderecoUserSnapShot (DocumentSnapshot snapshot){
-    this.rua=snapshot['rua'];
-    this.bairro=snapshot['bairro'];
-    this.numero=snapshot['numero'];
-    this.complemento=snapshot['complemento'];
-    this.localizacao=snapshot['localizacao'];
+       if (snapshot!=null){
+        this.rua=snapshot['rua'];
+        this.bairro=snapshot['bairro'];
+        this.numero=snapshot['numero'];
+        this.complemento=snapshot['complemento'];
+        this.localizacao=snapshot['localizacao'];
+      }
   }
 
 

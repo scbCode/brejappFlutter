@@ -175,10 +175,10 @@ _perfil_user(context){
   Navigator.push(
     context,
     PageTransition(
-      curve: Curves.bounceIn,
-      duration: Duration(milliseconds:500),
+      curve: Curves.elasticInOut,
+      duration: Duration(milliseconds:1000),
       alignment: Alignment.center,
-      type: PageTransitionType.leftToRight,
+      type: PageTransitionType.rightToLeftWithFade,
       child: Perfil_user(),
     ),
   );
@@ -202,10 +202,10 @@ _home(context){
   Navigator.pop(
     context,
     PageTransition(
-      curve: Curves.bounceIn,
-      duration: Duration(milliseconds:500),
+      curve: Curves.easeIn,
+      duration: Duration(milliseconds:1000),
       alignment: Alignment.center,
-      type: PageTransitionType.rightToLeft,
+      type: PageTransitionType.rightToLeftWithFade,
       child: MyHomePage(),
     ),
   );

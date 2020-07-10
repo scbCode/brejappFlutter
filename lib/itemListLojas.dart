@@ -57,62 +57,17 @@ class itemListLojasState extends State<itemListLojas> {
               Column(children: <Widget>[
                 Row(children: <Widget>[
 
-                  Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), alignment: Alignment.centerRight , child:
-                  Image.network(widget.snapshot["url"])),
-
                       Container(
                           margin: EdgeInsets.all(5),
                           child:
                           Stack(
                             children: <Widget>[
-                              Column(
+                              Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Container(width: 170, margin:EdgeInsets.fromLTRB(10, 8, 0, 0),child:Text(widget.snapshot["nome"],textAlign: TextAlign.left, style: TextStyle(fontSize:16,fontFamily: 'BreeSerif'))),
-                                  Row (mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Container(margin: EdgeInsets.fromLTRB(10, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                                      Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text("11.8km ",style: TextStyle(color: Colors.grey[500],fontSize: 13,fontFamily: 'RobotoLight'),)),
-                                      Container(margin: EdgeInsets.fromLTRB(10, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                                      Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text("Frete: ",style: TextStyle(color: Colors.grey[500],fontSize: 13,fontFamily: 'RobotoLight'),)),
-
-                                    ],),
-                                  Row (mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                           ],),
-                                    Container(
-                                        padding: EdgeInsets.all(2),
-                                        decoration: BoxDecoration(
-                                          
-                                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                                            color: Colors.white, boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.orange[200],
-                                            blurRadius: 0.50,
-                                            offset: Offset(
-                                              0.0, // horizontal, move right 10
-                                              0.5, // vertical, move down 10
-                                            ),
-                                          )
-                                        ]),
-                                        margin: EdgeInsets.fromLTRB(10, 8, 0, 0),height: 43,width: 170, child:
-                                    ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: widget.listaMarcas.length,
-                                          itemBuilder: (context, index) {
-
-                                              return
-                                                      Column(children: <Widget>[
-                                                      Container(height: 25 , child:
-                                                        Image.network(widget.listaMarcas[index])),
-                                            Container( child:
-                                                  Text("R\u00242,99", style: TextStyle(fontFamily: 'BreeSerif' ,fontSize: 8,color: Colors.orange,letterSpacing: 1),)
-                                            )
-                                              ],)
-                                              ;
-                                          }
-                                  ,))
-
+                                  Container( margin:EdgeInsets.fromLTRB(10, 5, 0, 0),child:Text(widget.snapshot["nome"],textAlign: TextAlign.left, style: TextStyle(fontSize:16,fontFamily: 'BreeSerif'))),
+                                  Container( margin:EdgeInsets.fromLTRB(10, 5, 0, 0),child:
+                                  Image.network(widget.snapshot["url"],width: 30,height: 30,)),
                                 ],),
                             ],)),
                 ],),

@@ -59,17 +59,18 @@ class _itemListProdstate extends State<itemListProd>  {
   var   qntd = 1;
   var uid;
   final bloc = BlocAll();
-  var styleTextFreteGratis = TextStyle(letterSpacing: 1.5,color: Colors.red,fontSize: 10,fontStyle: FontStyle.italic,fontFamily: 'RobotoBold');
-  var styleTextFrete =TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
+  var styleTextFreteGratis = TextStyle(color: Colors.grey[700],fontSize: 12,fontStyle: FontStyle.italic,fontFamily: 'RobotoBold');
+  var styleTextFrete =TextStyle(color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
   var styleTextFrete_ =TextStyle(color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
   var distTxt="";
   AnimationController _controllerIcon;
   List<String> lista = new List<String > ();
+
   @override
   Widget build(BuildContext context) {
+
     if (widget.produto.quantidade==null)
       widget.produto.quantidade=total;
-
 
 
     if (itemOn==true){
@@ -105,7 +106,7 @@ class _itemListProdstate extends State<itemListProd>  {
                           if (value.data[i].id==widget.produto.id){
                               print("BLOC ITEM == ITEM "+value.data[i].quantidade.toString());
                               if ( widget.produto.quantidade==0)
-                                widget.produto.quantidade=1;
+                                   widget.produto.quantidade=1;
                               widget.produto.quantidade=value.data[i].quantidade;
                               total=widget.produto.quantidade+incremental;
                               incremental=0;
@@ -184,9 +185,9 @@ class _itemListProdstate extends State<itemListProd>  {
                     mainAxisAlignment: MainAxisAlignment.start ,
                     children: <Widget>[
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Container(width: 50,height: 100, padding: EdgeInsets.fromLTRB(0, 5, 0, 5) , margin: EdgeInsets.fromLTRB(5, 0, 0, 0), alignment: Alignment.centerRight , child:
+                          Container(width: 50,height: 100, padding: EdgeInsets.fromLTRB(0, 0, 0, 0) , margin: EdgeInsets.fromLTRB(5, 0, 0, 0), alignment: Alignment.centerRight , child:
                           Image.network(widget.produto.img)),
                           Expanded(
                               child:
@@ -208,20 +209,46 @@ class _itemListProdstate extends State<itemListProd>  {
                                                 margin:EdgeInsets.fromLTRB(4, 3, 0, 0),height: 15,child:
                                             Text("gelada",style: TextStyle(fontSize: 10,color: Colors.lightBlue[400]),)))
                                           ],),
-                                          Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.descricao,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 0.7, color: Colors.grey[700], fontSize:12,fontFamily: 'RobotoLight'))),
-                                          Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.vol,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 1.9, color: Colors.grey[700], fontSize:12,fontFamily: 'RobotoLight'))),
+                                          Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.descricao,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 0.7, color: Colors.grey[700], fontSize:14,fontFamily: 'RobotoLight'))),
+                                          Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.vol,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 1.9, color: Colors.grey[700], fontSize:14,fontFamily: 'RobotoLight'))),
+                                         Container(
+                                             padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                             child:
+                                         Divider(height: 7,color: Colors.grey[200],)),
+                                          Container(alignment: Alignment.centerLeft,margin: EdgeInsets.fromLTRB(10, 2, 5, 0), child:Text(widget.produto.loja,textAlign: TextAlign.right, style: TextStyle(letterSpacing: 0.5,color: Colors.orange[300] ,fontSize:14,fontFamily: 'RobotoBold'))),
                                           Row (mainAxisAlignment: MainAxisAlignment.start,
                                             children: <Widget>[
-                                              Container(alignment: Alignment.bottomRight,margin: EdgeInsets.fromLTRB(10, 4, 5, 0), child:Text(widget.produto.loja,textAlign: TextAlign.right, style: TextStyle(letterSpacing: 0.5,color: Colors.orange[300] ,fontSize:12,fontFamily: 'RobotoLight'))),
+                                              Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Entrega: "+formatFrete(),style: styleTextFrete),),
                                               Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
                                               Visibility(
                                                 visible:view_dist,child:
                                               Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(
                                                 distTxt
-                                              ,style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
+                                                ,style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
                                               ),
+
+                                              Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
+
+                                              Visibility(
+                                                visible:widget.produto.cartaoApp,child:
+                                              Container(
+                                                  alignment: Alignment.bottomCenter,
+                                                  margin: EdgeInsets.fromLTRB(5, 5, 0, 0), child:
+                                              Image.asset("card-app.png",width: 20,)
+                                              ),),
+
+                                              Visibility(
+                                                visible:widget.produto.maquinaCartao,child:
+                                              Container(
+                                                  alignment: Alignment.bottomCenter,
+                                                  margin: EdgeInsets.fromLTRB(5, 5, 0, 0), child:
+                                                  Image.asset("card_machine.png",width: 15,)
+                                              ),),
+
                                             ],),
-                                          Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Entrega: "+formatFrete(),style: styleTextFrete),),
+
+
+
 
                                         ],),
                                       Container(

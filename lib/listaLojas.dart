@@ -41,6 +41,7 @@ class listaProdutoState  extends State<listaLojas> {
               break;
             case ConnectionState.active:
               return new ListView.builder(
+
                   scrollDirection: Axis.horizontal,
                   itemCount: snapshot.data.documents.length,
                   itemBuilder: (context, index) {

@@ -7,8 +7,9 @@ typedef SeletItem = Function(int,dynamic,dynamic);
 class itemCarduser extends StatefulWidget{
 
   var snapshot;
+  var tipo;
   SeletItem seletItem;
-  itemCarduser(this.snapshot,this.seletItem);
+  itemCarduser(this.snapshot,this.seletItem,this.tipo);
 
   @override
   itemCardState createState() =>itemCardState();
@@ -41,18 +42,30 @@ class itemCardState extends State<itemCarduser>  {
   }
 
   item (var data, var index){
-    var icon = Icons.radio_button_unchecked;
-    if (cartaoselect==index)
-      icon=Icons.radio_button_checked;
+    var icon;
+    if (widget.tipo=="compra") {
+       icon = Icons.radio_button_unchecked;
+      if (cartaoselect == index)
+        icon = Icons.radio_button_checked;
+    }else
+      icon = Icons.delete_forever;
+
+
 
     return
     GestureDetector(
         onTap:  (){
           setState(() {
             print("click cartao");
-            cartaoselect=index;
-            var idcard=widget.snapshot.data.documents[index].documentID;
-            widget.seletItem(cartaoselect,data,idcard);
+            if (widget.tipo=="compra") {
+              cartaoselect = index;
+              var idcard = widget.snapshot.data.documents[index].documentID;
+              widget.seletItem(cartaoselect, data, idcard);
+            }else
+              {
+                var idcard = widget.snapshot.data.documents[index].documentID;
+                widget.seletItem(cartaoselect, data, idcard);
+              }
           });
         },
         child:
@@ -82,9 +95,13 @@ class itemCardState extends State<itemCarduser>  {
                         style:
                         TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
                     ],),
+
+                  Visibility(
+                      visible: true,
+                      child:
                     Container(
                       margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                      child:Icon(icon,color: Colors.orange,),),
+                      child:Icon(icon,color: Colors.orange,),)),
                   ],)),
 
             ],),

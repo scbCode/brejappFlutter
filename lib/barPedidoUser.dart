@@ -65,7 +65,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   var txt_time_pedido="";
   var txt_time_confirmacao="";
   var txt_time_entrega="";
-  var scale=3.9;
+  var scale=3.5;
   var scaleentrega=3.95;
   var statustext="";
   var view_statusbar_pedido=true;
@@ -137,8 +137,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     return    barCestaCompleta();
 
   }
-  
-  
+
 
   barCestaCompleta(){
     print(widget.pedido);
@@ -178,7 +177,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     }
     if (widget.pedido.status=="aguardando") {
         setState(() {
-          scale=3.5;
+          scale=4.5;
           statustext = "Aguardando confirmação";
           status_confirmacao=false;
           status_entrega=false;
@@ -188,19 +187,21 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     }
 
     if (widget.pedido.status=="confirmado") {
-      setState(() {
-        DateTime data_pedido_confirma =widget.pedido.timeConfirmado.toDate();
-        txt_time_confirmacao =  "" +data_pedido_confirma.hour.toString()+" "+data_pedido_confirma.minute.toString();
-        scale=3.5;
-        statustext = "Seu pedido está sendo preparado";
-      status_confirmacao=true;
-      status_entrega=false;
-      });
+        setState(() {
+          DateTime data_pedido_confirma =widget.pedido.timeConfirmado.toDate();
+          txt_time_confirmacao =  "" +data_pedido_confirma.hour.toString()+" "+data_pedido_confirma.minute.toString();
+          scale=4.5;
+          statustext = "Seu pedido está sendo preparado";
+        status_confirmacao=true;
+        status_entrega=false;
+        });
     }
+
     if (widget.pedido.status=="nao_aceito") {
-      pedido_nao_aceito=false;
-      status_nao_aceito=true;
+        pedido_nao_aceito=false;
+        status_nao_aceito=true;
     }
+
     if (widget.pedido.status=="entrega") {
       setState(() {
         scale=12;
@@ -215,10 +216,10 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
         status_confirmacao=true;
         status_entrega=true;
      });
+
   }
 
     return
-//Container(decoration: BoxDecoration(color: Colors.transparent),child:
       SingleChildScrollView(child:
         Stack(
         alignment: Alignment.bottomCenter,
@@ -233,13 +234,10 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
             controller:_scrollController_pop,
             child:
         Container(
-          padding: EdgeInsets.fromLTRB(0, 0, 0, 2),
-          margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-          decoration: BoxDecoration(color: Colors.orange[100],
-            boxShadow: [
-          BoxShadow( color: Colors.grey,
-          offset: Offset(0.0,0.0,  ),)
-        ],),
+          padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+          margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+          decoration: BoxDecoration(color: Colors.transparent,
+            ),
         child:
         Stack(
             children: <Widget>[
@@ -270,49 +268,47 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 //          if (view_resumo_pedido)view_resumo_pedido=false;else view_resumo_pedido=true;});
             });} ,child:
             Container(
-                margin: EdgeInsets.fromLTRB(0, 0, 0,0),
+                margin: EdgeInsets.fromLTRB(10, 0, 10,0),
+                padding: EdgeInsets.fromLTRB(10, 0, 10,0),
                 decoration: BoxDecoration(color:Colors.white,
-                    boxShadow: [BoxShadow(color: Colors.grey[500],offset: Offset(0,0.0) ),
+                    borderRadius:BorderRadius.all(Radius.circular(15)),
+                    boxShadow: [BoxShadow(color: Colors.grey[500],blurRadius: 10,offset: Offset(0,0.0) ),
                     ]),
                 child:
                     
               Column(children: [
 
-                  Row(mainAxisAlignment: MainAxisAlignment.start ,
-                      children: [
-                        Container(padding: EdgeInsets.all(5),
-                            child:Text("Loja xxyy",style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.black),)),
+                  Row (mainAxisAlignment: MainAxisAlignment.start ,
+                        children: [
+                          Container(padding: EdgeInsets.all(5),
+                              child:Text("Loja xxyy",style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.black),)),
+                          Container(padding: EdgeInsets.all(5),
+                              margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              child:
+                              Text(statustext,
+                                style: TextStyle(fontFamily: 'BreeSerif',fontSize: 14,color: Colors.orange[700]),)),
+                  ]),
 
-                  Container(padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                    child:
-                    Text(statustext,
-                      style: TextStyle(fontFamily: 'BreeSerif',fontSize: 14,color: Colors.orange[700]),)),
-                ]),
-
-              Container(padding: EdgeInsets.fromLTRB(10, 0, 0, 0),child:
-              Row(mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      
-                    Column( children: [
-                        Container(
-                            margin: EdgeInsets.fromLTRB(0,15,0,0),
-                            padding: EdgeInsets.all(5),
-                            decoration:   BoxDecoration(color:Colors.orange,
-                                borderRadius:BorderRadius.all(Radius.circular(30))),
-                            child:Icon(Icons.shopping_basket,size: 22,color: Colors.white,)
-                        ),
-                       Text(txt_time_pedido,style:TextStyle(color:Colors.grey,fontSize:10))
-                      ]),
-
-                      Stack(children: [
+                Container(padding: EdgeInsets.fromLTRB(10, 0, 0, 0),child:
+                Row(mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                       Column ( children: [
+                            Container(
+                                  margin: EdgeInsets.fromLTRB(0,15,0,0),
+                                  padding: EdgeInsets.all(5),
+                                  decoration:   BoxDecoration(color:Colors.orange,
+                                  borderRadius:BorderRadius.all(Radius.circular(30))),
+                                  child:Icon(Icons.shopping_basket,size: 22,color: Colors.white,)),
+                             Text(txt_time_pedido,style:TextStyle(color:Colors.grey,fontSize:10))
+                       ]),
+                Stack (
+                       children: [
                         Container(
                           width: (MediaQuery.of(context).size.width)/scale,
                           child: Container(height:2,
                               decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3)),
                              ),
                         ),
-
                         Visibility(
                             visible:!status_entrega &&  !status_confirmacao,
                             child:
@@ -328,8 +324,9 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                               child: Container(height: 2,
                                   decoration: BoxDecoration(color: Colors.orange),
                                   padding: EdgeInsets.all(0)),
-                            )),
+                        )),
                       ]),
+
                       Visibility(
                         visible:status_confirmacao  ,
                         child:
@@ -626,13 +623,14 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
             Container(
               padding: EdgeInsets.fromLTRB(0, 0,0,20),
+              margin: EdgeInsets.fromLTRB(10, 10,10,0),
                 width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(color:Colors.white),
             child:
           Container(
               padding: EdgeInsets.fromLTRB(0, 0,0,20),
               decoration: BoxDecoration(color:Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.grey[100],offset: Offset(0,0.0) ),
+                  boxShadow: [BoxShadow(color: Colors.grey[400],blurRadius: 3 ,offset: Offset(0,0.0) ),
                   ]),
               child: 
               
@@ -1035,7 +1033,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
         ]),
 
-    ))))])
+    )   )    ))])
   ]));
   }
 
@@ -1436,28 +1434,26 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                   style:TextStyle())))),
 
       Visibility(visible: view_denunc_btn_outro,child:
-      GestureDetector(
-          onTap:(){
-
-            setState(() {
-              if (!view_field_denuncia) {
-                view_field_denuncia = true;
-                view_denunc_btn_prodeng =false;
-                view_denunc_btn_preceeng=false;
-                origemDenuncia="outro";
-
-              }else
-              {
-                view_denunc_btn_prodeng =true;
-                view_denunc_btn_preceeng=true;
-                bottompop=0.0;
-                origemDenuncia="";
-                view_field_denuncia = false;
-              }
-            });
-
-          },
-          child:
+          GestureDetector(
+              onTap:(){
+                setState(() {
+                  if (!view_field_denuncia) {
+                      view_field_denuncia = true;
+                      view_denunc_btn_prodeng =false;
+                      view_denunc_btn_preceeng=false;
+                      origemDenuncia="outro";
+                  }
+                    else
+                  {
+                      view_denunc_btn_prodeng =true;
+                      view_denunc_btn_preceeng=true;
+                      bottompop=0.0;
+                      origemDenuncia="";
+                      view_field_denuncia = false;
+                  }
+                });
+            },
+            child:
           Container(
               alignment: Alignment.center ,
               margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
@@ -1466,18 +1462,16 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               child:    Text("OUTRO",
                   style:TextStyle())))),
 
-      Visibility(visible: view_denunc_btn_outro && view_denunc_btn_prodeng && view_denunc_btn_preceeng,child:
-      GestureDetector(
-          onTap:(){
-
-            setState(() {
-              view_botoes_fazer_denuncia=false;
-              bg_pop_pedido=false;
-            });
-
-          },
+        Visibility(visible: view_denunc_btn_outro && view_denunc_btn_prodeng && view_denunc_btn_preceeng,
           child:
-          Container(
+        GestureDetector(
+            onTap:(){
+                setState(() {
+                  view_botoes_fazer_denuncia=false;
+                  bg_pop_pedido=false;
+                });
+            },child:
+        Container(
               alignment: Alignment.center ,
               margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
               padding: EdgeInsets.fromLTRB(10, 15,10,15),
@@ -1552,7 +1546,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
               borderRadius: BorderRadius.all(Radius.circular(2))),
           child:
           Container(
-            
+
           margin: EdgeInsets.fromLTRB(0, 0, 0,0),
     child:
     ClipRect(
@@ -1586,11 +1580,17 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
            Container(
                margin:EdgeInsets.fromLTRB(5,0,0,0),
                width: MediaQuery.of(context).size.width-75
-               ,child:   TextField(cursorColor: Colors.white,cursorRadius: Radius.circular(20),
+               ,child:
+           TextField (
+             cursorColor: Colors.white,cursorRadius: Radius.circular(20),
                style: TextStyle(color:Colors.white,fontFamily: 'BreeSerif'),
                controller: control_chattext,
-               decoration: InputDecoration(hintText: "MSG",focusColor: Colors.white,hintStyle: TextStyle(color:Colors.white) ),)),
-               GestureDetector(onTap:(){
+               decoration: InputDecoration(hintText: "MSG",
+                   focusColor: Colors.white,
+                   hintStyle: TextStyle(color:Colors.white) ),)),
+//
+
+          GestureDetector(onTap:(){
                  FocusScope.of(context).requestFocus(FocusNode());
                  bloc_financeiro.enviarMsgChat(control_chattext.text,widget.user.email, widget.user.uid, "user", widget.pedido.idloja, widget.pedido.idPedido,"" );
                  control_chattext.text="";
@@ -1701,7 +1701,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     msgDenuncia="";
   }
   _snackbarcor(text,cor){
-    final snackBar = SnackBar(backgroundColor: cor, content: Text(text));
+    final snackBar = SnackBar(backgroundColor: cor, content: Text(text,style:TextStyle(fontFamily: 'RobotoBold')));
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
@@ -1710,6 +1710,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
       text = "Total: R\u0024 "+getPrecoFormat(widget.pedido.total);
     return text;
   }
+
   getPrecoFormat(preco){
     preco = preco.toStringAsFixed(2).toString();
     preco=preco.replaceAll(".", ",");
@@ -1902,13 +1903,16 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   infoDistanciaTime(){
     var text="";
     for(int i = 0;i < widget.listaDistancia_.length;i++) {
-        if (widget.listaDistancia_[i].loja=="loja brejapp"){
+        if (widget.listaDistancia_[i].idloja==widget.pedido.idloja){
           var numb = widget.listaDistancia_[i].duracao.toString().split(" ");
           var n = numb[0];
           var duracao = int.parse(numb[0].toString()) + 30;
-          text = "previsão: "+n.toString() +" à "+duracao.toString() +" mins | "+formatDistancia(i);
+          text = "Previsão: de "+n.toString() +" à "+duracao.toString() +" mins | "+formatDistancia(i);
         }
     }
+    setState(() {
+
+    });
     return text;
   }
 
@@ -1965,15 +1969,16 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
         });
       }, child: Container(
-          margin: EdgeInsets.fromLTRB(0, 0, 0,0),
+          padding: EdgeInsets.fromLTRB(10, 10, 10,0),
+          margin: EdgeInsets.fromLTRB(10, 10, 10,0),
           child:
           ClipRect(
               child:  BackdropFilter(
                 filter:  ImageFilter.blur(sigmaX:3, sigmaY:3),
                 child:  Container(
-                  width: double.infinity,
+                  width: 150,
                   height:  double.infinity,
-                  decoration:  BoxDecoration(color: Colors.red[400].withOpacity(.7)),
+                  decoration:  BoxDecoration(color: Colors.orange[900].withOpacity(.7)),
                   child:
                   Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
                     Container(

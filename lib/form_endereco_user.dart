@@ -283,9 +283,10 @@ Container(
             GestureDetector(onTap: (){ _initSaveEndereco_check();},child:
             FlatButton (
               onPressed: () {
-                  if (widget.compareLocal!=null)
+
                   if (localupdate != widget.enderecoExist.localizacao )
                     getDirections();
+
               },
               textColor: Colors.white,
               padding: const EdgeInsets.all(0.0),

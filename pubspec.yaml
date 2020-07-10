@@ -91,6 +91,7 @@ flutter:
     - iconwhats.png
     - moto-on.png
     - moto-off.png
+    - card-app.png
   # FONTS
   fonts:
     - family: RobotoLight

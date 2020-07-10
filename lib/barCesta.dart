@@ -65,7 +65,7 @@ class barCestaState extends State<barCesta>   {
   var view_remove=false;
   var totaltxt="";
   var total=0.0;
-  var frete; 
+  var frete;
   TextEditingController c_cvv = TextEditingController();
 
   var listaProdutos;
@@ -1037,7 +1037,7 @@ class barCestaState extends State<barCesta>   {
                 .collection("cartoes").snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState== ConnectionState.active){
-                return  itemCarduser(snapshot, (value,cartao,idcartao){selectitem(value,cartao,idcartao);});
+                return  itemCarduser(snapshot, (value,cartao,idcartao){selectitem(value,cartao,idcartao);},"compra");
               } else
                 return Container(height: 50,);
 
@@ -1244,7 +1244,7 @@ class barCestaState extends State<barCesta>   {
                       Container(
                           width: MediaQuery.of(context).size.width*.54,
                           margin: EdgeInsets.fromLTRB(20, 25,0, 0),
-                          alignment: Alignment.center, child:
+                          alignment: Alignment.centerLeft, child:
                       Text(data['rua']+", "+data['bairro'], maxLines: 4,
                         overflow: TextOverflow.ellipsis,style:
                         TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
@@ -1281,7 +1281,7 @@ class barCestaState extends State<barCesta>   {
 //                  )),
                   Container(
                       height: 130,
-                      width:105,
+                      width:MediaQuery.of(context).size.width*.29,
                       margin: EdgeInsets.fromLTRB(0, 0, 0, 0), alignment: Alignment.centerLeft,
                       child:
                       Stack(children: <Widget>[
@@ -1293,7 +1293,6 @@ class barCestaState extends State<barCesta>   {
                             zoomGesturesEnabled: false,
                             scrollGesturesEnabled: false,
                             mapType: MapType.normal,
-
                             initialCameraPosition:  CameraPosition(
                                 target:getLocal(data),
                                 zoom: 17.0

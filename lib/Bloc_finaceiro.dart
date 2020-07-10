@@ -103,6 +103,24 @@ class Bloc_financeiro {
 
 
 
+  deleteCartao(var uid,var id)async{
+    var refData = Firestore.instance;
+    await Firestore.instance.collection('Usuarios').document(uid)
+        .collection("cartoes").document(id).delete();
+
+    return true;
+
+//    refData.collection("Usuarios")
+//        .document(uid).collection('cesta').orderBy("status").getDocuments().then((event) {
+//      for(int i =0;i<event.documents.length;i++) {
+//        event.documents[i].reference.delete();
+//      }
+//    });
+
+  }
+
+
+
   callTokenrizarCartao(var CustomerName,var CardNumber,var Holder,var ExpirationDate,var Brand) async {
 
       final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(

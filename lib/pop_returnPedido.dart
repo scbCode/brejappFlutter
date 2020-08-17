@@ -51,7 +51,7 @@ class pop_returnPedidoState extends State<pop_returnPedido>   with TickerProvide
                        alignment: Alignment.center,
                        margin: EdgeInsets.fromLTRB(10, 15, 10, 30),
                        child:
-                     Text("Sua solicitação de reembolso está sendo processada",textAlign: TextAlign.center ,style: TextStyle(fontSize: 16,fontFamily: 'RobotoLight',color: Colors.black))),
+                     Text("Estamos verificando o que ocorreu, sua solicitação de reembolso está sendo processada.",textAlign: TextAlign.center ,style: TextStyle(fontSize: 16,fontFamily: 'RobotoLight',color: Colors.black))),
 
                     GestureDetector(onTap:(){widget.call_show_pop_final();},child:
                      Container(

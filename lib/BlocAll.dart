@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_firestore/Bloc_finaceiro.dart';
 import 'package:flutter_firestore/prePedido.dart';
@@ -45,6 +46,10 @@ class BlocAll {
 
   var pedidoExist=false;
   var cestaExist=false;
+
+  var listaAutoComplete = [];
+
+
   Future getCesta() async{
 
 
@@ -118,7 +123,7 @@ class BlocAll {
         ((data)   {
        Loja loja = Loja(data);
        returnloja=loja;
-       print("LOJA GET "+loja.nome);
+
        return loja;
         }
       );
@@ -194,6 +199,7 @@ class BlocAll {
   }
 
   initBloc(){
+    getAutoComplete();
     print("Iniciando Bloc All");
     getCesta();
     getEnderecoUser();
@@ -246,7 +252,8 @@ class BlocAll {
     var ctrol=false;
     await refData.collection("Usuarios")
         .document(uid).collection('Pedidos')
-        .document(pedido).setData({"time_nao_aceito_visto":FieldValue.serverTimestamp(),"status":"finalizado-chegou",},merge: true)
+        .document(pedido).setData({"time_nao_aceito_visto":FieldValue.serverTimestamp(),
+      "status":"finalizado_user",},merge: true)
         .then((v){
       print("SAVE CANCEL-PEDIDO");
       ctrol=true;
@@ -262,7 +269,7 @@ class BlocAll {
     var ctrol=false;
     await refData.collection("Usuarios")
         .document(uid).collection('Pedidos')
-        .document(pedido).setData({"time_nao_aceito_visto":FieldValue.serverTimestamp(),"status":"nao_aceito_visto",},merge: true)
+        .document(pedido).setData({"time_canelado_loja_visto":FieldValue.serverTimestamp(),"status":"cancelado_loja_reembolso_desativado",},merge: true)
         .then((v){
       print("SAVE CANCEL-PEDIDO");
       ctrol=true;
@@ -363,7 +370,7 @@ class BlocAll {
         .document(uid).collection('Pedidos')
         .document(pedido).setData(
         {"time":FieldValue.serverTimestamp(),
-          "status":"desativado_finalizado"
+          "status":"finalizado_desativado"
         },merge: true
       ).then((v){
       print("SAVE FINALIZADO-PEDIDO");
@@ -450,15 +457,14 @@ class BlocAll {
 
   void StreamPedidos() async {
 
-
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     if (user!=null){
       var uid = user.uid;
-      var document = await Firestore.instance.collection('Usuarios').document(uid);
-      document.collection("Pedidos").snapshots()
-          .listen((data) => {
-            setUiPedido(data)
-      });
+        var document = await Firestore.instance.collection('Usuarios').document(uid);
+        document.collection("Pedidos").snapshots()
+            .listen((data) => {
+              setUiPedido(data)
+        });
     }
 
   }
@@ -477,12 +483,15 @@ class BlocAll {
             print ("BLOC - getPedido EXIXST ");
             pd.setPedido(p);
             if ( pd.status != "cancelado_user" &&
+                pd.status != "cancelado_loja_visto" &&
                 pd.status != "cancelado_user_reembolso" &&
+                pd.status != "cancelado_loja_reembolso_desativado" &&
                 pd.status != "nao_aceito_visto" &&
-                pd.status != "desativado_finalizado"){
+                pd.status != "finalizado_desativado"){
             pedidos.add(pd);
             streamControl_Pedidos.sink.add(pedidos);
             }
+
          });
 
 //
@@ -588,39 +597,74 @@ class BlocAll {
 
 
 
+  resetListProduto() async {
+
+    var ref = Firestore.instance
+        .collection("Produtos_On").orderBy("loja", descending: false);
+
+    streamControl_ListaProdutos.sink.add(null);
+
+    ref = Firestore.instance
+        .collection("Produtos_On").orderBy("preco",descending: false);
+      ref
+          .snapshots()
+          .listen((data) => {
+        listaProdutos(data)
+      });
+
+  }
 
   getListaProdutos(var tag,var busca) async {
+
 
       var ref = Firestore.instance
           .collection("Produtos_On").orderBy("preco",descending: false);
 
-      if (tag=="tags")
-        ref =    Firestore.instance
-            .collection("Produtos_On")
-            .where(tag,arrayContains: busca.toString().toLowerCase()).orderBy("preco",descending: false);
-      else
-      if (tag!="tudo")
-          ref =    Firestore.instance
-          .collection("Produtos_On")
-          .where(tag,isEqualTo: busca).orderBy("preco",descending: false);
+      busca=busca.toString().toLowerCase();
+      var busctext = removeDiacritics(busca);
 
-      //////////////////////
-      //////////////////////
-      //////////////////////
-      if (tag=="tudo")
-            ref
-            .snapshots()
+      for (var i = 0; i <listaAutoComplete.length; i++){
+
+        if (listaAutoComplete[i].toString().toLowerCase()==busca) {
+          print(" IGUAL ");
+
+          busctext = listaAutoComplete[i];
+        } else
+        if (listaAutoComplete[i].toString().toLowerCase().contains(busca))
+          busctext=listaAutoComplete[i];
+      }
+
+      print("busctext "+busctext );
+      if (tag=="tags" || tag=="tipo" || tag=="marca" || tag=="tamanho"  ) {
+
+        ref = Firestore.instance
+            .collection("Produtos_On")
+            .where("tags", arrayContains: busctext)
+            .orderBy("preco", descending: false);
+      }else
+        if (tag!="tudo")
+            ref = Firestore.instance
+            .collection("Produtos_On")
+            .where(tag,isEqualTo: busca).orderBy("preco",descending: false);
+
+
+        ref.snapshots()
             .listen((data) => {
           listaProdutos(data)
         });
 
-      if (tag!="tudo")
-          ref
-          .snapshots()
-          .listen((data) => {
-             listaProdutos(data)
-      });
 
+  }
+
+  getAutoComplete(){
+    Firestore.instance
+        .collection("Autocomplete")
+      .snapshots()
+        .listen((data) => {
+      data.documents.forEach((element) {
+        listaAutoComplete.add(element.data['nome']);
+      })
+    });
   }
 
 
@@ -631,10 +675,24 @@ class BlocAll {
         streamControl_ListaProdutos.sink.add(data);
     } else {
         print("listaProdutos 1");
-        streamControl_ListaProdutos.sink.close();
+        streamControl_ListaProdutos.sink.add(null);
     }
   }
 
+  additemcesta(var produto)async{
+    produto.quantidade=1;
+
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    var uid = user.uid;
+    final bloc = BlocAll();
+
+    await Firestore.instance.collection("Usuarios")
+          .document(uid).collection("cesta").document(produto.id).setData(produto.getproduto())
+          .then((e){
+          bloc.getCesta();
+      });
+
+  }
 
 }
 

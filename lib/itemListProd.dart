@@ -103,7 +103,8 @@ class _itemListProdstate extends State<itemListProd>  {
                       if (value.data.isNotEmpty) {
                         var ct5rl=false;
                         for ( int i = 0;i< value.data.length;i++ ){
-                          if (value.data[i].id==widget.produto.id){
+
+                          if (value.data[i].id+""+value.data[i].idloja==(widget.produto.id+""+widget.produto.idloja)){
                               print("BLOC ITEM == ITEM "+value.data[i].quantidade.toString());
                               if ( widget.produto.quantidade==0)
                                    widget.produto.quantidade=1;
@@ -223,7 +224,7 @@ class _itemListProdstate extends State<itemListProd>  {
                                               Visibility(
                                                 visible:view_dist,child:
                                               Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(
-                                                distTxt
+                                                distanceTo().toString()
                                                 ,style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
                                               ),
 
@@ -234,7 +235,7 @@ class _itemListProdstate extends State<itemListProd>  {
                                               Container(
                                                   alignment: Alignment.bottomCenter,
                                                   margin: EdgeInsets.fromLTRB(5, 5, 0, 0), child:
-                                              Image.asset("card-app.png",width: 20,)
+                                              Image.asset("card-app.png",width: 15,)
                                               ),),
 
                                               Visibility(
@@ -244,18 +245,12 @@ class _itemListProdstate extends State<itemListProd>  {
                                                   margin: EdgeInsets.fromLTRB(5, 5, 0, 0), child:
                                                   Image.asset("card_machine.png",width: 15,)
                                               ),),
-
                                             ],),
-
-
-
-
                                         ],),
                                       Container(
                                           alignment: Alignment.centerRight,
                                           margin:EdgeInsets.fromLTRB(0, 15, 5, 0),child:Text("R\u0024 "+_FormatPreco(widget.produto.preco.toString()),textAlign: TextAlign.left, style: TextStyle(color: Colors.deepOrangeAccent,fontSize:24,fontFamily: 'BreeSerif'))),
                                     ],))),
-
 
                         ],),
                       Stack(children: <Widget>[
@@ -484,8 +479,8 @@ class _itemListProdstate extends State<itemListProd>  {
       }else {
         if (distKm != 0.0) {
           styleTextFrete=styleTextFrete_;
-          var frete = (coef * distKm).round();
-          var fretef = frete.toStringAsFixed(2).toString();
+          var frete = (coef * distKm);
+          var fretef = frete.toStringAsFixed(2).toString().replaceAll(".", ",");
           return "R\u0024 "+fretef;
         } else
           return "...";
@@ -577,7 +572,7 @@ class _itemListProdstate extends State<itemListProd>  {
   _removeItemCesta() async{
 
     await Firestore.instance.collection("Usuarios")
-        .document(uid).collection("cesta").document(widget.produto.id).delete();
+        .document(uid).collection("cesta").document(widget.produto.idloja+""+widget.produto.id).delete();
 
     setState(() {
       itemOn=false;
@@ -629,7 +624,7 @@ class _itemListProdstate extends State<itemListProd>  {
 
     if (uid!=null)
       await Firestore.instance.collection("Usuarios")
-          .document(uid).collection("cesta").document(item.id).updateData(p.getproduto());
+          .document(uid).collection("cesta").document(widget.produto.idloja+""+item.id).updateData(p.getproduto());
 
   }
 
@@ -641,15 +636,17 @@ class _itemListProdstate extends State<itemListProd>  {
     item.quantidade=total;
     if (uid!=null)
       await Firestore.instance.collection("Usuarios")
-          .document(uid).collection("cesta").document(item.id).updateData(p.getproduto());
+          .document(uid).collection("cesta").document(widget.produto.idloja+""+item.id).updateData(p.getproduto());
   }
 
 
   void addItemCesta(Produto_cesta item) async{
+
     var ctrol = false;
     if(widget.listaCesta!=null){
       if(widget.listaCesta.length>0) {
         for (int i = 0;i<widget.listaCesta.length;i++){
+
           if (widget.listaCesta[0].idloja != item.idloja) {
             print("loja diff");
             ctrol = true;
@@ -662,8 +659,9 @@ class _itemListProdstate extends State<itemListProd>  {
 
     item.quantidade=total;
     if (ctrol==false){
+      var idp = item.idloja+""+item.id;
         await Firestore.instance.collection("Usuarios")
-            .document(uid).collection("cesta").document(item.id).setData(item.getproduto())
+            .document(uid).collection("cesta").document(idp).setData(item.getproduto())
         .then((e){
             setState(() {
               print("add item lista pos load");
@@ -687,12 +685,8 @@ class _itemListProdstate extends State<itemListProd>  {
 
   @override
   void initState() {
-
-
     lista= bloc.getLojasOn();
-
     getUser();
-
     super.initState();
   }
 
@@ -705,13 +699,6 @@ class _itemListProdstate extends State<itemListProd>  {
 
     if (uid!=null)
     bloc.getCesta();
-    distanceTo();
-//    _controllerIcon = AnimationController(duration: Duration(milliseconds: 10000));
-//
-//    setState(() {
-//      _controllerIcon.forward(from: 0.0);
-//      _controllerIcon.repeat();
-//    });
 
     if ( widget.distancias!=null) {
       view_dist=true;
@@ -720,20 +707,15 @@ class _itemListProdstate extends State<itemListProd>  {
 
   }
 
-
-
   @override
-
   void dispose() {
-//    _controllerIcon.dispose();
-
+//  _controllerIcon.dispose();
     super.dispose();
   }
 
+  distanceTo() {
 
-  String distanceTo() {
-
-    var ctrol =false;
+    distTxt="";
     if ( widget.distancias!=[])
       if ( widget.distancias.isNotEmpty)
         if ( widget.distancias!=null){
@@ -748,19 +730,12 @@ class _itemListProdstate extends State<itemListProd>  {
                   valeu=valeu/1000;
                   unidadeMedida = "km";
                 }
-                setState(() {
-                distTxt= valeu.toStringAsFixed(1)+""+unidadeMedida;
-                });
-
-                ctrol=true;
+                distTxt= valeu.toStringAsFixed(2)+""+unidadeMedida;
               }
           }
         }else
         {
         }
-
-
-
 
     return distTxt;
 

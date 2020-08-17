@@ -65,10 +65,12 @@ class barCestaState extends State<barCesta>   {
   var view_remove=false;
   var totaltxt="";
   var total=0.0;
-  var frete;
+  var frete=0.0;
+  var v_cartaoapp=false;
   TextEditingController c_cvv = TextEditingController();
 
   var listaProdutos;
+  var pedidoMinimo=0;
   double initial=0.0;
   var bloc = BlocAll();
   var bloc_financeiro = Bloc_financeiro();
@@ -109,6 +111,7 @@ class barCestaState extends State<barCesta>   {
   var view_deb_maq=false;
   var view_cred_maq=false;
   var view_card_form = false;
+  var greyfilter=BlendMode.color;
   var idCartao;
   enderecoUserSnapShot end_user;
   enderecoUser end_user_;
@@ -131,7 +134,6 @@ class barCestaState extends State<barCesta>   {
 
   @override
   Widget build(BuildContext context) {
-    _checkreresult();
 
    if (widget.view_barra_ctrol==false){
      //listaCesta_=listaCesta();
@@ -182,10 +184,13 @@ class barCestaState extends State<barCesta>   {
         maquina = widget.listaCesta[0].maquinaCartao;
       });
 
+    v_cartaoapp=widget.listaCesta[0].cartaoApp;
+
     if (widget.user.uid==null)
       return Container();
     else
     return
+
       Visibility(visible: view,child:
       barCompleta());
 
@@ -199,8 +204,24 @@ class barCestaState extends State<barCesta>   {
     super.dispose();
   }
 
+  getLoja() async{
+    print("getLoja");
+    var idloja;
+      Produto_cesta p =  widget.listaCesta[0];
+       idloja=p.idloja;
+    Loja loja = await bloc.getLojaPedido(idloja);
+    if (loja!=null) {
+      setState((){
+        print("pedidoMinimo");
+        print(loja.pedidoMinimo);
+        pedidoMinimo= loja.pedidoMinimo;
+      });
+    }
+    print("loja xxxy "+loja.tell);
+  }
 
   barCompleta(){
+    _checkreresult();
     return
 //Container(decoration: BoxDecoration(color: Colors.transparent),child:
       SingleChildScrollView(child:
@@ -245,47 +266,9 @@ class barCestaState extends State<barCesta>   {
                   Visibility(visible: (pagSelectfinal), child:
                   viewcomprapagamento_,),
 
-//                  Visibility(visible:pagSelect, child:
-//                  ColorFiltered(
-//                    colorFilter: ColorFilter.mode(
-//                      Colors.grey,
-//                      BlendMode.saturation,
-//                    ),
-//                      child:viewcomprapagamento_
-//                  ),),
 
-//                  Visibility(visible:view_resumo_cesta && !widget.view_barra_ctrol, child:
-//                      Container(height: 35, decoration:BoxDecoration(color:Colors.orange),
-//                    child:  Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
-//
-
-//              Container(margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
-//              Text("R\u0024 " + totaltxt.toString(), style: TextStyle(
-//                  color: Colors.white,
-//                  fontFamily: 'RobotoBold',
-//                  fontWeight: FontWeight.bold,
-//                  fontSize: 14),)),
-//
-//              Container(padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-//                  decoration: BoxDecoration(
-//                      borderRadius: BorderRadius.all(Radius.circular(5))),
-//                  alignment: Alignment.centerRight,
-//                  margin: EdgeInsets.fromLTRB(5, 5, 0, 5),
-//                  child: Image.asset("basket_.png",width:25,height:25,)),
-////        Icon(Icons.shopping_basket, color: Colors.white)),
-//              Container(padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-//                  decoration: BoxDecoration(
-//                      borderRadius: BorderRadius.all(Radius.circular(5))),
-//                  alignment: Alignment.centerRight,
-//                  margin: EdgeInsets.fromLTRB(5, 5, 15, 5),
-//                  child:
-//                  Text(qntdItenstxt, style: TextStyle(color: Colors.white,
-//                      fontFamily: 'RobotoBold',
-//                      fontWeight: FontWeight.bold,
-//                      fontSize: 16),)),
-//            ],),
-//                  )),
                   Visibility(visible:view_resumo_cesta || !widget.view_barra_ctrol && !fazerpedido, child:
+//                  Visibility(visible:view_resumo_cesta || !widget.view_barra_ctrol && !fazerpedido, child:
                   LimitedBox(maxHeight:MediaQuery.of(context).size.height*.7,child:
                   SingleChildScrollView(child:
                   Container(
@@ -324,14 +307,25 @@ class barCestaState extends State<barCesta>   {
                                 margin: EdgeInsets.fromLTRB(0, 10,0, 5),
                                 alignment: Alignment.topCenter, child: listaCesta_),
 
+                            Text("Pedido mínimo de R\$ "+pedidoMinimo.toString(),style:
+                            TextStyle(color: Colors.grey,fontFamily: 'BreeSerif',fontSize:16),),
+//
                             Visibility(visible: !view_cestadetalhes,child:
                             GestureDetector(onTap: (){
                               setState(() {
 
+                                var t = double.parse(total.toString().replaceAll(",", "."));
+                                print('$pedidoMinimo  $t');
+                                if (pedidoMinimo <= t){
                                 if (view_cestadetalhes){
-                                  view_cestadetalhes=false;}
-                                else
-                                  view_cestadetalhes=true;
+                                    view_cestadetalhes=false;}
+                                  else
+                                    view_cestadetalhes=true;
+                                }else
+                                  {
+                                    _snackbar("Pedido mínimo de R\$ "+pedidoMinimo.toString().replaceAll('.',','));
+                                  }
+
                               });
                             },
                               child:
@@ -342,7 +336,7 @@ class barCestaState extends State<barCesta>   {
                                   padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                                   alignment: Alignment.topCenter, child:
                               Text("Fazer pedido",style:
-                              TextStyle(color: Colors.orange,fontFamily: 'RobotoLight'),)),)),
+                              TextStyle(color: Colors.orange,fontFamily: 'BreeSerif',fontSize:20),)),)),
 //
 
                             Visibility(visible: view_cestadetalhes,child:
@@ -375,47 +369,31 @@ class barCestaState extends State<barCesta>   {
                                     Container(
                                         padding: EdgeInsets.fromLTRB(10,10,0,0),
                                         alignment: Alignment.centerLeft,
-                                        child: Text("TOTAL + FRETE: "+totalComFrete()
+                                        child: Text("Total com frete: "+totalComFrete()
                                           ,textAlign: TextAlign.center,style: TextStyle(fontSize: 19,fontFamily: 'BreeSerif',color: Colors.orange),)),
-
-                                    GestureDetector(
-                                        onTap: (){
-                                          setState(() {
-                                            if (!view_cestadetalhespreco)
-                                              view_cestadetalhespreco=true;
-                                            else
-                                              view_cestadetalhespreco=false;
-                                          });
-                                        },
-                                        child:
-                                        Container(
-                                            padding: EdgeInsets.fromLTRB(10,10,0,0),
-                                            alignment: Alignment.centerLeft,
-                                            child: Text("mais detalhes",
-                                              textAlign: TextAlign.right,
-                                              style:
-                                              TextStyle(fontSize: 12,fontFamily: 'RobotoRegular',color: Colors.black54),))),
 
                                   ]),
                                   //END ENTREGA TEXT
-                                  Visibility(visible:view_cestadetalhespreco, child:
-                                  Row(children: <Widget>[
+                                  Visibility(visible:true, child:
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
 
                                     Container(
                                         padding: EdgeInsets.fromLTRB(20,5,0,10),
-                                        alignment: Alignment.centerLeft,
+                                        alignment: Alignment.center,
                                         child: Text("FRETE: "+formatFrete() ,style:
                                         TextStyle(fontStyle: FontStyle.italic,fontSize: 14,fontFamily:'RobotoRegular',color: Colors.black54),)),
                                     Visibility(visible: cartao,child:
                                     Container(
-                                        padding: EdgeInsets.fromLTRB(15,0,0,0),
-                                        alignment: Alignment.centerLeft,
-                                        child: Image.asset("credit-card.png",width: 20,height: 20,))),
-                                    Visibility(visible: cartao,child:
-                                    Container(
                                         padding: EdgeInsets.fromLTRB(5,0,0,0),
                                         alignment: Alignment.centerLeft,
-                                        child: Image.asset("machine2.png",width: 20,height: 20,))),
+                                        child: Image.asset("card-app.png",width: 20,height: 20,))),
+                                    Visibility(visible: cartao,child:
+                                    Container(
+                                        padding: EdgeInsets.fromLTRB(10,0,0,0),
+                                        alignment: Alignment.centerLeft,
+                                        child: Image.asset("card_machine.png",width: 20,height: 20,))),
                                   ],)),
 
                                   Divider(color:Colors.grey),
@@ -466,7 +444,7 @@ class barCestaState extends State<barCesta>   {
                               Container(
                                   margin: EdgeInsets.fromLTRB(10, 10,0,10),
                                   alignment: Alignment.center, child:
-                              Text("Qual a forma de pagamento?",
+                              Text("Qual a forma de pagamento?x",
                                 style:
                                 TextStyle(color: Colors.black,fontSize: 17,fontFamily: 'BreeSerif'),)),
                               //PAGUE DINHEIRO
@@ -474,16 +452,20 @@ class barCestaState extends State<barCesta>   {
                               //MAQUINA CARTÃO
                               Visibility(visible: maquina,
                                   child:formaPagMaquina()),
+                              Visibility(visible:view_troco,child:Container(height:75)),
 
                               //LISTA CARTOES USER
-                              Container(
-                                  margin: EdgeInsets.fromLTRB(25, 10,0,10),
-                                  alignment: Alignment.centerLeft, child:Text("Seus cartões",
-                                  style:TextStyle(fontFamily: 'BreeSerif',fontSize:18,color:Colors.grey))),
-                              //LISTA SEUS CARTOES
-                              view_cards_,
-                              //BTN ADD CARTOES
-                              pagamentoCartaoVazio(),
+                              Visibility(visible:v_cartaoapp,child:
+                                Column(children:[
+                                  Container(
+                                    margin: EdgeInsets.fromLTRB(25, 10,0,10),
+                                    alignment: Alignment.centerLeft, child:Text("Seus cartões",
+                                    style:TextStyle(fontFamily: 'BreeSerif',fontSize:18,color:Colors.grey))),
+                                //LISTA SEUS CARTOES
+                                 view_cards_,
+                                //BTN ADD CARTOES
+                                pagamentoCartaoVazio(),
+                              ])),
 
                             ])),
                       ])
@@ -491,6 +473,62 @@ class barCestaState extends State<barCesta>   {
             )),),
 
           ]),
+          StreamBuilder(
+              stream: Firestore.instance.collection('Lojas_ON')
+                  .document(widget.listaCesta[0].idloja)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.active)
+                  return Container();
+                else
+                if (snapshot.connectionState == ConnectionState.active)
+                  if (snapshot.data.data!=null){
+                    return Container();
+                }else{
+                    return
+                      Visibility(
+                        visible: view_resumo_cesta,
+                        child:
+                        Container(
+                            alignment: Alignment.center,
+                            width:MediaQuery.of(context).size.width,
+                            height:MediaQuery.of(context).size.height,
+                          decoration: BoxDecoration(color:Colors.grey.withOpacity(.3)),
+                            child:
+                            Container(
+                                alignment: Alignment.center,
+                                height: 170,
+                                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                decoration: BoxDecoration(color:Colors.white,
+                                    boxShadow: [BoxShadow(color:Colors.grey,blurRadius: 3)],
+                                    borderRadius: BorderRadius.all(Radius.circular(25))),
+                                child:
+                                Column(children:[
+                                  Text("Esta loja ficou offline",
+                                      style:TextStyle(fontFamily: 'BreeSerif',
+                                          color:Colors.orange,fontSize: 24)),
+                                Container(
+                                    alignment: Alignment.center,
+                                    padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                    child:    Text("Não é possivel continuar com esse pedido",
+                                      textAlign: TextAlign.center,style:TextStyle(fontFamily: 'BreeSerif',
+                                          color:Colors.grey,fontSize: 18))),
+
+                               GestureDetector(
+                                   onTap:(){
+                                     deleteCesta();
+                                   },
+                                   child:
+                                  Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                      child:    Text("Limpar cesta aqui",
+                                          style:TextStyle(fontFamily: 'RobotoLight',
+                                              color:Colors.black,fontSize: 20)))),
+                                ])
+                            )));}
+              }),
 
             Visibility(visible: view_cvv_pop  ,child:
             Column(
@@ -525,8 +563,6 @@ class barCestaState extends State<barCesta>   {
 
                                                 setState((){
                                                   view_cvv_pop=false;
-                                                  show_popprocessando=true;
-                                                  pagSelectfinal=false;
                                                 });
                                               },
                                               child:
@@ -592,6 +628,19 @@ class barCestaState extends State<barCesta>   {
                 formularioCartao(),visible: view_card_form,)),
 
           ]));
+  }
+
+
+
+
+  deleteCesta()async{
+    Produto_cesta p = new Produto_cesta(listaProdutos[0]);
+    await Firestore.instance.collection('Usuarios').document(widget.user.uid)
+        .collection("cesta").getDocuments().then((event) {
+         event.documents.forEach((element) {
+              element.reference.delete();
+         });
+    });
   }
 
   returnoErroPagamentoCartao() {
@@ -1112,6 +1161,7 @@ class barCestaState extends State<barCesta>   {
 
   @override
   void initState() {
+    getLoja();
 
     layout_maquina=formaPagMaquina();
     layout_dinheiro=pagamentoDinheiro();
@@ -1125,6 +1175,7 @@ class barCestaState extends State<barCesta>   {
     listaCesta_=listaCesta();
     if (widget.listaCesta.length==0)
       widget.call_back_show_bg(false);
+    _checkreresult();
 
     super.initState();
   }
@@ -1153,13 +1204,14 @@ class barCestaState extends State<barCesta>   {
             .collection("endereco").where("temp",isEqualTo: false).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState==ConnectionState.active){
-            if (snapshot.data.documents.length > 0) {
-                enderecoTemp_=false;
-                print("endereco principal");
-              return
-                enderecoUserView(snapshot.data.documents[0]);
+
+          if (snapshot.data.documents.length > 0) {
+                  enderecoTemp_=false;
+                return
+                  enderecoUserView(snapshot.data.documents[0]);
             }
             else{
+
               return
                 StreamBuilder(
                     stream: Firestore.instance.collection('Usuarios').document(widget.user.uid)
@@ -1356,16 +1408,18 @@ class barCestaState extends State<barCesta>   {
             ],));
   }
   getLocal(var data){
-    var   _center;
+    var   _center ;
 
-    print(data['localizacao']);
-    print(data['localizacao'].longitude);
+    if (data!=null) {
+      print(data['localizacao']);
+      print(data['localizacao'].longitude);
 
-    _center=new LatLng(data['localizacao'].latitude,
-        data['localizacao'].longitude);
-    if (mapController!=null)
-      mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 15));
 
+      _center = new LatLng(data['localizacao'].latitude,
+          data['localizacao'].longitude);
+      if (mapController != null)
+        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 15));
+    }
     return _center;
   }
 
@@ -1748,6 +1802,8 @@ class barCestaState extends State<barCesta>   {
       print("desativaformend");
 
       view_form_end=false;
+      bloc.resetListProduto();
+
     });
   }
 
@@ -1872,7 +1928,7 @@ class barCestaState extends State<barCesta>   {
           return "Entrega gratis";
         } else {
           if (distKm != 0.0) {
-            var frete = (coef * distKm).round();
+            var frete = (coef * distKm);
             var fretef = frete.toStringAsFixed(2).toString();
             return "R\u0024 " + fretef;
           } else
@@ -1891,14 +1947,14 @@ class barCestaState extends State<barCesta>   {
 
     for (int i = 0; i < widget.listaCesta.length;i++) {
       if (widget.listaDistancia_ != null) {
-        if (widget.listaCesta[i].loja == widget.listaDistancia_.loja) {
-          distKm = double.parse(widget.listaDistancia_.distancia) / 1000;
-          if (widget.listaCesta[0].distanciaGratisKm >= distKm) {
-            return "R\u0024 " + total.toStringAsFixed(2).replaceAll(".", ",");
-          }
-          else {
-            if (distKm != 0.0) {
-              var frete_ = (coef * distKm).round();
+        if (widget.listaCesta[i].idloja == widget.listaDistancia_.idloja) {
+            distKm = double.parse(widget.listaDistancia_.distancia) / 1000;
+            if (widget.listaCesta[0].distanciaGratisKm >= distKm) {
+              return "R\$ " + total.toStringAsFixed(2).replaceAll(".", ",");
+            }
+            else {
+            if (distKm != null) {
+              var frete_ = (coef * distKm);
               var fretef = (total + frete_).toStringAsFixed(2).replaceAll(".", ",");
               frete = frete_;
               return fretef;
@@ -1957,6 +2013,7 @@ class barCestaState extends State<barCesta>   {
 
 
   listaCards()  {
+
     return
       Container(
           height: 125,
@@ -2029,22 +2086,19 @@ class barCestaState extends State<barCesta>   {
     var valfinal=0.0;
     if (widget.listaCesta.length==0)
       widget.call_back_show_bg(false);
-    print("data "+widget.listaCesta.length.toString());
     for (int i = 0; i <  widget.listaCesta.length; i++) {
 
       Produto_cesta produto = widget.listaCesta[i];
       var preco = produto.preco;
-      print("precooo quantidade 1 "+preco.toString());
 
       var quantidade = produto.quantidade;
       var t = (preco * quantidade);
-      print("precooo quantidade 2 "+t.toString());
 
       total += t;
       qntdItens += quantidade;
       qntdItenstxt = qntdItens.toStringAsFixed(0).toString() + " itens";
 
-      valfinal = total;
+      valfinal = total ;
 
 
     }
@@ -2085,6 +2139,8 @@ class barCestaState extends State<barCesta>   {
     pedido_.idloja=idloja;
     pedido_.emailUser=widget.user.email;
     pedido_.statusPagamento=false;
+    pedido_.distancia = widget.listaDistancia_.distancia;
+    pedido_.previsao = widget.listaDistancia_.duracao;
     Random random = new Random();
     int randomNumber = random.nextInt(1000000) + 10000;
     pedido_.idPedido=idloja+""+ randomNumber.toString();

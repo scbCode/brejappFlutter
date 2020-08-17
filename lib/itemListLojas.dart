@@ -5,13 +5,15 @@ import 'package:flutter_firestore/perfil_loja.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'animator.dart';
+typedef OpenPerfil = String Function(String);
 
 class itemListLojas extends StatefulWidget {
 
   DocumentSnapshot snapshot;
   var listaMarcas= [];
-
-  itemListLojas (this.snapshot, this.listaMarcas);
+  OpenPerfil openPerfil;
+  var index;
+  itemListLojas (this.snapshot, this.listaMarcas,this.openPerfil);
 
 
   @override
@@ -32,7 +34,7 @@ class itemListLojasState extends State<itemListLojas> {
       GestureDetector(
           onTap: (){
             setState((){
-              _perfil(context);
+              widget.openPerfil(widget.snapshot['idloja']);
             });
           },
           child:
@@ -53,10 +55,8 @@ class itemListLojasState extends State<itemListLojas> {
                   color: Colors.white
               ),
               child:
-
               Column(children: <Widget>[
                 Row(children: <Widget>[
-
                       Container(
                           margin: EdgeInsets.all(5),
                           child:
@@ -65,28 +65,21 @@ class itemListLojasState extends State<itemListLojas> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Container( margin:EdgeInsets.fromLTRB(10, 5, 0, 0),child:Text(widget.snapshot["nome"],textAlign: TextAlign.left, style: TextStyle(fontSize:16,fontFamily: 'BreeSerif'))),
-                                  Container( margin:EdgeInsets.fromLTRB(10, 5, 0, 0),child:
-                                  Image.network(widget.snapshot["url"],width: 30,height: 30,)),
+                                  Container( margin:EdgeInsets.fromLTRB(10, 10, 0, 0),
+                                      child:Text(widget.snapshot["nome"],
+                                          textAlign: TextAlign.left,
+                                          style: TextStyle(fontSize:16,fontFamily: 'BreeSerif'))),
+                                  Container( margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:
+                                  Image.network(widget.snapshot["url"],width: 40,height: 40,)),
                                 ],),
                             ],)),
                 ],),
               ],)
-          ));
-
+      ));
   }
 
   _perfil(context){
-    Navigator.push(
-      context,
-      PageTransition(
-        curve: Curves.bounceIn,
-        duration: Duration(milliseconds:500),
-        alignment: Alignment.center,
-        type: PageTransitionType.leftToRight,
-        child: perfil_loja(widget.snapshot["idloja"]),
-      ),
-    );
+
   }
 
 }

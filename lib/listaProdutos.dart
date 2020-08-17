@@ -70,7 +70,6 @@ class listaProdutoState  extends State<listaProdutos> {
   var local_end;
   var local_=null;
   var viewListProd=false;
-  var listalojasview = listaLojas();
   var listaProdutos;
   var bloc = BlocAll();
   var bloc_finance = Bloc_financeiro();

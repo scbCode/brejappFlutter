@@ -14,9 +14,11 @@ import 'package:flutter_firestore/enderecoUserSnapShot.dart';
 import 'package:flutter_firestore/form_endereco_user.dart';
 import 'package:flutter_firestore/itemListProd.dart';
 import 'package:flutter_firestore/pop_returnPedido.dart';
+import 'package:flutter_firestore/prePedido.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 
+import 'BlocAll.dart';
 import 'Produto_cesta.dart';
 import 'cartao_form.dart';
 import 'enderecoUser.dart';
@@ -51,6 +53,7 @@ class Perfil_user extends StatefulWidget {
 }
 
 class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStateMixin {
+  var bloc = new BlocAll();
 
   var t="x";
   var enablePag=false;
@@ -92,14 +95,10 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
       statusBarColor: Colors.transparent,
     ));
 
-
-
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body:
-
-     Stack(
+        Stack(
         children: <Widget>[
 
          Container(
@@ -191,41 +190,115 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
 
                           })
                   ),
-
                   pagamentoCartaoVazio(),
-
                   Visibility(
                             visible: widget.enablePag, child:
                               listacards()),
                       Visibility(
                           visible: widget.enablePag, child: _btnaddCard()),
-                GestureDetector(
-                    onTap: (){},
+            GestureDetector(
+                    onTap:(){
+                    },
                     child:
             Container(
                 padding: EdgeInsets.fromLTRB(0, 10, 0, 10) ,
-                decoration: BoxDecoration(color:Colors.white, boxShadow: [BoxShadow(color: Colors.grey[100], blurRadius: 2)]),
+                decoration: BoxDecoration(color:Colors.white, boxShadow: [
+                  BoxShadow(color: Colors.grey[100], blurRadius: 2)]),
                 margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
             Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-//              Text("Histórico de pedidos",
-//                  style:TextStyle(color:Colors.black,fontFamily:'BreeSerif'))
+                    Text ( "Histórico de pedidos",
+                            style:TextStyle(color:Colors.black,fontFamily:'BreeSerif'))
                   ]),
                 )),
-               Visibility(
-                visible: widget.enableHistorico, child:
-                Expanded(child:
+                Visibility(
+                    visible: true, child:
+                Container(
+                    child:
                 StreamBuilder(
-                    stream: Firestore.instance
-                        .collection("Produtos_On").orderBy("preco",descending: false).orderBy("marca")
-                        .snapshots(),
+                    stream: Firestore.instance.collection('Usuarios').document(uid)
+                    .collection("Pedidos").snapshots(),
                     builder: (context, snapshot) {
                       return new ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
                           scrollDirection: Axis.vertical,
                           itemCount: snapshot.data.documents.length,
                           itemBuilder: (context, index) {
-                            Produto_cesta p = new Produto_cesta(snapshot.data.documents[index]);
-                            return Container();
+
+                            Pedido pd = new Pedido();
+                            pd.setPedido(snapshot.data.documents[index]);
+                            var status = pd.status;
+                            DateTime data_pedido = pd.time.toDate();
+
+                            var d = data_pedido.day.toString()+"/"+data_pedido.month.toString()
+                                +"/"+data_pedido.year.toString()+" "+data_pedido.hour.toString()
+                                +":"+data_pedido.second.toString();
+
+                            if (pd.status.contains("cancelado"))
+                              status="Cancelado";
+                            if (pd.status.contains("finalizado"))
+                              status="Finalizado";
+
+
+
+                            return
+                              Container(
+                                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                    padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                    alignment: Alignment.centerLeft,
+                                    decoration:
+                                  BoxDecoration(color: Colors.white,
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                        boxShadow: [BoxShadow(color:Colors.grey)]),
+                                    child:
+                              Column(children:[
+                                Row(children:[
+
+                               Container(
+                                      height:80,
+                                      child:
+                                StreamBuilder(
+                                  stream: Firestore.instance.collection('LogosLoja')
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                   if (snapshot.connectionState==ConnectionState.active){
+                                     var index=-1;
+                                     for(int i=0; i < snapshot.data.documents.length;i++){
+                                       if (snapshot.data.documents[i].documentID==pd.idloja)
+                                          index=i;
+                                     }
+                                     if (index==-1)
+                                         return Container();
+                                     if (index!=-1)
+                                         return
+                                       Container(
+                                         height: 50,
+                                         margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                         alignment: Alignment.centerLeft,
+                                         child:Image.network(snapshot.data.documents[index]['url']),
+                                         width: 50,);
+
+                                  }else return Container();
+                                })),
+
+                                Container(
+                                    margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                    alignment: Alignment.centerLeft,
+                                    child:
+                                     Text(pd.lista_produtos[0]['loja'])),
+                                  ]),
+                                  Container(
+                                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                      alignment: Alignment.centerLeft,
+                                     child:
+                                      Text(status)),
+                                Container(
+                                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                    alignment: Alignment.centerLeft,
+                                    child:
+                                    Text(d)),
+                              ]));
                           }
                       );
                     }
@@ -258,6 +331,16 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
       ]),
     );
   }
+
+
+   Future<dynamic> geturllogo(var idloja)async{
+      var url;
+      await Firestore.instance.collection('LogosLoja').document(idloja).get()
+      .then((value) => url= value.data['url']);
+      print(url);
+      return url;
+  }
+
   formularioCartao(){
 
     return

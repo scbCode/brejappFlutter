@@ -25,6 +25,8 @@ class Pedido {
   var timeConfirmado;
   var timeEntrega;
   var motivoRecusa;
+  var distancia;
+  var previsao;
   List<dynamic> lista_produtos;
 
 
@@ -49,6 +51,8 @@ class Pedido {
     this.timeAguardando=snapshot['timeAguardando'];
     this.timeConfirmado=snapshot['timeConfirmado'];
     this.motivoRecusa=snapshot['motivoRecusa'];
+    this.distancia=snapshot['distancia'];
+    this.previsao=snapshot['previsao'];
   }
 
 
@@ -61,6 +65,8 @@ class Pedido {
       'statusPagamento':this.statusPagamento,'lista_produtos':this.lista_produtos,
       'emailUser':this.emailUser,
       'idPedido':this.idPedido,
+      'distancia':this.distancia,
+      'previsao':this.previsao,
       'timeAguardando':this.timeAguardando,
       'timeConfirmado':this.timeConfirmado,
       'timeEntrega':this.timeEntrega,

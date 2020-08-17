@@ -88,6 +88,7 @@ class autenticacaoState extends State<autenticacao> {
 
   var view_nometell=true;
   var view_email_senha;
+
   var view_form_final_gmail=false;
   var refData = Firestore.instance;
   FirebaseUser user;
@@ -662,7 +663,9 @@ btnrealizarloginemail(){
 
 
 _btnLogiEmail(){
-  return  GestureDetector(
+
+  return
+    GestureDetector(
       onTap: (){setState(() {
         viewemaillogin=true;
         viewbtns=false;
@@ -683,7 +686,10 @@ _btnLogiEmail(){
         Text("EMAIL E SENHA",style: TextStyle(fontSize: 16)))
       ],)
   ));
+
 }
+
+
   _handleSignIn() async {
 
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
@@ -699,13 +705,28 @@ _btnLogiEmail(){
         .user;
 
     myUser = new User(user.displayName,user.phoneNumber,user.email,user.uid,null);
-    print("LOGIN GMAIL "+myUser.uid);
-
-    if (user!=null)
-      showFormUser(myUser);
-
+    var document = await Firestore.instance.collection('Usuarios').document(user.uid);
+    document.snapshots()
+        .listen((data) => {
+        checkusergmail(data)
+      });
 
     return true;
+  }
+
+
+  checkusergmail(var data){
+    print("checkusergmail");
+    print(data.data);
+    if (data.data==null) {
+      showFormUser(myUser);
+    }else
+    setState((){
+          viewlogin=false;
+          widget.restartUserLogin();
+          _screen_loading_out(true);
+
+    });
   }
 
 _btnGoogle(){
@@ -904,7 +925,15 @@ showFormUser(var user){
     c_tell.text=user.tell;
     });
 }
+  void getDadosUser(var uid) async {
 
+    var document = await Firestore.instance.collection('Usuarios').document(uid);
+    document.snapshots()
+        .listen((data) => {
+
+    });
+
+  }
 Future  signUp() async {
   _screen_loading_in();
   bool check = _checkDados();

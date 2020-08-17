@@ -352,7 +352,7 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
                   buscaManual(value);
                 },
                 keyboardType: TextInputType.text ,
-                style: TextStyle(fontSize: 16,color:Colors.orange,
+                style: TextStyle(fontSize: 24,color:Colors.orange,
                     fontFamily: 'RobotoLight'),)
            )),
 
@@ -369,7 +369,7 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
 
 
   buscaManual(var texto){
-    if (texto.length>3)
+    if (texto.length>2)
     widget.buscaFiltro("tags",texto);
   }
 

@@ -111,14 +111,7 @@ class barNavBottomState extends State<barNavBottom> {
           )], borderRadius: BorderRadius.all(Radius.circular(3))), alignment: Alignment.center, margin: EdgeInsets.fromLTRB(5, 5, 0, 5) ,child:
       Icon(Icons.account_circle,color:widget.coloriconUser))),
 
-     GestureDetector(onTap: (){ setState((){
-       _buscar(context);
 
-      });  },
-
-       child: Container (width: 40, padding:EdgeInsets.fromLTRB(0, 0, 0, 0), decoration: BoxDecoration(color:Colors.white, boxShadow: [BoxShadow(
-                color: widget.colorBusca,blurRadius: 2.0, offset: Offset(0.0,0.5, ),)], borderRadius: BorderRadius.all(Radius.circular(5))), alignment: Alignment.center, margin: EdgeInsets.fromLTRB(5, 5, 0, 5) ,child:
-              Icon(Icons.search,color:  Colors.grey[400]))),
 
        ]),
         Container(

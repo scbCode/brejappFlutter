@@ -13,6 +13,7 @@ import 'package:flutter_firestore/main.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:dio/dio.dart';
+import 'BlocAll.dart';
 import 'Produto_cesta.dart';
 
 typedef refresh = Function();
@@ -171,7 +172,8 @@ class _itemListProdstate extends State<item_cesta> with SingleTickerProviderStat
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     if (user!=null)
       await Firestore.instance.collection("Usuarios")
-          .document(user.uid).collection("cesta").document(p.id).updateData(p.getproduto());
+          .document(user.uid).collection("cesta").document(p.idloja+""+p.id).updateData(p.getproduto());
+
   }
 
   void decrementItemCesta_on(var item) async{
@@ -191,7 +193,7 @@ class _itemListProdstate extends State<item_cesta> with SingleTickerProviderStat
      FirebaseUser user = await FirebaseAuth.instance.currentUser();
         if (user!=null)
           await Firestore.instance.collection("Usuarios")
-              .document(user.uid).collection("cesta").document(p.id).updateData(p.getproduto());
+              .document(user.uid).collection("cesta").document(p.idloja+""+p.id).updateData(p.getproduto());
    }
 
 
@@ -199,7 +201,7 @@ class _itemListProdstate extends State<item_cesta> with SingleTickerProviderStat
   _FormatPreco(var preco,var quantidade){
 
     var totalPrecotxt=preco * quantidade;
-    var p = totalPrecotxt.toString();
+    var p = totalPrecotxt.toStringAsFixed(2);
 
     if (p.length<=2)
       p = p+",00";
@@ -208,16 +210,16 @@ class _itemListProdstate extends State<item_cesta> with SingleTickerProviderStat
     if (p.length==3)
       p+="0";
 
-    p= "R\u0024 "+ p;
-
+    p= ""+ p;
     return p;
+
   }
 
   _removeItemCesta() async{
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     if (user!=null)
       await Firestore.instance.collection("Usuarios")
-          .document(user.uid).collection("cesta").document(widget.data['id']).delete();
+          .document(user.uid).collection("cesta").document(widget.data['idloja']+""+widget.data['id']).delete();
   }
 
 

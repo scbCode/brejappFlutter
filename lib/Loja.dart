@@ -9,6 +9,7 @@ class Loja {
   var maquinaCredito;
   var snapshot;
   var tell;
+  var pedidoMinimo;
 
   Loja(DocumentSnapshot snapshot){
     this.nome=snapshot['nome'];
@@ -17,13 +18,14 @@ class Loja {
     this.cartaoApp=snapshot['cartaoApp'];
     this.maquinaCredito=snapshot['maquinaCredito'];
     this.tell=snapshot['tell'];
+    this.pedidoMinimo=snapshot['pedidoMinimo'];
   }
 
 
   getLoja(){
     Map<String, dynamic> p = {
       'nome':this.nome,'id':this.id,'img':this.img,'cartaoApp':this.cartaoApp,'maquinaCredito':this.maquinaCredito
-      ,'tell':this.tell
+      ,'tell':this.tell,'pedidoMinimo':this.pedidoMinimo
     };
     return p;
   }

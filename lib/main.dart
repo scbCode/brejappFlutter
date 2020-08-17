@@ -7,9 +7,11 @@ import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_firestore/BlocAll.dart';
 import 'package:flutter_firestore/Bloc_finaceiro.dart';
@@ -18,11 +20,13 @@ import 'package:flutter_firestore/autenticacao.dart';
 import 'package:flutter_firestore/barBuscar.dart';
 import 'package:flutter_firestore/barNavBottom.dart';
 import 'package:flutter_firestore/barPedidoUser.dart';
+import 'package:flutter_firestore/perfil_loja.dart';
 import 'package:flutter_firestore/pop_returnPedido.dart';
 import 'package:flutter_firestore/itemListProd.dart';
 import 'package:flutter_firestore/listaLojas.dart';
 import 'package:flutter_firestore/prePedido.dart';
 import 'package:flutter_firestore/returnBarCestaVazia.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:loading/indicator/ball_beat_indicator.dart';
 import 'package:loading/loading.dart';
@@ -34,6 +38,7 @@ import 'ScannerUtils.dart';
 import 'TextDetectorPainter.dart';
 import 'User.dart';
 import 'barCesta.dart';
+import 'chatloja.dart';
 import 'distanciaLoja.dart';
 import 'enderecoUser.dart';
 import 'geoLocationWeb.dart';
@@ -92,9 +97,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  var v_popadditem=false;
+  var prodadd=null;
   bool v_bg=false;
   bool v_bg_=false;
   bool v_bg_load=true;
+  var view_listavazia=false;
   var modo="app";
   var view_listaPedidos=false;
   var tag_lista_prod="";
@@ -106,7 +114,14 @@ class _MyHomePageState extends State<MyHomePage> {
   var bottomBarPedido=45.0;
   var bottomBarcesta=105.0;
 var show_cesta=false;
+var idlojaperfil="";
+var view_perfilloja=false;
+var view_perfilloja_;
   static var listaCesta=[];
+  TextEditingController control_chattext = new TextEditingController();
+  ScrollController _scrollController_pop = new ScrollController();
+
+  var bloc_financeiro = Bloc_financeiro();
   int _counter = 0;
   var isLocationEnabled=false;
   var countProd=[];
@@ -124,7 +139,9 @@ var show_cesta=false;
   TextEditingController c_nome = TextEditingController();
   TextEditingController c_tell = TextEditingController();
   TextEditingController c_email = TextEditingController();
-
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  static FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static  var pushPedido;
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
   var user_logado = false;
   var ruanometemp="...";
@@ -144,7 +161,7 @@ var show_cesta=false;
   var local_end;
   var local_=null;
   var viewListProd=false;
-  var listalojasview = listaLojas();
+  var listalojasview ;
   var listaFiltros;
   var listaProdutos;
   var refListaProd = Firestore.instance
@@ -169,8 +186,12 @@ var show_cesta=false;
   var modo_teste=false;
   var selecPedido="";
   var view_pop_cadastrodados=false;
-
   var hist_pedidoexist=false;
+  var idloja;
+  var idPedido;
+  var view_popchatpedido=false;
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -203,10 +224,11 @@ var show_cesta=false;
            Container(
                   margin: EdgeInsets.fromLTRB(15, 80, 0, 0),alignment: Alignment.bottomLeft,
                   child: Text("Lojas",
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange,fontSize: 18),))),
+                  style: TextStyle(fontWeight: FontWeight.bold,
+                      color: Colors.orange,fontSize: 18),))),
 
            Container(
-                height: 60,
+                height: 65,
                 margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child:  listalojasview ),
 
@@ -225,9 +247,9 @@ var show_cesta=false;
     ///////////
     Visibility(visible: view_barranav,
     child:
-    Positioned(bottom: 0, child:
-    Container(width: MediaQuery.of(context).size.width, alignment: Alignment.centerRight, child:
-    GestureDetector(onTap: (){   },
+      Positioned(bottom: 0, child:
+      Container(width: MediaQuery.of(context).size.width, alignment: Alignment.centerRight, child:
+      GestureDetector(onTap: (){   },
       child: Container (
         padding:EdgeInsets.fromLTRB(0, 0, 5, 0),
         alignment: Alignment.centerRight,
@@ -262,9 +284,101 @@ var show_cesta=false;
           ),
       ),
        ///////////////////////////////
-       Visibility( visible: v_bg_load , child:
+
+            Container(
+                margin:EdgeInsets.fromLTRB(0, 0, 0, 48),
+                child:
+              Visibility( visible: view_perfilloja , child:
+                view_perfilloja_)
+            ),
+
+            Visibility( visible: v_bg_load , child:
               blur_background_load()
           ),
+
+            Visibility(
+                visible:v_popadditem,
+                child:
+                Container(
+                    decoration:BoxDecoration(color:Colors.black54),
+                    alignment: Alignment.center,
+                    height: MediaQuery.of(context).size.height,
+                    child:
+                    Container(
+                        padding: EdgeInsets.all(15),
+                        child:
+                        Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Container(
+                                  decoration:BoxDecoration(color:Colors.white,
+                                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                                      boxShadow: [BoxShadow(color:Colors.grey)]),
+                                  child:
+                                  Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                            margin:EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                            child:
+                                            Text("Adicionar à cesta?",style: TextStyle(fontSize: 20),)),
+
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            GestureDetector(
+                                                onTap: (){
+                                                  setState(() {
+                                                    v_popadditem=false;
+                                                  });
+                                                  var ctrol=false;
+                                                  if(listaCesta!=null){
+                                                    if(listaCesta.length>0) {
+                                                      for (int i = 0;i<listaCesta.length;i++) {
+                                                        if (listaCesta[0].idloja != prodadd.idloja) {
+                                                          print("loja diff");
+                                                          ctrol = true;
+                                                        }
+                                                        if (listaCesta[0].nome != prodadd.nome) {
+                                                          ctrol = true;
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                  if (!ctrol)
+                                                  bloc.additemcesta(prodadd);
+                                                },
+                                                child:
+                                                Container(
+                                                    decoration:BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(10))),
+                                                    margin:EdgeInsets.fromLTRB(10, 20, 10, 10),
+                                                    padding:EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                                    child:
+                                                    Text("Sim",style: TextStyle(fontSize: 20,color: Colors.white),))),
+
+                                            GestureDetector(
+                                                onTap: (){
+                                                  setState(() {
+                                                    v_popadditem=false;
+                                                    prodadd=null;
+
+                                                  });
+                                                },
+                                                child:
+                                                Container(
+                                                  decoration:BoxDecoration(color:Colors.grey,borderRadius: BorderRadius.all(Radius.circular(10))),
+                                                  margin:EdgeInsets.fromLTRB(10, 20, 10, 10),
+                                                  padding:EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                                  child:
+                                                  Text("Não",style: TextStyle(fontSize: 20,color: Colors.white)),)),
+                                          ],)
+                                      ]))
+
+                            ])
+                    )
+                )),
+
+
       ////////////////////////////////////
       StreamBuilder<List<Produto_cesta>>(
           stream: bloc.check,
@@ -306,6 +420,7 @@ var show_cesta=false;
                 print("STREM PRE PEDIDO "+value.data.status );
                 if (value.data.status == "prepedido") {
                   view_listaPedidos=true;
+
                   return Container(height: MediaQuery
                       .of(context)
                       .size
@@ -327,7 +442,7 @@ var show_cesta=false;
                     builder: (context,value) {
                       if (value.connectionState==ConnectionState.active) {
                           if (value.data.length>0){
-                            print("STREM PEDIDO "+value.data.toString());
+                            print("STREM PEDIDO 0 "+value.data.toString());
 
                             return
                              Column(children: <Widget>[
@@ -356,24 +471,32 @@ var show_cesta=false;
                                   if (selecPedido==value.data[index].idPedido)
                                     ctrol=true;
 
+
+                                  print("STREM PEDIDO $ctrol");
+
                                   if (selecPedido=="" || ctrol){
                                     if ( Usuario != null ) {
                                       if ( value.data[index].status != "cancelado_user" &&
                                            value.data[index].status != "cancelado_user_reembolso" &&
-                                           value.data[index].status != "nao_aceito_visto" &&
-                                           value.data[index].status != "desativado_finalizado") {
-                                        if (pedidoAtivo==false)
-                                          pedidoAtivo=true;
-                                        return
+                                           value.data[index].status != "cancelado_loja_visto" &&
+                                           value.data[index].status != "cancelado_loja_reembolso_desativado" &&
+                                           value.data[index].status != "cancelado_user_visto" &&
+                                           value.data[index].status != "finalizado_desativado") {
+                                            if (pedidoAtivo==false)
+                                                pedidoAtivo=true;
+
+                                            return
                                           barPedidoUser(
                                               Usuario, value.data[index], listaDist,ctrol,
                                                   (value) {
                                                 return showhide_bg(value);
                                               }, () {
                                             return show_pop_final();
-                                          }, (value){return selectPedidoView(value);}) ;
-                                      }else
-                                      if (value.data[index].status == "cancelado_user_reembolso") {
+                                          }, (value){return selectPedidoView(value);}, (idloja,idpedido){return retornoChatPedido(idloja,idpedido);}) ;
+                                      }
+
+                                      else
+                                      if ( value.data[index].status == "cancelado_user_reembolso") {
                                         return Container();
                                       } else{
                                         return Container();}
@@ -385,6 +508,7 @@ var show_cesta=false;
                           ]);}else
                             {
                               print("STREM PEDIDO null ");
+
 //                              bloc.getCesta();
                               return Container();
                             }
@@ -438,6 +562,7 @@ var show_cesta=false;
                     stream: bloc.check,
                     builder: (context,value) {
                       listaCesta.clear();
+                      print("NOVA CESTA");
                       if (value.connectionState==ConnectionState.active) {
                         if (value.data.length>0){
                           distanciaLoja d;
@@ -571,11 +696,266 @@ var show_cesta=false;
         Visibility( visible:view_pop_cadastrodados , child:
             view_pop_completaCad()),
 
-          ])));
+        Visibility(
+            visible:view_popchatpedido,
+                child:
+                chat()),
+
+
+  ])));
 
 
  }
 
+ closeChat(){
+    setState((){
+      view_popchatpedido=false;
+    });
+ }
+ chat(){
+    if (Usuario==null)
+      return Container();
+    else
+      return
+        chatloja(Usuario.uid,Usuario.nome,Usuario.email,idloja,idPedido,(){return closeChat();});
+ }
+
+ retornoChatPedido(var idloja, var idPedido){
+    setState((){
+      this. idloja=idloja;
+      this. idPedido=idPedido;
+      view_popchatpedido=true;
+    });
+ }
+
+ popChat(var idloja, var idPedido){
+
+    return
+      SingleChildScrollView(
+          controller:_scrollController_pop,
+          child:
+         Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children:[
+
+            LimitedBox(maxHeight: MediaQuery.of(context).size.height-50, child:
+            Container(
+                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                decoration:BoxDecoration(
+                    boxShadow: [BoxShadow(color:Colors.black45)],
+                    borderRadius: BorderRadius.all(Radius.circular(2))),
+                child:
+                Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 0,0),
+                    child:
+                    ClipRect(
+                        child:  BackdropFilter(
+                            filter:  ImageFilter.blur(sigmaX:2, sigmaY:2),
+                            child:
+                            Container(
+                                  width: double.infinity,
+                                  decoration:  BoxDecoration(color: Colors.transparent),
+                                  child:
+                                SingleChildScrollView(
+                                    child:
+                                  Column (
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children:[
+                                       Container (
+                                              child:
+                                              listaChat_(idPedido)
+                                          ),
+                                        ]))
+                            ))))),
+            ),
+
+            Container(
+                decoration:BoxDecoration(color:Colors.orange,
+                    borderRadius: BorderRadius.all(Radius.circular(2))),
+                child:Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween ,
+                    children:[
+                      Container(
+                          margin:EdgeInsets.fromLTRB(5,0,0,0),
+                          width: MediaQuery.of(context).size.width-75
+                          ,child:
+                      TextField (
+                        cursorColor: Colors.white,cursorRadius: Radius.circular(20),
+                        style: TextStyle(color:Colors.white,fontFamily: 'BreeSerif'),
+                        decoration: InputDecoration(hintText: "MSG",
+                            focusColor: Colors.white,
+                            hintStyle: TextStyle(color:Colors.white) ),)),
+
+                      GestureDetector(
+                          onTap:(){
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            bloc_financeiro.enviarMsgChat(control_chattext.text,Usuario.email, Usuario.uid, "user", idloja,  idPedido,"" ,Usuario.nome);
+                            control_chattext.text="";
+                          },child:
+                       Icon(Icons.send,color:Colors.white,size: 35,)),
+                    ])
+            ),
+
+            Container(height: MediaQuery.of(context).viewInsets.bottom,)
+
+
+          ]));
+
+  }
+
+  listaChat_(var idPedido){
+
+    if (Usuario==null)
+      return Container();
+    else
+    return
+      StreamBuilder(
+          stream: Firestore.instance.collection('Usuarios').document(Usuario.uid)
+              .collection("Pedidos").document(idPedido)
+              .collection("chat").orderBy("time").snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState==ConnectionState.active){
+
+              return
+                ListView.builder(
+                    reverse:false,
+                    primary: false,
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    itemCount: snapshot.data.documents.length,
+                    itemBuilder: (context, index) {
+
+
+                      if (snapshot.data.documents[index]['remetente']!="user" && snapshot.data.documents[index]['remetente']!="user-auto-pedidoErrado")
+                        return
+                          Container(
+                              margin:EdgeInsets.fromLTRB(50, 0,0, 0),
+                              alignment: Alignment.centerRight,
+                              child:
+                              Container(
+                                  decoration:BoxDecoration(color:Colors.red,
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                    boxShadow: [BoxShadow(color:Colors.white,blurRadius: 4,offset: Offset(0,1))],),
+                                  padding:EdgeInsets.fromLTRB(20,15, 20, 15),
+                                  margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child:
+                                  Text(snapshot.data.documents[index]['msg'],
+                                    style: TextStyle(color:Colors.white,fontFamily: 'BreeSerif'),)));
+                      else
+                      if (snapshot.data.documents[index]['remetente']=="user-auto-pedidoErrado")
+                        return
+                          LimitedBox(maxWidth:MediaQuery.of(context).size.width,child:
+                          IntrinsicWidth(child:
+                          Container(
+                              margin:EdgeInsets.fromLTRB(5, 0, 0, 0),
+                              alignment: Alignment.center,
+                              child:  Container(
+                                  decoration:BoxDecoration(color:Colors.yellow,
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),),
+                                  padding:EdgeInsets.fromLTRB(20,15, 20, 15),
+                                  margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child:
+                                  Text(""+
+                                      snapshot.data.documents[index]['msg'],style: TextStyle(fontFamily: 'BreeSerif',fontSize: 16),))
+                          )));
+                      else
+                        return
+                          LimitedBox(maxWidth:MediaQuery.of(context).size.width*.8,child:
+                          Container(
+                              margin:EdgeInsets.fromLTRB(0, 0, 50, 0),
+                              alignment: Alignment.centerLeft,
+                              child:  Container(
+                                  decoration:BoxDecoration(color:Colors.white,
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                    boxShadow: [BoxShadow(color:Colors.grey[200],blurRadius: 1,offset: Offset(0,1))],),
+                                  padding:EdgeInsets.fromLTRB(20,15, 20, 15),
+                                  margin:EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child:
+                                  Text(snapshot.data.documents[index]['msg'],style: TextStyle(fontFamily: 'BreeSerif'),))));
+                    });
+
+            }else
+              return Container();
+          });
+  }
+
+  void addItemCesta(Produto_cesta item) async{
+
+    if (Usuario!=null){
+          var ctrol = false;
+          if(listaCesta!=null){
+            if(listaCesta.length>0) {
+              for (int i = 0;i<listaCesta.length;i++){
+                if (listaCesta[0].idloja != item.idloja) {
+                  print("loja diff");
+                  ctrol = true;
+                }
+              }
+            }
+          }
+
+          print("addItemCesta "+listaCesta.length.toString());
+
+          item.quantidade=1;
+          if (ctrol==false){
+            var idp = item.idloja+""+item.id;
+            await Firestore.instance.collection("Usuarios")
+                .document(Usuario.uid).collection("cesta").document(idp).setData(item.getproduto())
+                .then((e){
+              setState(() {
+                print("add item lista pos load");
+                bloc.getCesta();
+              });
+            });
+          }else
+          {
+            _snackbar("Voçê possui itens de outra loja na sua cesta, deseja substituir");
+
+          }
+    }else {
+      _showpop_login();
+    }
+
+  }
+
+ sendItemCestaPerfil(var Produto_cesta) async {
+   addItemCesta(Produto_cesta);
+ }
+
+ openperfilloja(var id){
+
+    setState(() {
+     idlojaperfil = id;
+     view_perfilloja_ =  stremPerfilLoja();
+     view_perfilloja=true;
+    });
+
+  }
+
+  stremPerfilLoja(){
+    return
+      StreamBuilder <QuerySnapshot>(
+          stream:
+          Firestore.instance
+              .collection("Perfil_loja").where("idloja", isEqualTo :idlojaperfil)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (ConnectionState.active== snapshot.connectionState){
+              return  perfil_loja(listaCesta,snapshot.data.documents[0],(){ hidePefil();},(v){sendItemCestaPerfil(v);});
+            }else
+              return Container();
+          });
+
+ }
+
+ hidePefil(){
+   setState(() {
+     idlojaperfil = "";
+     view_perfilloja=false;
+   });
+ }
 
  show_btn_cesta_float(){
     setState(() {
@@ -599,13 +979,17 @@ var show_cesta=false;
     return
       GestureDetector(onTap: () {
         setState(() {
+
           if (view_listaPedidos) {
               btnfloat=true;
               view_listaPedidos = false;
             } else {
               view_listaPedidos=true;
+              selecPedido="";
               btnfloat=false;
           }
+
+
         });
       }, child: Container(
           margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -682,15 +1066,102 @@ var show_cesta=false;
 
 @override
 void initState() {
+
+  view_perfilloja_ =  stremPerfilLoja();
   bloc.initBloc();
+  listalojasview = listaLojas((value){openperfilloja(value);});
+  bloc.getListaProdutos("tudo", "preco");
   getLojasOn();
   listaFiltros=listaTagsBusca((tag,value){changeRefListProd(tag,value);});
   listaProdutos = Container();
   checkPermission();
+
+  var initializationSettingsAndroid = new AndroidInitializationSettings('icon_app');
+  var initializationSettingsIOS = new IOSInitializationSettings();
+  var initializationSettings = new InitializationSettings(initializationSettingsAndroid, initializationSettingsIOS);
+  _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+
+  _firebaseMessaging.configure(
+    onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+      _showNotificationWithDefaultSound();
+    },
+    onBackgroundMessage: myBackgroundMessageHandler,
+    onLaunch: (Map<String, dynamic> message) async {
+      print("onLaunch: $message");
+      _showNotificationWithDefaultSound();
+
+    },
+    onResume: (Map<String, dynamic> message) async {
+      print("onResume: $message");
+      _showNotificationWithDefaultSound();
+
+    },
+  );
+
+  _firebaseMessaging.requestNotificationPermissions(
+      const IosNotificationSettings(
+          sound: true, badge: true, alert: true, provisional: true));
+  _firebaseMessaging.onIosSettingsRegistered
+      .listen((IosNotificationSettings settings) {
+    print("Settings registered: $settings");
+  });
+
   super.initState();
 }
 
-  blur_background(){
+  static Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
+    print("onBackgroundMessage: $message");
+    shownotif(message);
+    return Future<void>.value();
+  }
+  Future _showNotificationWithDefaultSound() async {
+
+
+  }
+
+  static Future  shownotif(Map<String, dynamic> message){
+
+    var  titulo = message['data']['title'];
+    var  text = message['data']['body'];
+    var  origem = message['data']['origem'];
+
+//  var codeInitP = pedido['idPedido'][idpfinal]+pedido['idPedido'][idpfinal-1]+    pedido['idPedido'][idpfinal-2]+ pedido['idPedido'][idpfinal-3];
+
+    if (origem.contains("pedido")) {
+        var id = origem.split(":")[1];
+          pushPedido=id;
+          print(pushPedido);
+    }
+
+    var platformChannelSpecificsAndroid = new AndroidNotificationDetails(
+      '01',
+      '0',
+      '0',
+      playSound: false,
+      enableVibration: false,
+      importance: Importance.Max,
+      styleInformation: BigTextStyleInformation(''),
+    );
+    // @formatter:on
+    var platformChannelSpecificsIos = new IOSNotificationDetails(presentSound: false);
+    var platformChannelSpecifics = new NotificationDetails(platformChannelSpecificsAndroid, platformChannelSpecificsIos);
+
+    new Future.delayed(Duration.zero, () {
+      _flutterLocalNotificationsPlugin.show(
+        0,
+        titulo,
+        text,
+        platformChannelSpecifics,
+        payload: 'No_Sound',
+      );
+    });
+
+  }
+
+
+ blur_background(){
     return  Container(
       child: ClipRect(
         child:  BackdropFilter(
@@ -747,12 +1218,10 @@ void initState() {
 
 checkStateUser() async {
 
- var user = null;
- user = await FirebaseAuth.instance.currentUser();
-// isLocationEnabled = await Geolocator().isLocationServiceEnabled();
- setState(()  {
-   if (user!=null) {
-
+   var user = null;
+   user = await FirebaseAuth.instance.currentUser();
+   setState(()  {
+     if (user!=null) {
           print("checkstateuser user 0");
           user_logado = true;
           Usuario = new User(null,null,null,null,null);
@@ -760,7 +1229,8 @@ checkStateUser() async {
           Usuario.email=user.email;
           getDadosUser(user.uid);
 
-   }else{
+
+     }else{
        completeLoad=true;
        if (local_user_cancel==true){
            viewListProd=true;
@@ -786,6 +1256,14 @@ checkStateUser() async {
    return user_logado;
 }
 
+  saveTokenPush()async{
+    var token = await _firebaseMessaging.getToken();
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    Firestore.instance.collection('Usuarios')
+        .document(user.uid)
+        .setData({'tokenPush':token},merge: true);
+
+  }
 
  void getDadosUser(var uid) async {
 
@@ -793,12 +1271,12 @@ checkStateUser() async {
    var document = await Firestore.instance.collection('Usuarios').document(uid);
    document.snapshots()
        .listen((data) => {
-         getUser(data,data.documentID)
+         getUser(data)
     });
 
 }
 
-void getUser(var data,var documentID)async{
+void getUser(var data)async{
 
     if (data.data!=null) {
       setState(() {
@@ -806,11 +1284,15 @@ void getUser(var data,var documentID)async{
             data['nome'], data['tell'], data['email'], data['uid'],
             data['localizacao']);
       });
+
+      saveTokenPush();
+
       view_pop_cadastrodados=false;
 
       print("user recuperado " + Usuario.email);
       bloc.getCesta();
       getEnderecoUser();
+
     }else
       {
         FirebaseUser user = await FirebaseAuth.instance.currentUser();
@@ -905,7 +1387,6 @@ return
   _snackbar(text){
     final snackBar = SnackBar(content: Text(text));
     scr.currentState..showSnackBar(snackBar);
-
   }
 
 void getEnderecoUser() async {
@@ -1090,14 +1571,19 @@ void getEnderecoUser() async {
 
     if (data!=null) {
       if (data.documents.isEmpty==false) {
+        print("getlojason_list");
+
         listalojason=[];
         var c =0;
         data.documents.forEach((p) {
           setState(() {
+
             listalojason.add(p['idloja']);
+
             if(snaphist!=null) {
               listViewProdutos = listaviewProd(snaphist);
             }
+
             if (tag_lista_prod=="")
               bloc.getListaProdutos("tudo","preco");
             else
@@ -1107,15 +1593,27 @@ void getEnderecoUser() async {
         });
 
       }
+      else {
+        listalojason=[];
+        listViewProdutos = listaviewProd(snaphist);
+        if (tag_lista_prod=="")
+          bloc.getListaProdutos("tudo","preco");
+        else
+          bloc.getListaProdutos(tag_lista_prod,nome_busca_lista_prod);
+
+      }
     }else {
+      listalojason=[];
     }
   }
 
   listaviewProd(snapshot){
 
-    if (snapshot.data.documents.length==0)
+    if (snapshot.data.documents.length==0) {
+      v_bg=false;
+
       return listaProdVazia();
-    else
+    }else
     return new
     Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 100),child:
     ListView.builder(
@@ -1135,8 +1633,14 @@ void getEnderecoUser() async {
 //            builder: (context,value_loja)
 //            {
             if (snapshot.connectionState == ConnectionState.active) {
-                 itemp  =  itemProdutoAll(snapshot,index);
-               return itemp;
+                Produto_cesta produto =  new Produto_cesta(snapshot.data.documents[index]);
+                if (produto.status==true){
+                   itemp  =  itemProdutoAll(snapshot,index);
+                 return itemp;
+                }else
+                  {
+                    return Container();
+                  }
             }
             else
                 return Container();
@@ -1148,10 +1652,13 @@ void getEnderecoUser() async {
 
   itemProdutoAll(var snapshot, var index){
     v_bg=false;
+    v_bg_load=false;
     var ctrl=false;
+    var ctrl_dist=false;
     double di = 0.0;
     Produto_cesta produto =  new Produto_cesta(snapshot.data.documents[index]);
     if (snapshot.data.documents.length==0){
+      v_bg_load=false;
       return listaProdVazia();
     }
     else
@@ -1177,15 +1684,13 @@ void getEnderecoUser() async {
               for (int i = 0; i < listaDist.length; i++) {
                 if (listaDist[i].distancia != null) {
                   di = double.parse(listaDist[i].distancia) / 1000.0;
-                  print("distancia xxx " + (di).toString() + "-" +
-                      (produto.distanciaMaxKm).toString());
+                  print("distancia xxx " + produto.idloja);
                   if (listaDist[i].idloja == produto.idloja)
-                    ctrl = true;
+                    ctrl_dist = true;
                 }
               }
-              if (ctrl == false) {
-                print("CRIAR LISTA - USER OK - distancia off");
-                if (local_user_cancel == false)
+              if (ctrl_dist == false) {
+                  print("CRIAR LISTA - USER OK - distancia off $local_user_cancel");
                   checkDistanceAtual(produto);
               } else {
                 if (di <= produto.distanciaMaxKm) {
@@ -1230,12 +1735,16 @@ void getEnderecoUser() async {
             });
           }
         }
-    } else
-      return listaProdVazia();
+
+    } else {
+      v_bg_load=false;
+      return Container();
+    }
 
   }
 
   listaProdVazia(){
+    v_bg_load=false;
     return Container(
       margin: EdgeInsets.fromLTRB(0, 50, 0, 0),
       decoration:BoxDecoration(
@@ -1433,6 +1942,8 @@ void getEnderecoUser() async {
 //          _getLocation();
 //          v_bg_load=false;
           viewListProd=true;
+          listaProdutos = listaprod();
+
         });
       }
 
@@ -1463,6 +1974,7 @@ _getLocationUser(produto) async {
   }
 
 checkDistanceAtual(produto) async {
+  print("CRIAR LISTA - checkDistanceAtual");
 
     if (local_user==null) {
       if (local_user_cancel==false)

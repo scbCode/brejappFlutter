@@ -21,8 +21,8 @@ class Bloc_financeiro {
   }
 
 
-  enviarMsgChat(var msg,var  emailUsuario,var uidUsuario,var remetente,var idloja,var idPedido,var time) async {
-
+  enviarMsgChat(var msg,var  emailUsuario,var uidUsuario,var remetente,var idloja,var idPedido,var time,var nome) async {
+    DateTime timeAguard = DateTime.now();
     var refData = Firestore.instance;
     var ctrol=false;
     await refData.collection("Usuarios")
@@ -31,25 +31,29 @@ class Bloc_financeiro {
       'emailUsuario': emailUsuario,
       'msg': msg,
       'remetente': remetente,
-      'time': FieldValue.serverTimestamp(),
-      'idloja': idPedido
+      'time': timeAguard,
+      'idloja': idloja,
+      'nome': nome
     }).then((v){
       print("SAVE MSG");
     }).catchError((erro){
       print("SAVE MSG ERROR");
     });
 
-    final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
-      functionName: 'enviarMsgChatUserParaLoja',
-    );
-    dynamic resp = await callable.call(<String, dynamic>{
-      'emailUsuario': emailUsuario,
-      'msg': msg,
-      'remetente': remetente,
-      'time': "123",
-      'idloja': idloja
-    });
-    return resp.data;
+//    final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
+//      functionName: 'enviarMsgChatUserParaLoja',
+//    );
+//    dynamic resp = await callable.call(<String, dynamic>{
+//      'emailUsuario': emailUsuario,
+//      'msg': msg,
+//      'remetente': remetente,
+//      'time': timeAguard.toIso8601String(),
+//      'idPedido': idPedido,
+//      'nome': nome,
+//      'idloja': idloja
+//    });
+    return true;
+
   }
 
   pagamentoCatao(var CustomerName,var idPedido,var idcard, var idLoja) async {

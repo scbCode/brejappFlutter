@@ -12,6 +12,7 @@ import 'package:flutter_firestore/botao3dFormEnd.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'BlocAll.dart';
 import 'ClickyButton.dart';
 import 'distanciaLoja.dart';
 import 'enderecoUser.dart';
@@ -376,7 +377,7 @@ Container(
   getLocal(){
     show_googlemaps=false;
 
-    if (mapController!=null)
+    if (mapController!=null && _center!=null)
         mapController.moveCamera(CameraUpdate.newLatLngZoom(_center,14));
 
    _center=new LatLng(widget.enderecoExist.localizacao.latitude,
@@ -520,8 +521,10 @@ Container(
   }
 
   _snackbar(text){
-    final snackBar = SnackBar(content: Text(text));
-    Scaffold.of(context).showSnackBar(snackBar);
+//    final snackBar = SnackBar(content: Text(text));
+//    Scaffold.of(context).showSnackBar(snackBar);
+    var bloc = BlocAll();
+    bloc.resetListProduto();
   }
 
   returnLocalInit(){

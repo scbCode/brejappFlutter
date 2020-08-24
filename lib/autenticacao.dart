@@ -65,6 +65,7 @@ class autenticacaoState extends State<autenticacao> {
 
   AnimationController rotationController;
   var checkboxvalue=false;
+  var checkboxvalueidade=false;
   final myController = TextEditingController();
   var viewbtns=true;
   var h_pop=200.0;
@@ -72,6 +73,7 @@ class autenticacaoState extends State<autenticacao> {
   var h_poplogin=375.0;
   var viewlogin=true;
   var viewloading=false;
+  var viewpoptermos=false;
   var viewemaillogin=false;
   var view_recuperarsenha=true;
   var btn_retorno_login=false;
@@ -319,14 +321,16 @@ _login(context) {
   view_pop_completaCad(){
     return
       Container(
-          margin:EdgeInsets.all(20),
-          padding:EdgeInsets.all(10),
+
           child:
+         Stack(children:[
           Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 IntrinsicHeight(child:
                 Container(
+                    margin:EdgeInsets.all(20),
+                    padding:EdgeInsets.all(10),
                     decoration: BoxDecoration(color:Colors.white, boxShadow:[BoxShadow(color:Colors.grey)]),
                     child:
                     Column(
@@ -359,6 +363,59 @@ _login(context) {
                             keyboardType: TextInputType.phone ,
                             style: TextStyle(fontSize: 16,color:Colors.black,
                                 fontFamily: 'RobotoLight'),),),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                                margin:EdgeInsets.fromLTRB(30, 0, 0, 0) ,
+                                child:
+                                Checkbox(checkColor: Colors.orange,value: checkboxvalueidade,
+                                  onChanged: (value){
+                                    setState(() {    checkboxvalueidade=value;});
+                                  },) ),
+
+                            GestureDetector(
+                                onTap:(){
+                                  setState((){
+                                  });
+                                },
+                                child:
+                                Container(
+                                    margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                    child:
+                                    Text("Sou maior de 18 anos",
+                                      style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.blue),) )),
+                          ],),
+
+
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(                  margin:EdgeInsets.fromLTRB(30, 0, 0, 0) ,
+                            child:
+                            Checkbox(checkColor: Colors.orange,value: checkboxvalue,
+                              onChanged: (value){
+                                setState(() {    checkboxvalue=value;});
+                              },) ),
+
+                        GestureDetector(
+                            onTap:(){
+                              setState((){
+                                viewpoptermos=true;
+                              });
+                            },
+                            child:
+                            Container(
+                                margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                child:
+                                Text("Aceito os termos e\ncondições\nLeia aqui",
+                                  style: TextStyle(fontFamily: 'RobotoBold',fontSize: 16,color: Colors.blue),) )),
+
+                      ]),
+
+
                         Container(
                             margin: EdgeInsets.fromLTRB(30, 10, 30, 10),
                             padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -368,6 +425,109 @@ _login(context) {
                         Visibility(visible: true,child:
                         Container(height: 45)),
                       ],)))
+              ]),
+
+                Visibility(
+                    visible: viewpoptermos,
+                    child:
+                    Container(
+                        margin: EdgeInsets.fromLTRB(20, 20, 20,30),
+                        padding: EdgeInsets.fromLTRB(20, 10, 20,40),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            color:Colors.white,boxShadow: [BoxShadow(color:Colors.grey[400],blurRadius: 10)]),
+                        alignment: Alignment.center,
+                        child: Column(children: <Widget>[
+
+                          Container(
+                              padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                              alignment: Alignment.center,
+                              child:
+                              Text("Termos e condições", style:
+                              TextStyle(
+                                  color: Colors.black, fontFamily: 'BreeSerif', fontSize: 20))),
+                          Container(
+                              padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                              alignment: Alignment.center,
+                              child:
+                              Text("Ao se cadastrar o usuário concorda completamente com os termos e condições abaixo", style:
+                              TextStyle(
+                                  color: Colors.black, fontFamily: 'RobotoLight', fontSize: 14))),
+
+//                     Text("Contrato versão 1.0.1"),
+
+                          LimitedBox(
+                              maxHeight: MediaQuery.of(context).size.height/2,
+                              child:
+                              SingleChildScrollView(
+                                  child:
+                                  StreamBuilder(
+                                      stream:
+                                      Firestore.instance      .collection('Docs').document("termosEcondicoes_loja")
+                                          .snapshots(),
+                                      builder: (context, snapshot) {
+                                        if (ConnectionState.active== snapshot.connectionState) {
+                                          return
+                                            Container(
+                                                width: MediaQuery
+                                                    .of(context)
+                                                    .size
+                                                    .width,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                                child: Text(""+snapshot.data['text'].toString(),
+                                                  textAlign: TextAlign.left, style:
+                                                  TextStyle(
+                                                      color: Colors.black, fontFamily: 'RobotoLight', fontSize: 20),));
+                                        } else
+                                          return Icon(Icons.update);}))),
+
+                          GestureDetector(
+                              onTap:(){
+                                setState((){
+                                  viewpoptermos=false;
+                                  checkboxvalue=true;
+                                });
+                              },
+                              child:
+
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(20, 10, 20,10),
+                                  padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                                  decoration: BoxDecoration(
+                                      border:Border.all(color: Colors.orange,width: 3),
+                                      borderRadius: BorderRadius.all(Radius.circular(20),),
+                                      color:Colors.white),
+                                  alignment: Alignment.center,
+                                  child:
+                                  Text("Li e aceito",style:
+                                  TextStyle(
+                                      color: Colors.orange, fontFamily: 'BreeSerif', fontSize: 16)))),
+                          GestureDetector(
+                              onTap:(){
+                                setState((){
+                                  viewpoptermos=false;
+                                });
+                              },
+                              child:
+
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(20, 10, 20,10),
+                                  padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                                  decoration: BoxDecoration(
+                                      border:Border.all(color: Colors.grey,width: 1),
+                                      borderRadius: BorderRadius.all(Radius.circular(20),),
+                                      color:Colors.white),
+                                  alignment: Alignment.center,
+                                  child:
+                                  Text("VOLTAR",style:
+                                  TextStyle(
+                                      color: Colors.grey, fontFamily: 'BreeSerif', fontSize: 16)))),
+
+                        ]))),
               ]));
 
   }
@@ -432,9 +592,12 @@ _login(context) {
         .of(context)
         .size
         .width,
-      child: Container(child: Column(children: <Widget>[
+      child: Container(child:
+      Stack(children:[
+          Column(children: <Widget>[
       Container(margin: EdgeInsets.fromLTRB(0, 35, 0, 0), child:
-        Column(
+
+         Column(
 
           children: <Widget>[
         Row(
@@ -552,6 +715,7 @@ _login(context) {
         Visibility(
             visible: true,
             child:
+
            Column(children: <Widget>[
         Column(children: <Widget>[
 
@@ -599,9 +763,35 @@ _login(context) {
           });},controller: c_senha_,decoration: InputDecoration(hintText: "SENHA NOVAMENTE*"),obscureText: true ,style: TextStyle(fontSize: 14,color:widget.corSenha_,fontFamily: 'RobotoLight'),),),
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-            Container( child:
+              Container(
+                  margin:EdgeInsets.fromLTRB(30, 0, 30, 0) ,
+                  child:
+              Checkbox(checkColor: Colors.orange,value: checkboxvalueidade,
+                onChanged: (value){
+                  setState(() {    checkboxvalueidade=value;});
+                },) ),
+
+              GestureDetector(
+                  onTap:(){
+                    setState((){
+                    });
+                  },
+                  child:
+                  Container(
+                      margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                      child:
+                      Text("Sou maior de 18 anos",
+                        style: TextStyle(fontFamily: 'RobotoBold',fontSize: 18,color: Colors.blue),) )),
+            ],),
+
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+            Container(                  margin:EdgeInsets.fromLTRB(30, 0, 30, 0) ,
+                child:
             Checkbox(checkColor: Colors.orange,value: checkboxvalue,
               onChanged: (value){
                 setState(() {    checkboxvalue=value;});
@@ -609,26 +799,141 @@ _login(context) {
 
             GestureDetector(
                 onTap:(){
-                   launch("www.google.com");
+                  setState((){
+                    viewpoptermos=true;
+                  });
                 },
                 child:
             Container(
                 margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child:
             Text("Aceito os termos e condições\nLeia aqui",
-              style: TextStyle(fontFamily: 'RobotoBold',color: Colors.blue),) )),
+              style: TextStyle(fontFamily: 'RobotoBold',fontSize: 18,color: Colors.blue),) )),
           ],),
 
-          Container(height: 35,width: 130, margin: EdgeInsets.fromLTRB(30, 5, 30, 10), child:
-                  RaisedButton(onPressed: (){signUp();},disabledColor: Colors.orange,color:Colors.orange,child: Text("CADASTRAR",style: TextStyle(color:Colors.white),),)),
+          Container(height: 35,width: 130, margin: EdgeInsets.fromLTRB(30, 15, 30, 10), child:
+                  RaisedButton(onPressed: (){signUp();},disabledColor: Colors.orange,color:Colors.orange,child:
+                  Text("CADASTRAR",style: TextStyle(color:Colors.white),),)),
 
 
            Visibility(visible: true ,child:
            Container(height: 185))
 
-              ])
-      ],)),
-    ],),),)));
+        ])
+      ],),
+
+
+
+
+
+      ),
+
+    ],),
+
+          //pop termos
+          Visibility(
+            visible: viewpoptermos,
+            child:
+            Container(
+                margin: EdgeInsets.fromLTRB(20, 20, 20,30),
+                padding: EdgeInsets.fromLTRB(20, 10, 20,40),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color:Colors.white,boxShadow: [BoxShadow(color:Colors.grey[400],blurRadius: 10)]),
+                alignment: Alignment.center,
+                child: Column(children: <Widget>[
+
+                  Container(
+                      padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                      alignment: Alignment.center,
+                      child:
+                      Text("Termos e condições", style:
+                      TextStyle(
+                          color: Colors.black, fontFamily: 'BreeSerif', fontSize: 20))),
+                  Container(
+                      padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                      alignment: Alignment.center,
+                      child:
+                      Text("Ao se cadastrar o usuário concorda completamente com os termos e condições abaixo", style:
+                      TextStyle(
+                          color: Colors.black, fontFamily: 'RobotoLight', fontSize: 14))),
+
+//                     Text("Contrato versão 1.0.1"),
+
+                  LimitedBox(
+                      maxHeight: MediaQuery.of(context).size.height/2,
+                      child:
+                      SingleChildScrollView(
+                          child:
+                          StreamBuilder(
+                              stream:
+                              Firestore.instance      .collection('Docs').document("termosEcondicoes_loja")
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (ConnectionState.active== snapshot.connectionState) {
+                                  return
+                                    Container(
+                                        width: MediaQuery
+                                            .of(context)
+                                            .size
+                                            .width,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(color: Colors.white,
+                                            borderRadius: BorderRadius.all(Radius.circular(20))),
+                                        margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                        child: Text(""+snapshot.data['text'].toString(),
+                                          textAlign: TextAlign.left, style:
+                                          TextStyle(
+                                              color: Colors.black, fontFamily: 'RobotoLight', fontSize: 20),));
+                                } else
+                                  return Icon(Icons.update);}))),
+
+                  GestureDetector(
+                      onTap:(){
+                          setState((){
+                            viewpoptermos=false;
+                            checkboxvalue=true;
+                          });
+                      },
+                      child:
+
+                      Container(
+                          margin: EdgeInsets.fromLTRB(20, 10, 20,10),
+                          padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                          decoration: BoxDecoration(
+                              border:Border.all(color: Colors.orange,width: 3),
+                              borderRadius: BorderRadius.all(Radius.circular(20),),
+                              color:Colors.white),
+                          alignment: Alignment.center,
+                          child:
+                          Text("Li e aceito",style:
+                          TextStyle(
+                              color: Colors.orange, fontFamily: 'BreeSerif', fontSize: 16)))),
+                  GestureDetector(
+                      onTap:(){
+                        setState((){
+                          viewpoptermos=false;
+                        });
+                      },
+                      child:
+
+                      Container(
+                          margin: EdgeInsets.fromLTRB(20, 10, 20,10),
+                          padding: EdgeInsets.fromLTRB(20, 10, 20,10),
+                          decoration: BoxDecoration(
+                              border:Border.all(color: Colors.grey,width: 1),
+                              borderRadius: BorderRadius.all(Radius.circular(20),),
+                              color:Colors.white),
+                          alignment: Alignment.center,
+                          child:
+                          Text("VOLTAR",style:
+                          TextStyle(
+                              color: Colors.grey, fontFamily: 'BreeSerif', fontSize: 16)))),
+
+                ]))),])
+
+      ),)));
 
 }
 
@@ -825,6 +1130,14 @@ _checkDadosGoogleSign() async{
     var nomeSplit = nome.split(" ");
     var erro = false;
 
+    if(checkboxvalue==false) {
+      _snackbar("Você não aceitou os termos e condições");
+      erro = true;
+    }  else
+    if(checkboxvalueidade==false) {
+      _snackbar("Este app é para maiores de 18 anos");
+      erro = true;
+    }  else
     if (email.length < 7 || email.contains("@")==false || email.contains(".com")==false
     ){
       _snackbar("email incorreto");
@@ -866,6 +1179,7 @@ _checkDadosGoogleSign() async{
   if (nome.length < 3){_snackbar("Nome incompleto");return false;}
   if (nomeSplit.length==1){_snackbar("Coloque um sobrenome"); return false;}
   if (checkboxvalue==false){_snackbar("Você deve aceitar os termos e condições para continuar"); return false;}
+  if (checkboxvalueidade==false){_snackbar("Este app é destinado para maiores de 18 anos"); return false;}
 
   return true;
 
@@ -968,7 +1282,7 @@ void criarUser(User muser) async {
 
     await refData.collection("Usuarios")
         .document(muser.uid)
-        .setData({"nome":muser.nome,"tell":muser.tell,
+        .setData({"nome":muser.nome,"tell":muser.tell,'maior18':checkboxvalueidade,'termosEcondicoes':checkboxvalue,
                   "email":muser.email,'uid':muser.uid});
 
     _screen_loading_out(true);

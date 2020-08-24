@@ -102,6 +102,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   ScrollController _scrollController = new ScrollController();
   ScrollController _scrollController_pop = new ScrollController();
   ScrollController _scrollController_listchar = new ScrollController();
+  var tellBrejapp="";
 
   var testAjudamsn="";
   var msgDenuncia="";
@@ -149,7 +150,6 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     return    barCestaCompleta();
 
   }
-
 
   barCestaCompleta(){
     print(widget.pedido);
@@ -738,9 +738,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                 Visibility(visible: !view_chat,child:
                 GestureDetector(onTap:(){
                       setState(() {
-                        view_chat_msgs=false;
-                        view_chat=true;
-                        view_ajuda=false;
+                        widget.chat_pop_pedido_(widget.pedido.idloja,widget.pedido.idPedido);
+
                       });
                     },child:
                     Container(
@@ -760,21 +759,6 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
                        ])
                     ))),
-
-                    Visibility(visible: view_chat,child:
-                    GestureDetector(onTap:(){
-                      setState(() {
-                          view_chat=false;
-                          view_ajuda=false;
-
-                      });
-                    },child:
-                    Container(
-                        decoration:BoxDecoration(color:Colors.blue,borderRadius: BorderRadius.all(Radius.circular(20))),
-                        padding: EdgeInsets.fromLTRB(10, 0,10,0),
-                        child:    Text("Chat",textAlign: TextAlign.left,
-                          style: TextStyle(color:Colors.white,fontSize: 16,
-                              fontFamily: 'BreeSerif'),)))),
 
                     Container(
                         padding: EdgeInsets.fromLTRB(10, 0,10,0),
@@ -1320,7 +1304,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
       GestureDetector(
           onTap:() {
             setState(() {
-              FlutterOpenWhatsapp.sendSingleMessage("+55"+tellloja, "Olá, preciso de ajuda.\n Meu nome: "+widget.user.nome+"\nMeu email: "+widget.user.email );
+              suporteBrejapp_msg("Olá, preciso de ajuda.\n Meu nome: "+widget.user.nome+"\nMeu email: "+widget.user.email);
             });
           },
           child:
@@ -2046,16 +2030,26 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     ],);
   }
 
+
+  getConfigBrejapp(){
+
+    Firestore.instance
+        .collection("BrejappSuporte").document("tell")
+        .get().then((value) => tellBrejapp=value.data['tell']);
+
+  }
+
+
   @override
   void initState() {
     super.initState();
+    getConfigBrejapp();
     line=LineAnim();
     getLoja();
     getChat();
     listachat=listaChat_();
     _controllerIcon_moto = AnimationController(duration: Duration(milliseconds:4000),vsync: this)..repeat();
     animation = Tween<Offset>(begin: Offset(.0, 0), end: Offset(2, 0)).animate(_controllerIcon_moto);
-
   }
 
   @override
@@ -2270,7 +2264,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                 Visibility(visible: v_popajudafinal ,child:
                 Column(children:[
 
-                Visibility(visible: diff_hora>=1 || widget.pedido.status.contains("finalizado") ,
+                Visibility(visible:  widget.pedido.tipoPagamento=="cartao" && diff_hora>=1 && widget.pedido.status.contains("finalizado")  ,
                     child:
                     GestureDetector(onTap:(){
                       setState(() {
@@ -2329,7 +2323,6 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                           fontFamily: 'BreeSerif'),)))),
 
              GestureDetector(onTap:(){
-                  print("ligar");
                   UrlLauncher.launch("tel://+55"+tellloja);
               },child:
               Container(
@@ -2342,7 +2335,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
                 ],),
                   GestureDetector(onTap:(){
-                    FlutterOpenWhatsapp.sendSingleMessage("+55"+tellloja, "Olá, preciso de ajuda.\n Meu nome: "+widget.user.nome+"\nMeu email: "+widget.user.email );
+                    suporteBrejapp();
                   },child:
               Container(
                   alignment: Alignment.center ,
@@ -2356,6 +2349,41 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
           ));
   }
 
+
+  suporteBrejapp()async{
+
+    var tell;
+    await Firestore.instance.collection('BrejappSuporte')
+        .document('tell').get()
+        .then((value) => tell= value.data['tell']);
+
+    FlutterOpenWhatsapp.
+    sendSingleMessage("+55"+tell,"Olá, preciso de ajuda no aplicativo." );
+
+  }
+
+
+  suporteBrejapp_msg(var msg)async{
+
+    var tell;
+    await Firestore.instance.collection('BrejappSuporte')
+        .document('tell').get()
+        .then((value) => tell= value.data['tell']);
+
+    FlutterOpenWhatsapp.
+    sendSingleMessage("+55"+tell,msg);
+
+  }
+
+
+  ligarLoja(var idloja)async{
+
+    var tell;
+    await Firestore.instance.collection('Perfil_loja').document(idloja).get()
+        .then((value) => tell= value.data['tell']);
+
+    UrlLauncher.launch("tel://"+tell);
+  }
 
   avaliar(var i){
 

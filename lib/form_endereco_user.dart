@@ -150,7 +150,7 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                    ]),
 
                    Container(
-                   width: MediaQuery.of(context).size.width,
+                       width: MediaQuery.of(context).size.width,
                        decoration: BoxDecoration(color:Colors.transparent,),
                        padding: EdgeInsets.all(0),
                        child:

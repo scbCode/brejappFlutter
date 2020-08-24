@@ -48,16 +48,17 @@ _query(text){
         .where("tags", arrayContains :t2)
         .snapshots();
         if (r.isEmpty != null){
-          setState(() {
-            widget.ref = Firestore.instance
-                .collection("Produtos_On")
-                .where("tags", arrayContains :t1)
-                .where("tags", arrayContains :t2)
-                .snapshots();
-          });
+            setState(() {
+              widget.ref = Firestore.instance
+                  .collection("Produtos_On")
+                  .where("tags", arrayContains :t1)
+                  .where("tags", arrayContains :t2)
+                  .snapshots();
+            });
         }
-
   }
+
+
   if (textsplit.length==1){
     text = '${textsplit[0][0].toString().toLowerCase()}${textsplit[0].substring(1)}';
     Stream<QuerySnapshot> r =  Firestore.instance

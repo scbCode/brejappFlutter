@@ -40,6 +40,7 @@ class itemListProd extends StatefulWidget {
 class _itemListProdstate extends State<itemListProd>  {
   distanciaLoja distancia;
   var total=1;
+  var txt24="24";
   var incremental=0;
   var totalPreco=0.0;
   var totalPrecotxt=0.0;
@@ -58,28 +59,60 @@ class _itemListProdstate extends State<itemListProd>  {
   var gelada=false;
   var   qntd = 1;
   var uid;
+  var v_contprod=false;
   final bloc = BlocAll();
   var styleTextFreteGratis = TextStyle(color: Colors.grey[700],fontSize: 12,fontStyle: FontStyle.italic,fontFamily: 'RobotoBold');
   var styleTextFrete =TextStyle(color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
   var styleTextFrete_ =TextStyle(color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight');
   var distTxt="";
+  var updatedist=false;
   AnimationController _controllerIcon;
-  List<String> lista = new List<String > ();
+  var idprodhist="";
+  var update=false;
 
   @override
   Widget build(BuildContext context) {
 
-    if (widget.produto.quantidade==null)
-      widget.produto.quantidade=total;
-
-
+    var c = false;
+    if(widget.listaCesta!=null)
+      if(widget.listaCesta.length>0)
+      for (int i=0; i <widget.listaCesta.length;i++){
+        if (widget.listaCesta[i].id==widget.produto.id)
+          if (widget.listaCesta[i].idloja==widget.produto.idloja){
+              c=true;
+              if (widget.produto.quantidade==null)
+             widget.produto.quantidade=widget.listaCesta[i].quantidade;
+          }
+      }
+    itemOn=c;
     if (itemOn==true){
-      _itemOn();
+      if (widget.produto.quantidade==null)
+          widget.produto.quantidade=total;
+         _itemOn();
     }
     else{
-      _itemOff();
-    }
+      print("idprodhist");
+      print("$idprodhist $widget.produto.id");
+      if (idprodhist!=widget.produto.id) {
+        total = 1;
+        addvisi = false;
+        vbtnRemoveqntd = false;
+        if (!update) {
+          total = 1;
+          addvisi = false;
+          vbtnRemoveqntd = false;
+          update = true;
 
+        }
+      }
+        _itemOff();
+    }
+    idprodhist=widget.produto.id;
+
+    if (updatedist){
+      updatedist=false;
+      setState((){});
+    }
 
     return
       animator(
@@ -102,36 +135,45 @@ class _itemListProdstate extends State<itemListProd>  {
 //                      print("BLOC ITEM CESTA ATIVO");
                       if (value.data.isNotEmpty) {
                         var ct5rl=false;
+                        var ct5rl_cesta=false;
                         for ( int i = 0;i< value.data.length;i++ ){
-
+                          if (value.data[i].id==(widget.produto.id)){
+                            ct5rl_cesta=true;
+                          }
                           if (value.data[i].id+""+value.data[i].idloja==(widget.produto.id+""+widget.produto.idloja)){
                               print("BLOC ITEM == ITEM "+value.data[i].quantidade.toString());
                               if ( widget.produto.quantidade==0)
                                    widget.produto.quantidade=1;
+                              else
                               widget.produto.quantidade=value.data[i].quantidade;
                               total=widget.produto.quantidade+incremental;
                               incremental=0;
                               ct5rl=true;
                           }
                         }
+                        if (!ct5rl_cesta){
+                          print("BLOC ITEM FALSE cesta");
+//                          itemOn=false;
+                          return _item_(itemOn);
+                        }
                         if (ct5rl){
                           print("BLOC ITEM TRUE");
-                          itemOn=true;
+//                          itemOn=true;
                           return _item_(itemOn);
                         }
                         else {
                           print("BLOC ITEM FALSE");
-                          itemOn=false;
+//                          itemOn=false;
                           return _item_(itemOn);
                         }
                       }else {
                         print("BLOC ITEM FALSE");
-                        itemOn=false;
+//                        itemOn=false;
                         return _item_(itemOn);
                       }
                     }else{
                       print("BLOC ITEM FALSE");
-                      itemOn=false;
+//                      itemOn=false;
                       return _item_(itemOn);
                     }
                     {
@@ -150,6 +192,7 @@ class _itemListProdstate extends State<itemListProd>  {
       textBtnadd="NA CESTA";
       total = widget.produto.quantidade;
       int q = widget.produto.quantidade;
+
       print("ITEM ON "+q.toString());
       if (q == 1){
         vbtnremoveitem=true;
@@ -203,6 +246,12 @@ class _itemListProdstate extends State<itemListProd>  {
                                           Row(children: <Widget>[
                                             Container(margin:EdgeInsets.fromLTRB(10, 0, 0, 0),child:Text(widget.produto.nome,textAlign: TextAlign.left, style: TextStyle(letterSpacing: 0.0,fontSize:18,fontFamily: 'BreeSerif'))),
 
+                                            Visibility(visible: !widget.produto.gelada,child:
+                                            Container(
+                                                decoration: BoxDecoration(border: Border.all(color: Colors.grey),borderRadius: BorderRadius.all(Radius.circular(3))),
+                                                padding: EdgeInsets.fromLTRB(4, 1, 4, 0),
+                                                margin:EdgeInsets.fromLTRB(4, 3, 0, 0),height: 15,child:
+                                            Text("natural",style: TextStyle(fontSize: 10,color: Colors.grey),))),
                                             Visibility(visible: widget.produto.gelada,child:
                                             Container(
                                                 decoration: BoxDecoration(border: Border.all(color: Colors.lightBlue[400]),borderRadius: BorderRadius.all(Radius.circular(3))),
@@ -222,7 +271,7 @@ class _itemListProdstate extends State<itemListProd>  {
                                               Container(margin: EdgeInsets.fromLTRB(10, 5, 0, 0), child:  Text("Entrega: "+formatFrete(),style: styleTextFrete),),
                                               Container(margin: EdgeInsets.fromLTRB(5, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
                                               Visibility(
-                                                visible:view_dist,child:
+                                                visible:true,child:
                                               Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text(
                                                 distanceTo().toString()
                                                 ,style: TextStyle(letterSpacing: 0.1,color: Colors.grey[700],fontSize: 12,fontFamily: 'RobotoLight'),)),
@@ -254,10 +303,14 @@ class _itemListProdstate extends State<itemListProd>  {
 
                         ],),
                       Stack(children: <Widget>[
-                        Visibility(
+                      Visibility(
                           visible: addvisi || itemOn==true,
                           child:
-                          Column(children: <Widget>[Divider(
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+
+                            Divider(
                             color: Colors.orange[200],
                           ),
                             Row(
@@ -274,9 +327,10 @@ class _itemListProdstate extends State<itemListProd>  {
                                         widget.listaCesta.addAll(value.data);
 
                                         if (value.data.isNotEmpty) {
+
                                           return
                                             Container(
-                                                margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                                                margin: EdgeInsets.fromLTRB(10, 0, 0, 10), child:
                                             OutlineButton(hoverColor: Colors.orange,
                                                 focusColor: Colors.orange,
                                                 textTheme: ButtonTextTheme.normal,
@@ -299,10 +353,12 @@ class _itemListProdstate extends State<itemListProd>  {
                                                       color: colorBtnAdd,
                                                       fontFamily: 'RobotoLight'),)
                                                 ])));
-                                        } else
+                                        } else{
+                                          print("GET CESTA ----");
+                                          itemOn=false;
                                           return
                                             Container(
-                                                margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                                                margin: EdgeInsets.fromLTRB(10, 0, 0, 10), child:
                                             OutlineButton(hoverColor: Colors.orange,
                                                 focusColor: Colors.orange,
                                                 textTheme: ButtonTextTheme.normal,
@@ -317,18 +373,20 @@ class _itemListProdstate extends State<itemListProd>  {
                                                   Container(
                                                     margin: EdgeInsets.fromLTRB(0, 0, 5, 0),
                                                     child: Icon(
-                                                        Icons.shopping_basket, color: colorBtnAdd,
+                                                        Icons.shopping_basket, color: Colors.orange,
                                                         size: 15),),
-                                                  Text(textBtnadd + " R\u0024 " +
+                                                  Text("ADICIONAR" + " R\u0024 " +
                                                       totalPrecotxt.toStringAsFixed(2).replaceAll(
                                                           ".", ","), style: TextStyle(
-                                                      color: colorBtnAdd,
+                                                      color: Colors.orange,
                                                       fontFamily: 'RobotoLight'),)
-                                                ])));
+                                                ])));}
                                       }else
-                                        return
+                                       {
+
+                                         return
                                           Container(
-                                              margin: EdgeInsets.fromLTRB(10, 0, 0, 0), child:
+                                              margin: EdgeInsets.fromLTRB(10, 0, 0, 5), child:
                                           OutlineButton(hoverColor: Colors.orange,
                                               focusColor: Colors.orange,
                                               textTheme: ButtonTextTheme.normal,
@@ -351,27 +409,24 @@ class _itemListProdstate extends State<itemListProd>  {
                                                         ".", ","), style: TextStyle(
                                                     color: colorBtnAdd,
                                                     fontFamily: 'RobotoLight'),)
-                                              ])));
+                                              ])));}
                                     }),
 
-                                //total qntd
-                                Opacity(
-                                    opacity: 1,
-                                    child:
-                                    Container(margin: EdgeInsets.fromLTRB(10, 15, 10, 0),
-                                      alignment: Alignment.bottomRight,
-                                      child: Text("$total",style: TextStyle(fontSize: 14,color: colorBtnAdd,fontFamily: 'RobotoBold'),),
-                                    )),
+
                                 //botao + qntd
                                 new GestureDetector(
                                     onTap: (){
+
                                       setState((){
-                                        _incrementQntdItem();
+                                      print("ADD UM");
+
+                                      _incrementQntdItem();
                                       });
+
                                     },
                                     child: Container(
                                         decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: colorBtnAdd)),
-                                        margin: EdgeInsets.fromLTRB(0, 5, 0, 20),
+                                        margin: EdgeInsets.fromLTRB(20, 5, 0, 10),
                                         child: SizedBox(
                                             width: 35,
                                             height: 35,
@@ -379,10 +434,10 @@ class _itemListProdstate extends State<itemListProd>  {
                                         )
                                     )
                                 ),
-                                Visibility(visible:vbtnremoveitem,child:
+                                Visibility(visible:!vbtnRemoveqntd && itemOn,child:
                                 Opacity(
                                     opacity: 1,
-                                    child:   Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
+                                    child:   Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 10),child:
                                     new GestureDetector(
                                         onTap: (){
                                           setState((){
@@ -391,7 +446,7 @@ class _itemListProdstate extends State<itemListProd>  {
                                         },
                                         child: Container(
                                             decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: Colors.red)),
-                                            margin: EdgeInsets.fromLTRB(10, 5, 0, 10),
+                                            margin: EdgeInsets.fromLTRB(10, 5, 0, 0),
                                             padding: EdgeInsets.fromLTRB(0, 4, 0, 2),
                                             child: SizedBox(
                                               width: 35,
@@ -411,6 +466,8 @@ class _itemListProdstate extends State<itemListProd>  {
                                     onTap: (){
                                       setState((){
                                         print("ok");
+
+
                                         _decrementQntdItem();
 
                                       });
@@ -430,7 +487,137 @@ class _itemListProdstate extends State<itemListProd>  {
                                 )
                                 ),
 
-                              ],)],),
+                              ],),
+
+                          Visibility(
+                              visible: vbtnRemoveqntd,
+                              child:
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround ,
+                            crossAxisAlignment: CrossAxisAlignment.center ,
+
+                            children:[
+
+                          Container(
+                              width:MediaQuery.of(context).size.width*.25,
+                              child:
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.end ,
+                                  children:[
+
+                                  //total qntd
+                                      Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                                        alignment: Alignment.center,
+                                        child: Text("$total",style:
+                                        TextStyle(fontSize: 30,color: colorBtnAdd,
+                                            fontFamily: 'BreeSerif'),),
+                                      ),
+                                    Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                                        alignment: Alignment.center,
+                                        child:   Text("uni",style:
+                                        TextStyle(fontSize: 18,color: colorBtnAdd,
+                                            fontFamily: 'BreeSerif'),)),
+                            ])),
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start ,
+                                mainAxisAlignment: MainAxisAlignment.center ,
+                                children:[
+
+
+                                      GestureDetector(
+                                  onTap: (){
+                                    setState((){
+                                      _incrementQntdItemValue(6);
+                                      txt24 = "24";
+
+                                    });
+                                  },
+                                  child: Container(
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: Colors.white)),
+                                      margin: EdgeInsets.fromLTRB(15, 0, 10, 5),
+                                      child: SizedBox(
+                                        child: Text("6", textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 24,fontFamily: 'BreeSerif', color:  Colors.grey[400]),),
+
+                                      )
+                                  )
+                              ),
+                              GestureDetector(
+                                  onTap: (){
+                                    setState((){
+                                      print("ok");
+                                      _incrementQntdItemValue(12);
+                                      txt24 = "24";
+
+
+                                    });
+                                  },
+                                  child: Container(
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color:  Colors.white)),
+                                      margin: EdgeInsets.fromLTRB(4, 0, 10, 5),
+                                      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                      child: SizedBox(
+                                        child: Text("12", textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 24,fontFamily: 'BreeSerif',color:  Colors.grey[400]),),
+
+                                      )
+                                  )
+                              ),
+                                  GestureDetector(
+                                      onTap: (){
+                                          print("ok");
+
+                                          if (total<24) {
+                                            txt24 = "+24";
+                                            _incrementQntdItemValue(24);
+                                          } else{
+                                            txt24 = "+24";
+                                            var t = total+24;
+                                            _incrementQntdItemValue(t);
+                                          }
+
+
+
+                                      },
+                                      child: Container(
+                                          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color:  Colors.white)),
+                                          margin: EdgeInsets.fromLTRB(4, 0, 10, 5),
+                                          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                          child: SizedBox(
+                                            child: Text(txt24, textAlign: TextAlign.center,
+                                              style: TextStyle(fontSize: 24,fontFamily: 'BreeSerif', color:  Colors.grey[400]),),
+
+                                          )
+                                      )
+                                  ),
+                                  Visibility(visible:vbtnRemoveqntd && itemOn, child:
+
+                                  GestureDetector(
+                                      onTap: (){
+                                        setState((){
+                                          _removeItemCesta();
+                                        });
+                                      },
+                                      child: Container(
+                                          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),
+                                          ),
+                                          margin: EdgeInsets.fromLTRB(0, 4, 0, 10),
+                                          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                          child: SizedBox(
+                                            width: 35,
+                                            height: 28,
+                                            child
+                                                :Icon(Icons.remove_shopping_cart,color:Colors.red,size: 20,),
+
+                                          )
+                                      )
+                                  )),
+                            ]),
+
+                            ],)),
+
+                            ],),
                         ),
                       ],)
                     ],)
@@ -445,7 +632,7 @@ class _itemListProdstate extends State<itemListProd>  {
           setState(() {
             incremental -= 1;
           });
-          decrementItemCesta_on(widget.produto);
+          decrementItemCesta_on(widget.produto,1);
         }
       }else {
         if (total>1){
@@ -460,6 +647,7 @@ class _itemListProdstate extends State<itemListProd>  {
 
   }
 
+
   formatFrete(){
 
     var coef = widget.produto.coefKm;
@@ -472,7 +660,6 @@ class _itemListProdstate extends State<itemListProd>  {
             distKm = double.parse(widget.distancias[i].distancia)/1000;
         }
       }
-
       if ( widget.produto.distanciaGratisKm>=distKm){
         styleTextFrete=styleTextFreteGratis;
         return "grátis";
@@ -487,6 +674,7 @@ class _itemListProdstate extends State<itemListProd>  {
       }
     } else
       return "...";
+
   }
 
 
@@ -498,8 +686,11 @@ class _itemListProdstate extends State<itemListProd>  {
       if (widget.produto.quantidade<99) {
         setState(() {
           incremental += 1;
+          total+=1;
+          widget.produto.quantidade=total;
         });
-        incrementItemCesta_on(widget.produto);
+        incrementItemCesta_on(widget.produto,total);
+
       }
     }else{
       opc=1.0;
@@ -512,6 +703,36 @@ class _itemListProdstate extends State<itemListProd>  {
         print("total : "+total.toString());
         widget.produto.quantidade=total;
       });
+    }
+  }
+
+
+  _incrementQntdItemValue(var valor){
+
+    if (itemOn==true){
+      opc=1.0;
+      setState((){
+        vbtnRemoveqntd=true;
+        incremental = valor;
+        if (total==1)total=0;
+        total=valor;
+        incrementItemCesta_on(widget.produto, valor);
+
+      });
+    }else{
+      opc=1.0;
+      vbtnRemoveqntd=true;
+      setState(() {
+        if (incremental==1)incremental=0;
+        incremental = valor;
+        totalPreco = widget.produto.preco*incremental;
+        totalPrecotxt = totalPreco;
+        if (total==1)total=0;
+        total=valor;
+        print("total : "+total.toString());
+        widget.produto.quantidade=total;
+      });
+
     }
   }
 
@@ -616,10 +837,10 @@ class _itemListProdstate extends State<itemListProd>  {
     return preco;
   }
 
-  void decrementItemCesta_on(Produto_cesta item) async{
+  void decrementItemCesta_on(Produto_cesta item,var valor) async{
 
     Produto_cesta  p =item;
-    total-=1;
+    total-=valor;
     item.quantidade=total;
 
     if (uid!=null)
@@ -629,14 +850,15 @@ class _itemListProdstate extends State<itemListProd>  {
   }
 
 
-  void incrementItemCesta_on(Produto_cesta item) async{
+  void incrementItemCesta_on(Produto_cesta item, var valor) async{
 
     Produto_cesta  p =item;
-    total+=1;
+//    total=valor;
     item.quantidade=total;
     if (uid!=null)
       await Firestore.instance.collection("Usuarios")
-          .document(uid).collection("cesta").document(widget.produto.idloja+""+item.id).updateData(p.getproduto());
+          .document(uid).collection("cesta").document(widget.produto.idloja+""+item.id).
+      updateData(p.getproduto());
   }
 
 
@@ -665,7 +887,7 @@ class _itemListProdstate extends State<itemListProd>  {
         .then((e){
             setState(() {
               print("add item lista pos load");
-              bloc.getCesta();
+              bloc.getCesta();//////////////remove?
               itemOn = true;
               widget.produto.cesta = true;
               colorBtnAdd=Colors.green;
@@ -676,7 +898,7 @@ class _itemListProdstate extends State<itemListProd>  {
         });
     }else
     {
-      _snackbar("Voçê possui itens de outra loja na sua cesta, deseja substituir");
+      _snackbar("Você possui itens de outra loja na sua cesta");
 
     }
 
@@ -685,7 +907,9 @@ class _itemListProdstate extends State<itemListProd>  {
 
   @override
   void initState() {
-    lista= bloc.getLojasOn();
+
+    print("initstate");
+//    lista= bloc.getLojasOn();
     getUser();
     super.initState();
   }
@@ -697,8 +921,8 @@ class _itemListProdstate extends State<itemListProd>  {
     if (user!=null)
     uid =  user.uid;
 
-    if (uid!=null)
-    bloc.getCesta();
+//    if (uid!=null)
+//    bloc.getCesta();
 
     if ( widget.distancias!=null) {
       view_dist=true;
@@ -715,6 +939,7 @@ class _itemListProdstate extends State<itemListProd>  {
 
   distanceTo() {
 
+    print("distanceTO");
     distTxt="";
     if ( widget.distancias!=[])
       if ( widget.distancias.isNotEmpty)
@@ -736,7 +961,7 @@ class _itemListProdstate extends State<itemListProd>  {
         }else
         {
         }
-
+    updatedist=true;
     return distTxt;
 
   }

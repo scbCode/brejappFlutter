@@ -33,6 +33,7 @@ class Bloc_financeiro {
       'remetente': remetente,
       'time': timeAguard,
       'idloja': idloja,
+      'idPedido':idPedido,
       'nome': nome
     }).then((v){
       print("SAVE MSG");

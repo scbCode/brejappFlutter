@@ -1,4 +1,4 @@
-package brejapp.flutter_firestore;
+package brejapp.brejapp;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;

@@ -69,10 +69,11 @@ class barNavBottomState extends State<barNavBottom> {
       Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
       GestureDetector(onTap: (){
           setState((){
-            _home(context);
+            if (widget.local!="Home"){
+              _home(context);
              widget.colorHome=Colors.orange[200];
              widget.colorUser=Colors.transparent;
-             widget.colorBusca=Colors.transparent;
+             widget.colorBusca=Colors.transparent;}
           });
        },
       child:
@@ -89,10 +90,11 @@ class barNavBottomState extends State<barNavBottom> {
       GestureDetector(onTap: (){
           setState((){
             if (widget.logado==true){
+              if (widget.local!="User"){
                 _perfil_user(context);
                 widget.colorUser=Colors.orange[200];
                 widget.  colorHome=Colors.transparent;
-                widget.colorBusca=Colors.transparent;
+                widget.colorBusca=Colors.transparent;}
             }else
               {
                 widget.callback_open_login();
@@ -192,6 +194,7 @@ _buscar(context){
 }
 
 _home(context){
+
   Navigator.pop(
     context,
     PageTransition(

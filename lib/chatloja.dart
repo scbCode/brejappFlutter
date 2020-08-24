@@ -144,7 +144,6 @@ class chatlojaState extends State<chatloja> {
 
                                 GestureDetector(
                                     onTap:(){
-                                      FocusScope.of(context).requestFocus(FocusNode());
                                       bloc_financeiro.enviarMsgChat(control_chattext.text,widget.email, widget.uid, "user", widget.idloja,  widget.idPedido,"" ,widget.nome);
                                       control_chattext.text="";
                                     },child:
@@ -193,7 +192,7 @@ class chatlojaState extends State<chatloja> {
                         if (snapshot.data.documents[index]['remetente']!="user" && snapshot.data.documents[index]['remetente']!="user-auto-pedidoErrado")
                           return
                             Container(
-                                margin:EdgeInsets.fromLTRB(50, 0,0, 0),
+                                margin:EdgeInsets.fromLTRB(50, 0,0, 10),
                                 alignment: Alignment.centerRight,
                                 child:
                                 Container(
@@ -211,7 +210,7 @@ class chatlojaState extends State<chatloja> {
                             LimitedBox(maxWidth:MediaQuery.of(context).size.width,child:
                             IntrinsicWidth(child:
                             Container(
-                                margin:EdgeInsets.fromLTRB(5, 0, 0, 0),
+                                margin:EdgeInsets.fromLTRB(5, 0, 0, 10),
                                 alignment: Alignment.center,
                                 child:  Container(
                                     decoration:BoxDecoration(color:Colors.yellow,
@@ -226,7 +225,7 @@ class chatlojaState extends State<chatloja> {
                           return
                             LimitedBox(maxWidth:MediaQuery.of(context).size.width*.8,child:
                             Container(
-                                margin:EdgeInsets.fromLTRB(0, 0, 50, 0),
+                                margin:EdgeInsets.fromLTRB(0, 0, 50, 10),
                                 alignment: Alignment.centerLeft,
                                 child:  Container(
                                     decoration:BoxDecoration(color:Colors.white,

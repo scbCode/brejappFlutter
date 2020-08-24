@@ -10,10 +10,9 @@ typedef OpenPerfil = String Function(String);
 class itemListLojas extends StatefulWidget {
 
   DocumentSnapshot snapshot;
-  var listaMarcas= [];
   OpenPerfil openPerfil;
   var index;
-  itemListLojas (this.snapshot, this.listaMarcas,this.openPerfil);
+  itemListLojas (this.snapshot,this.openPerfil);
 
 
   @override

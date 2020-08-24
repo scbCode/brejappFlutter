@@ -1,4 +1,4 @@
-package brejapp.flutter_firestore;
+package brejapp.brejapp;
 
 import com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsPlugin;
 

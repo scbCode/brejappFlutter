@@ -82,7 +82,7 @@ class perfil_lojaState extends State<perfil_loja> {
                   child:
                   Text(widget.loja['nome'],
                     style: TextStyle(color:Colors.orange,
-                        fontSize: 24,fontFamily: 'BreeSerif'),),),
+                        fontSize: 18,fontFamily: 'BreeSerif'),),),
               ],),
 
                 Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
@@ -104,7 +104,7 @@ class perfil_lojaState extends State<perfil_loja> {
                       Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
                           child: Image.asset("card-app.png",width: 20))),
                       Visibility(
-                        visible: true,
+                        visible: widget.loja['vendaComMaquina'],
                         child:
                         Container(margin: EdgeInsets.fromLTRB(5, 5, 0, 0),
                             child: Image.asset("card_machine.png",width: 20))),
@@ -215,8 +215,9 @@ class perfil_lojaState extends State<perfil_loja> {
   listaprodutos(){
     return
      Container(
-         padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
-         height: 210,
+         padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+         margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+         height: 250,
          child:
      StreamBuilder(
         stream: Firestore.instance
@@ -233,17 +234,16 @@ class perfil_lojaState extends State<perfil_loja> {
                   scrollDirection: Axis.horizontal,
                   itemCount: snapshot.data.documents.length,
                   itemBuilder: (context, index) {
-                    var color = Color(0xFF330000) ;
-                    if (listaCores.length>0)
-                        listaCores.forEach((element) {
-                        if (element['nome'] == snapshot.data.documents[index]['nome'])
-                            color =  Color(int.parse(element['hex']));
-                      });
+
+                    var color = Colors.orange[300];
+
 
                     return
+                      Container(
+                          padding:EdgeInsets.fromLTRB(10,10,10,10),
+                          child:
                       GestureDetector(
                           onTap: (){
-
                             setState(() {
                               v_popadditem=true;
                               Produto_cesta produto =  new Produto_cesta(snapshot.data.documents[index]);
@@ -278,16 +278,15 @@ class perfil_lojaState extends State<perfil_loja> {
                                    quarterTurns: -1,
                                    child:
                                     Container(
-                                        width: 210,
-                                        padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+                                        width: 250,
+                                        padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
                                         decoration:BoxDecoration(color:color),
                                         child:
                                         Column(children:[
 
-
-                                        Text( snapshot.data.documents[index]['nome'],
-                                          style: TextStyle(fontSize: 20,color: Colors.white,fontFamily: 'RobotoBold'),
-                                          textAlign: TextAlign.center, ),
+                                          Text( snapshot.data.documents[index]['nome'],
+                                            style: TextStyle(fontSize: 20,color: Colors.white,fontFamily: 'RobotoBold'),
+                                            textAlign: TextAlign.center, ),
 
                                           Container(
                                               margin:EdgeInsets.all(0) ,
@@ -316,9 +315,21 @@ class perfil_lojaState extends State<perfil_loja> {
                                           Text("R\$ "+ (snapshot.data.documents[index]['preco'].toStringAsFixed(2).replaceAll(".",",")),
                                             style: TextStyle(fontFamily: 'BreeSerif',fontSize: 24,color: Colors.deepOrangeAccent),textAlign: TextAlign.center, )),
 
+                                      Visibility(visible: snapshot.data.documents[index]['gelada'],child:
+                                      Container(
+                                          decoration: BoxDecoration(border: Border.all(color: Colors.lightBlue[400]),borderRadius: BorderRadius.all(Radius.circular(3))),
+                                          padding: EdgeInsets.fromLTRB(4, 1, 4, 0),
+                                          margin:EdgeInsets.fromLTRB(4, 3, 0, 0),height: 15,child:
+                                      Text("gelada",style: TextStyle(fontSize: 10,color:
+                                      Colors.lightBlue[400]),))),
+                                      Visibility(visible: !snapshot.data.documents[index]['gelada'],child:
+                                      Container(
+                                          decoration: BoxDecoration(border: Border.all(color: Colors.grey),borderRadius: BorderRadius.all(Radius.circular(3))),
+                                          padding: EdgeInsets.fromLTRB(4, 1, 4, 0),
+                                          margin:EdgeInsets.fromLTRB(4, 3, 0, 0),height: 15,child:
+                                      Text("natural",style: TextStyle(fontSize: 10,color: Colors.grey),)))
 
-
-                                    ],) ])));
+                                    ],) ]))));
                   }
               );}else return Container();
         }

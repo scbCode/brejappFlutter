@@ -59,7 +59,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Brejapp',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -97,6 +98,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+
+   var tellBrejapp="";
   var v_popadditem=false;
   var prodadd=null;
   bool v_bg=false;
@@ -219,7 +222,8 @@ var view_perfilloja_;
         Column(
           children: <Widget>[
 
-          GestureDetector(onTap: (){ additem(); },
+          GestureDetector(
+              onTap:(){  },
               child:
            Container(
                   margin: EdgeInsets.fromLTRB(15, 80, 0, 0),alignment: Alignment.bottomLeft,
@@ -280,7 +284,7 @@ var view_perfilloja_;
           width: MediaQuery.of(context).size.width,
           height: 70,
           child:CustomPaint(
-            painter: headCurve(Colors.orange),
+            painter: headCurve(Colors.orange[300]),
           ),
       ),
        ///////////////////////////////
@@ -620,7 +624,7 @@ var view_perfilloja_;
                         color: Colors.orange[700].withOpacity(.6),borderRadius: BorderRadius.all(Radius.circular(20))),
                     width: 50,
                     height:  50,
-                child:
+                   child:
                 Container(
                     decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
 
@@ -911,12 +915,21 @@ var view_perfilloja_;
             });
           }else
           {
-            _snackbar("Voçê possui itens de outra loja na sua cesta, deseja substituir");
+            _snackbar("Você possui itens de outra loja na sua cesta");
 
           }
     }else {
       _showpop_login();
     }
+
+  }
+
+
+  getConfigBrejapp(){
+
+    Firestore.instance
+        .collection("BrejappSuporte").document("tell")
+        .get().then((value) => tellBrejapp=value.data['tell']);
 
   }
 
@@ -969,6 +982,7 @@ var view_perfilloja_;
     print(tag+" "+busca);
     nome_busca_lista_prod=busca;
     tag_lista_prod=tag;
+    listaProdutos = listaprod();
     bloc.getListaProdutos(tag,busca);
  }
 
@@ -992,7 +1006,7 @@ var view_perfilloja_;
 
         });
       }, child: Container(
-          margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+          margin: EdgeInsets.fromLTRB(0, 0, 0, 4),
           decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
           child:
           ClipRRect(
@@ -1217,6 +1231,7 @@ void initState() {
   }
 
 checkStateUser() async {
+  print("checkstateuser  0");
 
    var user = null;
    user = await FirebaseAuth.instance.currentUser();
@@ -1544,8 +1559,7 @@ void getEnderecoUser() async {
               // TODO: Handle this case.
               break;
             case ConnectionState.active:
-                      snaphist = snapshot;
-              return listViewProdutos = listaviewProd(snapshot);
+              return listViewProdutos= listaviewProd(snapshot);
               // TODO: Handle this case.
               break;
             case ConnectionState.done:
@@ -1583,6 +1597,7 @@ void getEnderecoUser() async {
             if(snaphist!=null) {
               listViewProdutos = listaviewProd(snaphist);
             }
+            setState((){});
 
             if (tag_lista_prod=="")
               bloc.getListaProdutos("tudo","preco");
@@ -1595,7 +1610,9 @@ void getEnderecoUser() async {
       }
       else {
         listalojason=[];
+        setState((){
         listViewProdutos = listaviewProd(snaphist);
+        });
         if (tag_lista_prod=="")
           bloc.getListaProdutos("tudo","preco");
         else
@@ -1636,7 +1653,7 @@ void getEnderecoUser() async {
                 Produto_cesta produto =  new Produto_cesta(snapshot.data.documents[index]);
                 if (produto.status==true){
                    itemp  =  itemProdutoAll(snapshot,index);
-                 return itemp;
+                 return  itemp;
                 }else
                   {
                     return Container();
@@ -1673,7 +1690,7 @@ void getEnderecoUser() async {
       if (ctrl)
         if (local_user == null) {
           print("CRIAR LISTA - LOCAL USER NULL");
-          return itemListProd(produto, null, [], null, () {
+          return new itemListProd(produto, null, [], null, () {
             return _showpop_gps();
           });
         }
@@ -1697,7 +1714,8 @@ void getEnderecoUser() async {
                   print(
                       "CRIAR LISTA - USER OK - distancia ON - GET DISTANCE " +
                           listaCesta.length.toString());
-                  return itemListProd(
+
+                  return new itemListProd(
                       produto, local_, listaDist, listaCesta, () {
                     return _showpop_login();
                   });
@@ -1708,13 +1726,12 @@ void getEnderecoUser() async {
               print(
                   "CRIAR LISTA - USER OK - distancia OFF - lista [] ");
               if (local_user_cancel == false) {
-                print(
-                    "CRIAR LISTA - USER OK - distancia off - GET DISTANCE");
+
                 checkDistanceAtual(produto);
               }
               else {
                 print("itemProd -d -f");
-                return itemListProd(produto, null, null, [], () {
+                return new itemListProd(produto, null, null, [], () {
                   return _showpop_gps();
                 });
               }
@@ -1723,14 +1740,14 @@ void getEnderecoUser() async {
             if (di <= produto.distanciaMaxKm) {
               print(
                   "CRIAR LISTA - USER OK - distancia ON - GET DISTANCE");
-              return itemListProd(produto, local_, listaDist, null, () {
+              return new itemListProd(produto, local_, listaDist, null, () {
                 return _showpop_login();
               });
             } else
               return Container();
           } else {
             print("itemProd -d -f");
-            return itemListProd(produto, null, [], null, () {
+            return new itemListProd(produto, null, [], null, () {
               return _showpop_gps();
             });
           }
@@ -1862,7 +1879,7 @@ void getEnderecoUser() async {
   }
 
   checkPermission() async {
-
+  print('checkpermission');
     if (modo=="web")
       checkStateUser();
     else

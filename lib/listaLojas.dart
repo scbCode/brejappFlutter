@@ -21,21 +21,13 @@ class listaLojas extends StatefulWidget {
 
 class listaProdutoState  extends State<listaLojas> {
 
-  var marcas =
-  [
-    "https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/o-brahma.png?alt=media&token=a9c0362d-da89-4079-8bc4-f22079b6dbee",
-    "https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/o-budweiser.png?alt=media&token=547573e8-aa3f-4937-8c19-f9fa818c57d7",
-    "https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/o-corona.png?alt=media&token=5ede9836-f3e6-403d-9b9e-9e0cba81715e",
-    "https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/o-brahma.png?alt=media&token=a9c0362d-da89-4079-8bc4-f22079b6dbee",
-    "https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/o-budweiser.png?alt=media&token=547573e8-aa3f-4937-8c19-f9fa818c57d7",
-    "https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/o-corona.png?alt=media&token=5ede9836-f3e6-403d-9b9e-9e0cba81715e"
-  ];
+
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
         stream: Firestore.instance
-            .collection("Perfil_loja")
+            .collection("Perfil_loja").where('online',isEqualTo: true)
             .snapshots(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
@@ -50,7 +42,7 @@ class listaProdutoState  extends State<listaLojas> {
                   scrollDirection: Axis.horizontal,
                   itemCount: snapshot.data.documents.length,
                   itemBuilder: (context, index) {
-                    return itemListLojas(snapshot.data.documents[index],marcas,(value){openPerfilLoja(value);});
+                    return itemListLojas(snapshot.data.documents[index],(value){openPerfilLoja(value);});
                   }
               );
               // TODO: Handle this case.

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
-
+import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,6 +17,7 @@ import 'package:flutter_firestore/pop_returnPedido.dart';
 import 'package:flutter_firestore/prePedido.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
 import 'BlocAll.dart';
 import 'Produto_cesta.dart';
@@ -54,6 +55,7 @@ class Perfil_user extends StatefulWidget {
 
 class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStateMixin {
   var bloc = new BlocAll();
+  var tellBrejapp="";
 
   var t="x";
   var enablePag=false;
@@ -119,19 +121,35 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                         painter: headCurve(Colors.orange),
                       ),
                     ),
+
                     Container(
                       width: MediaQuery.of(context).size.width,
                       margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
                       alignment: Alignment.center ,
-                      child: Text("Bem vindo\n "+ widget.nome, style:styleTxt,
+                      child: Text("Bem vindo", style: TextStyle(fontSize: 20,color:Colors.black54,fontFamily: 'BreeSerif'),
                         textAlign: TextAlign.center,),),
-                    Container( margin: EdgeInsets.fromLTRB(10, 15, 0, 10),alignment: Alignment.centerLeft ,
+
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    margin: EdgeInsets.fromLTRB(10, 15, 0, 0),
+                    alignment: Alignment.centerLeft ,
+                    child: Text(widget.nome, style: TextStyle(fontSize: 18,color:Colors.black54,fontFamily: 'BreeSerif'),
+                      textAlign: TextAlign.center,),),
+
+                  Container( margin: EdgeInsets.fromLTRB(10, 5, 0, 10),alignment: Alignment.centerLeft ,
                       child: Text( widget.email,style:TextStyle(fontFamily: 'RobotoLight',fontSize: 16),),),
+
+                  GestureDetector(onTap:(){
+                        suporteBrejapp();
+                    },child:
                     Container(alignment: Alignment.centerLeft ,
                          margin: EdgeInsets.fromLTRB(10, 5, 0, 5),
                          child:Container(
-                             child: Text("sair", style:styleTxtred ,),
-                             decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(3)),border:  Border.all(color: Colors.red)))),
+                             padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                             child: Text("Falar com suporte", style:TextStyle(fontSize: 16,color:Colors.grey,fontFamily: 'RobotoLight') ,),
+                             decoration: BoxDecoration(borderRadius:
+                             BorderRadius.all(Radius.circular(3)),border:
+                             Border.all(color: Colors.grey))))),
                     GestureDetector(onTap: ()
                        {
                           setState((){
@@ -157,8 +175,8 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                           ],)
                          )),
             Visibility(
-                visible: end_user_!=null, child:
-                  enderecoview),
+                visible: true, child:
+            enderecoView_()),
                         Container(
                           padding: EdgeInsets.fromLTRB(10, 10, 0,15) ,
                             decoration: BoxDecoration(color:Colors.white),
@@ -217,8 +235,12 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                     child:
                 StreamBuilder(
                     stream: Firestore.instance.collection('Usuarios').document(uid)
+
                     .collection("Pedidos").snapshots(),
                     builder: (context, snapshot) {
+                      if (snapshot.connectionState!=ConnectionState.active )
+                        return Container();
+                        if (snapshot.connectionState==ConnectionState.active )
                       return new ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
@@ -239,8 +261,12 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                               status="Cancelado";
                             if (pd.status.contains("finalizado"))
                               status="Finalizado";
-
-
+                            if (pd.status.contains("entrega"))
+                              status="Em andamento";
+                            if (pd.status.contains("confirmado"))
+                              status="Em andamento";
+                            if (pd.status.contains("aguardando"))
+                              status="Em andamento";
 
                             return
                               Container(
@@ -267,7 +293,8 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                                      for(int i=0; i < snapshot.data.documents.length;i++){
                                        if (snapshot.data.documents[i].documentID==pd.idloja)
                                           index=i;
-                                     }
+                                       }
+
                                      if (index==-1)
                                          return Container();
                                      if (index!=-1)
@@ -279,25 +306,65 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                                          child:Image.network(snapshot.data.documents[index]['url']),
                                          width: 50,);
 
-                                  }else return Container();
+                                  }else
+                                    return Container();
                                 })),
 
                                 Container(
                                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                                     alignment: Alignment.centerLeft,
                                     child:
-                                     Text(pd.lista_produtos[0]['loja'])),
+                                     Text(pd.lista_produtos[0]['loja'],
+                                         style:TextStyle(fontFamily: 'BreeSerif'))),
                                   ]),
-                                  Container(
-                                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                                      alignment: Alignment.centerLeft,
-                                     child:
-                                      Text(status)),
-                                Container(
-                                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                                    alignment: Alignment.centerLeft,
-                                    child:
-                                    Text(d)),
+                                  Divider(),
+                                   Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround ,
+                                      children:[
+                                   Column(children:[
+                                        Container(
+                                            margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                            alignment: Alignment.centerLeft,
+                                           child:
+                                            Text(status,style:TextStyle(fontFamily: 'BreeSerif'))),
+                                        Container(
+                                            margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                            alignment: Alignment.centerLeft,
+                                            child:
+                                            Text(d,style:TextStyle(fontFamily: 'RobotoLight'))),
+                                    ]),
+
+                                   Column(children:[
+                                     Container(
+                                         margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                         alignment: Alignment.centerLeft,
+                                         child:
+                                         Text("Ajuda?",style:
+                                         TextStyle(fontFamily: 'BreeSerif',color:Colors.orange[300]))),
+
+//                                         GestureDetector(
+//                                             onTap:(){
+//                                               ligarLoja(pd.idloja);
+//                                             },
+//                                             child:
+//
+//                                         Container(
+//                                              margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+//                                              alignment: Alignment.centerLeft,
+//                                              child:
+//                                           Text("Ligar para loja",style:
+//                                           TextStyle(fontFamily: 'RobotoLight',fontSize: 18)))),
+                            GestureDetector(onTap:(){
+                              suporteBrejapp();
+
+                            },child:   Container(
+                                         margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+                                         alignment: Alignment.centerLeft,
+                                         child:
+                                         Text("Suporte",style:
+                                         TextStyle(fontFamily: 'RobotoLight',fontSize: 18)))),
+                                   ]),
+                                  ]),
                               ]));
                           }
                       );
@@ -339,6 +406,28 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
       .then((value) => url= value.data['url']);
       print(url);
       return url;
+  }
+
+  suporteBrejapp()async{
+
+    var tell;
+    await Firestore.instance.collection('BrejappSuporte')
+          .document('tell').get()
+          .then((value) => tell= value.data['tell']);
+
+    FlutterOpenWhatsapp.
+      sendSingleMessage("+55"+tell,"Olá, preciso de ajuda no aplicativo." );
+
+  }
+
+
+  ligarLoja(var idloja)async{
+
+    var tell;
+    await Firestore.instance.collection('Perfil_loja').document(idloja).get()
+        .then((value) => tell= value.data['tell']);
+
+    UrlLauncher.launch("tel://"+tell);
   }
 
   formularioCartao(){
@@ -521,7 +610,7 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
           child:
           Column(
             children: <Widget>[
-              Row(mainAxisAlignment: MainAxisAlignment.start,
+              Row(mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max, children: <Widget>[
                   Column(
                     mainAxisSize: MainAxisSize.max,
@@ -542,30 +631,30 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                         TextStyle(color: Colors.black45,fontFamily: 'RobotoLight'),)),
 
                     ],),
-                  Container(
-                      height: 130,
-                      width:MediaQuery.of(context).size.width*.32,
-                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0), alignment: Alignment.centerLeft,
-                      child:
-                      Stack(children: <Widget>[
-                        GoogleMap(
-                            onMapCreated:  _onMapCreated,
-                            zoomControlsEnabled: false,
-                            buildingsEnabled: true,
-                            rotateGesturesEnabled: false,
-                            zoomGesturesEnabled: false,
-                            scrollGesturesEnabled: false,
-                            mapType: MapType.normal,
-                            initialCameraPosition:  CameraPosition(
-                                target:getLocal(data),
-                                zoom: 17.0
-                            )),
-                        Visibility(visible: true, child:
-                        Container(
-                            height: 150,
-                            alignment: Alignment.center,
-                            child:Icon(Icons.radio_button_checked,color: Colors.red,size: 25,))),
-                      ],)),
+//                  Container(
+//                      height: 130,
+//                      width:MediaQuery.of(context).size.width*.32,
+//                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0), alignment: Alignment.centerLeft,
+//                      child:
+//                      Stack(children: <Widget>[
+//                        GoogleMap(
+//                            onMapCreated:  _onMapCreated,
+//                            zoomControlsEnabled: false,
+//                            buildingsEnabled: true,
+//                            rotateGesturesEnabled: false,
+//                            zoomGesturesEnabled: false,
+//                            scrollGesturesEnabled: false,
+//                            mapType: MapType.normal,
+//                            initialCameraPosition:  CameraPosition(
+//                                target:getLocal(data),
+//                                zoom: 17.0
+//                            )),
+//                        Visibility(visible: true, child:
+//                        Container(
+//                            height: 150,
+//                            alignment: Alignment.center,
+//                            child:Icon(Icons.radio_button_checked,color: Colors.red,size: 25,))),
+//                      ],)),
 
                 ],),
               Divider(color:Colors.red,height: 1,),
@@ -674,7 +763,10 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
 
   @override
   void initState() {
+
+    print("init perfiluser");
     getUseruid();
+    getConfigBrejapp();
     enderecoview = enderecoView_();
     setState(() {
       widget.iconEnd = Icons.arrow_drop_down;
@@ -687,7 +779,13 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
      // _rotatemap();
     });
   }
+  getConfigBrejapp(){
 
+    Firestore.instance
+        .collection("BrejappSuporte").document("tell")
+        .get().then((value) => tellBrejapp=value.data['tell']);
+
+  }
   _rotatemap() async {
 
 //    Timer.periodic(new Duration(milliseconds: 100), (timer) {

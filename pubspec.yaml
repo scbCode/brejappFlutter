@@ -95,6 +95,8 @@ flutter:
     - moto-on.png
     - moto-off.png
     - card-app.png
+    - icongarrafa.png
+    - ic_garrafa.png
   # FONTS
   fonts:
     - family: RobotoLight

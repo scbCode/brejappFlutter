@@ -63,6 +63,7 @@ class BlocAll {
         {
           cestaExist=false;
           control_check.sink.add([]);
+          getListaProdutos("tudo","preco");
         }
 
   }
@@ -71,6 +72,8 @@ class BlocAll {
 
   _checkreresult(QuerySnapshot data) async{
     listaCesta=[];
+    control_check.sink.add([]);
+
     var loja="";
     if (data.documents.isEmpty==false) {
         print ("BLOC - getCesta EXIXST");
@@ -616,40 +619,47 @@ class BlocAll {
 
   getListaProdutos(var tag,var busca) async {
 
-
+      var busctext=busca;
       var ref = Firestore.instance
           .collection("Produtos_On").orderBy("preco",descending: false);
-
-      busca=busca.toString().toLowerCase();
-      var busctext = removeDiacritics(busca);
-
-      for (var i = 0; i <listaAutoComplete.length; i++){
-
-        if (listaAutoComplete[i].toString().toLowerCase()==busca) {
-          print(" IGUAL ");
-
-          busctext = listaAutoComplete[i];
-        } else
-        if (listaAutoComplete[i].toString().toLowerCase().contains(busca))
-          busctext=listaAutoComplete[i];
-      }
-
       print("busctext "+busctext );
-      if (tag=="tags" || tag=="tipo" || tag=="marca" || tag=="tamanho"  ) {
 
+      if (tag=="loja"){
         ref = Firestore.instance
             .collection("Produtos_On")
-            .where("tags", arrayContains: busctext)
+            .where("loja", isEqualTo: busctext)
             .orderBy("preco", descending: false);
-      }else
-        if (tag!="tudo")
-            ref = Firestore.instance
-            .collection("Produtos_On")
-            .where(tag,isEqualTo: busca).orderBy("preco",descending: false);
+      }else {
+        busca = busca.toString().toLowerCase();
+        busctext = removeDiacritics(busca);
 
+        for (var i = 0; i < listaAutoComplete.length; i++) {
+          if (listaAutoComplete[i].toString().toLowerCase() == busca) {
+            print(" IGUAL ");
+
+            busctext = listaAutoComplete[i];
+          } else
+          if (listaAutoComplete[i].toString().toLowerCase().contains(busca))
+            busctext = listaAutoComplete[i];
+        }
+
+
+        if (tag == "tags" || tag == "tipo" || tag == "marca" ||
+            tag == "tamanho") {
+          ref = Firestore.instance
+              .collection("Produtos_On")
+              .where("tags", arrayContains: busctext)
+              .orderBy("preco", descending: false);
+        } else if (tag != "tudo")
+          ref = Firestore.instance
+              .collection("Produtos_On")
+              .where(tag, isEqualTo: busca).orderBy("preco", descending: false);
+
+         }
 
         ref.snapshots()
-            .listen((data) => {
+            .listen((data) =>
+        {
           listaProdutos(data)
         });
 

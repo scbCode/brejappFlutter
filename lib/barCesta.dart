@@ -70,7 +70,7 @@ class barCestaState extends State<barCesta>   {
   TextEditingController c_cvv = TextEditingController();
 
   var listaProdutos;
-  var pedidoMinimo=0;
+  var pedidoMinimo=0.0;
   double initial=0.0;
   var bloc = BlocAll();
   var bloc_financeiro = Bloc_financeiro();
@@ -213,8 +213,7 @@ class barCestaState extends State<barCesta>   {
     if (loja!=null) {
       setState((){
         print("pedidoMinimo");
-        print(loja.pedidoMinimo);
-        pedidoMinimo= loja.pedidoMinimo;
+        pedidoMinimo= double.parse(loja.pedidoMinimo.toString());
       });
     }
     print("loja xxxy "+loja.tell);
@@ -389,7 +388,7 @@ class barCestaState extends State<barCesta>   {
                                         padding: EdgeInsets.fromLTRB(5,0,0,0),
                                         alignment: Alignment.centerLeft,
                                         child: Image.asset("card-app.png",width: 20,height: 20,))),
-                                    Visibility(visible: cartao,child:
+                                    Visibility(visible: maquina,child:
                                     Container(
                                         padding: EdgeInsets.fromLTRB(10,0,0,0),
                                         alignment: Alignment.centerLeft,
@@ -444,7 +443,7 @@ class barCestaState extends State<barCesta>   {
                               Container(
                                   margin: EdgeInsets.fromLTRB(10, 10,0,10),
                                   alignment: Alignment.center, child:
-                              Text("Qual a forma de pagamento?x",
+                              Text("Qual a forma de pagamento?",
                                 style:
                                 TextStyle(color: Colors.black,fontSize: 17,fontFamily: 'BreeSerif'),)),
                               //PAGUE DINHEIRO
@@ -452,7 +451,7 @@ class barCestaState extends State<barCesta>   {
                               //MAQUINA CARTÃO
                               Visibility(visible: maquina,
                                   child:formaPagMaquina()),
-                              Visibility(visible:view_troco,child:Container(height:75)),
+                              Visibility(visible:view_troco,child:Container(height:150)),
 
                               //LISTA CARTOES USER
                               Visibility(visible:v_cartaoapp,child:
@@ -1972,6 +1971,7 @@ class barCestaState extends State<barCesta>   {
   listaCesta()  {
     return
       Container(
+        margin:EdgeInsets.fromLTRB(0,15,0,5),
           height: 140,
           child:
           StreamBuilder(

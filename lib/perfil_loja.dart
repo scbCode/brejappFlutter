@@ -340,11 +340,29 @@ class perfil_lojaState extends State<perfil_loja> {
  getfrete(){
 
     if (distanciaKM!=""){
+
+      if (distanciaKM.contains("km")){
         var km = distanciaKM.replaceAll("km", "");
-         km = km.replaceAll("m", "");
         km = km.replaceAll(",", ".");
         var kmdouble = double.parse(km)*widget.loja['coefKm'];
+        var distgratis=double.parse(widget.loja['distanciaGratisKm']);
+        if (distgratis>=double.parse(km))
+            return "Grátis";
+        else
+          return (kmdouble).toStringAsFixed(2);
+
+      }else
+      if (distanciaKM.contains("m")){
+        var km = distanciaKM.replaceAll("m", "");
+        km = km.replaceAll(",", ".");
+        var kmdouble = (double.parse(km)/1000)*widget.loja['coefKm'];
+        var distgratis=double.parse(widget.loja['distanciaGratisKm'].toString());
+        if (distgratis>=(double.parse(km)/1000))
+          return "Grátis";
+        else
         return (kmdouble).toStringAsFixed(2);
+      }
+
     }else
         return "";
 

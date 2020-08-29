@@ -47,6 +47,7 @@ class BlocAll {
   var pedidoExist=false;
   var cestaExist=false;
 
+  var limit=30;
   var listaAutoComplete = [];
 
 
@@ -63,7 +64,7 @@ class BlocAll {
         {
           cestaExist=false;
           control_check.sink.add([]);
-          getListaProdutos("tudo","preco");
+          getListaProdutos("tudo","preco",'-',limit);
         }
 
   }
@@ -124,8 +125,8 @@ class BlocAll {
         .collection('Perfil_loja').document(loja).get().
       then
         ((data)   {
-       Loja loja = Loja(data);
-       returnloja=loja;
+           Loja loja = Loja(data);
+           returnloja=loja;
 
        return loja;
         }
@@ -208,7 +209,7 @@ class BlocAll {
     getEnderecoUser();
     StreamPedidos();
     StreamPrePedidos();
-    getListaProdutos("tudo","preco");
+    getListaProdutos("tudo","preco",'-',limit);
   }
 
   callTokenrizarCartao() async {
@@ -272,7 +273,28 @@ class BlocAll {
     var ctrol=false;
     await refData.collection("Usuarios")
         .document(uid).collection('Pedidos')
-        .document(pedido).setData({"time_canelado_loja_visto":FieldValue.serverTimestamp(),"status":"cancelado_loja_reembolso_desativado",},merge: true)
+        .document(pedido).setData({"time_canelado_loja_visto":FieldValue.serverTimestamp(),
+      "status":"cancelado_loja_desativado",},merge: true)
+        .then((v){
+      print("SAVE CANCEL-PEDIDO");
+      ctrol=true;
+      return  true;
+    }).catchError((erro){
+      print("SAVE CANCEL-PEDIDO - ERROR");
+    });
+
+    return ctrol;
+
+  }
+
+
+  Future<bool> cancelPedido_nao_aceito_reembolso(var uid, var pedido) async {
+    var refData = Firestore.instance;
+    var ctrol=false;
+    await refData.collection("Usuarios")
+        .document(uid).collection('Pedidos')
+        .document(pedido).setData({"time_canelado_loja_visto":FieldValue.serverTimestamp(),
+      "status":"cancelado_loja_reembolso_desativado",},merge: true)
         .then((v){
       print("SAVE CANCEL-PEDIDO");
       ctrol=true;
@@ -348,6 +370,7 @@ class BlocAll {
   }
 
   Future<bool> envarAvaliacao(var loja, var email,var aval) async {
+
     var refData = Firestore.instance;
     var ctrol=false;
     await refData.collection("Avaliacoes")
@@ -487,6 +510,7 @@ class BlocAll {
             pd.setPedido(p);
             if ( pd.status != "cancelado_user" &&
                 pd.status != "cancelado_loja_visto" &&
+                pd.status != "cancelado_loja_desativado" &&
                 pd.status != "cancelado_user_reembolso" &&
                 pd.status != "cancelado_loja_reembolso_desativado" &&
                 pd.status != "nao_aceito_visto" &&
@@ -609,7 +633,8 @@ class BlocAll {
 
     ref = Firestore.instance
         .collection("Produtos_On").orderBy("preco",descending: false);
-      ref
+
+    ref.limit(limit)
           .snapshots()
           .listen((data) => {
         listaProdutos(data)
@@ -617,11 +642,13 @@ class BlocAll {
 
   }
 
-  getListaProdutos(var tag,var busca) async {
+  getListaProdutos(var tag,var busca,var filtro,var limite) async {
 
+     limit=limite;
       var busctext=busca;
       var ref = Firestore.instance
-          .collection("Produtos_On").orderBy("preco",descending: false);
+          .collection("Produtos_On")
+          .orderBy("preco",descending: false);
       print("busctext "+busctext );
 
       if (tag=="loja"){
@@ -643,7 +670,7 @@ class BlocAll {
             busctext = listaAutoComplete[i];
         }
 
-
+        if (filtro=='-'){
         if (tag == "tags" || tag == "tipo" || tag == "marca" ||
             tag == "tamanho") {
           ref = Firestore.instance
@@ -655,9 +682,20 @@ class BlocAll {
               .collection("Produtos_On")
               .where(tag, isEqualTo: busca).orderBy("preco", descending: false);
 
-         }
+         }else
 
-        ref.snapshots()
+           {
+             if (tag == "marca") {
+               ref = Firestore.instance
+                   .collection("Produtos_On")
+                   .where("descricao", isEqualTo: filtro)
+                   .where("tags", arrayContains: busctext)
+                   .orderBy("preco", descending: false);
+           }
+           }
+      }
+
+        ref.limit(limit).snapshots()
             .listen((data) =>
         {
           listaProdutos(data)

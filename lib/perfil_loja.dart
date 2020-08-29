@@ -345,7 +345,7 @@ class perfil_lojaState extends State<perfil_loja> {
         var km = distanciaKM.replaceAll("km", "");
         km = km.replaceAll(",", ".");
         var kmdouble = double.parse(km)*widget.loja['coefKm'];
-        var distgratis=double.parse(widget.loja['distanciaGratisKm']);
+        var distgratis=double.parse(widget.loja['distanciaGratisKm'].toString());
         if (distgratis>=double.parse(km))
             return "Grátis";
         else
@@ -437,7 +437,6 @@ class perfil_lojaState extends State<perfil_loja> {
 
   @override
   void initState() {
-    getColorsMarcas();
     getDistanciaLoja(widget.loja['idloja']);
     listaprod=listaprodutos();
     super.initState();

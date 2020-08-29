@@ -463,10 +463,11 @@ _login(context) {
                                   child:
                                   StreamBuilder(
                                       stream:
-                                      Firestore.instance      .collection('Docs').document("termosEcondicoes_loja")
+                                      Firestore.instance      .collection('Docs').document("termosEcondicoes")
                                           .snapshots(),
                                       builder: (context, snapshot) {
                                         if (ConnectionState.active== snapshot.connectionState) {
+                                          String answer = snapshot.data['text'].replaceAll("/n", "\n");
                                           return
                                             Container(
                                                 width: MediaQuery
@@ -478,7 +479,7 @@ _login(context) {
                                                     borderRadius: BorderRadius.all(Radius.circular(20))),
                                                 margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
                                                 padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                                                child: Text(""+snapshot.data['text'].toString(),
+                                                child: Text(answer,
                                                   textAlign: TextAlign.left, style:
                                                   TextStyle(
                                                       color: Colors.black, fontFamily: 'RobotoLight', fontSize: 20),));
@@ -867,10 +868,11 @@ _login(context) {
                           child:
                           StreamBuilder(
                               stream:
-                              Firestore.instance      .collection('Docs').document("termosEcondicoes_loja")
+                              Firestore.instance      .collection('Docs').document("termosEcondicoes")
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 if (ConnectionState.active== snapshot.connectionState) {
+                                  String answer = snapshot.data['text'].replaceAll("/n", "\n");
                                   return
                                     Container(
                                         width: MediaQuery
@@ -882,10 +884,10 @@ _login(context) {
                                             borderRadius: BorderRadius.all(Radius.circular(20))),
                                         margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
                                         padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                                        child: Text(""+snapshot.data['text'].toString(),
+                                        child: Text(answer,
                                           textAlign: TextAlign.left, style:
                                           TextStyle(
-                                              color: Colors.black, fontFamily: 'RobotoLight', fontSize: 20),));
+                                              color: Colors.black, fontFamily: 'RobotoLight', fontSize: 14),));
                                 } else
                                   return Icon(Icons.update);}))),
 
@@ -948,7 +950,7 @@ btnrealizarloginemail(){
           if (c_emaillogin.text.length>0 && c_senhalogin.text.length>0)
               handleSignInEmail(c_emaillogin.text,c_senhalogin.text);
           else
-            _snackbar("Complete os campos");
+              _snackbar("Complete os campos");
 
           viewemaillogin=true;
           viewbtns=false;

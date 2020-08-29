@@ -1279,7 +1279,6 @@ class barCestaState extends State<barCesta>   {
 
             children: <Widget>[
 
-
               Row(mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max, children: <Widget>[
 
@@ -1295,18 +1294,20 @@ class barCestaState extends State<barCesta>   {
                       Container(
                           width: MediaQuery.of(context).size.width*.54,
                           margin: EdgeInsets.fromLTRB(20, 25,0, 0),
-                          alignment: Alignment.centerLeft, child:
-                      Text(data['rua']+", "+data['bairro'], maxLines: 4,
-                        overflow: TextOverflow.ellipsis,style:
-                        TextStyle(color: Colors.black87,fontFamily: 'RobotoLight'),)),
+                          alignment: Alignment.center, child:
+                        Text(data['rua']+", "+data['bairro'], maxLines: 4,
+                          overflow: TextOverflow.ellipsis ,
+                          style:
+                          TextStyle(color: Colors.black87,fontSize:18,
+                              fontFamily: 'RobotoLight'),)),
 
                       Container(
                           width: MediaQuery.of(context).size.width*.54,
                           margin: EdgeInsets.fromLTRB(20, 0,0, 5),
-                          alignment: Alignment.centerLeft, child:
-                      Text("Nº "+data['numero']+", "+data['complemento'], maxLines: 6,
-                        overflow: TextOverflow.ellipsis,style:
-                        TextStyle(color: Colors.black45,fontFamily: 'RobotoLight'),)),
+                          alignment: Alignment.center, child:
+                        Text("Nº "+data['numero']+", "+data['complemento'], maxLines: 6,
+                          overflow: TextOverflow.ellipsis,style:
+                          TextStyle(color: Colors.black45,fontSize:18,fontFamily: 'RobotoLight'),)),
 
                     ],),
 //
@@ -1330,30 +1331,30 @@ class barCestaState extends State<barCesta>   {
 //                        zoom: 16.0
 //                    ),
 //                  )),
-                  Container(
-                      height: 130,
-                      width:MediaQuery.of(context).size.width*.29,
-                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0), alignment: Alignment.centerLeft,
-                      child:
-                      Stack(children: <Widget>[
-                      GoogleMap(
-                            onMapCreated:  _onMapCreated,
-                            zoomControlsEnabled: false,
-                            buildingsEnabled: true,
-                            rotateGesturesEnabled: false,
-                            zoomGesturesEnabled: false,
-                            scrollGesturesEnabled: false,
-                            mapType: MapType.normal,
-                            initialCameraPosition:  CameraPosition(
-                                target:getLocal(data),
-                                zoom: 17.0
-                            )),
-                        Visibility(visible: true, child:
-                        Container(
-                            height: 150,
-                            alignment: Alignment.center,
-                            child:Icon(Icons.radio_button_checked,color: Colors.red,size: 25,))),
-                      ],)),
+//                  Container(
+//                      height: 130,
+//                      width:MediaQuery.of(context).size.width*.29,
+//                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0), alignment: Alignment.centerLeft,
+//                      child:
+//                      Stack(children: <Widget>[
+//                      GoogleMap(
+//                            onMapCreated:  _onMapCreated,
+//                            zoomControlsEnabled: false,
+//                            buildingsEnabled: true,
+//                            rotateGesturesEnabled: false,
+//                            zoomGesturesEnabled: false,
+//                            scrollGesturesEnabled: false,
+//                            mapType: MapType.normal,
+//                            initialCameraPosition:  CameraPosition(
+//                                target:getLocal(data),
+//                                zoom: 17.0
+//                            )),
+//                        Visibility(visible: true, child:
+//                        Container(
+//                            height: 150,
+//                            alignment: Alignment.center,
+//                            child:Icon(Icons.radio_button_checked,color: Colors.red,size: 25,))),
+//                      ],)),
 
                 ],),
               Divider(color:Colors.red,height: 1,),
@@ -1417,7 +1418,7 @@ class barCestaState extends State<barCesta>   {
       _center = new LatLng(data['localizacao'].latitude,
           data['localizacao'].longitude);
       if (mapController != null)
-        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 15));
+        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center, 12));
     }
     return _center;
   }
@@ -1917,10 +1918,11 @@ class barCestaState extends State<barCesta>   {
     var coef = widget.listaCesta[0].coefKm;
     var distKm=0.0;
 
+    if (widget.listaCesta!=null)
     for(int i = 0; i < widget.listaCesta.length;i++) {
 //      if (widget.listaCesta[i].loja == widget.listaDistancia_.loja) {}
 //      }
-      if (widget.listaDistancia_ != null) {
+      if (widget.listaDistancia_ != null && widget.listaDistancia_.distancia!=null) {
         distKm = double.parse(widget.listaDistancia_.distancia) / 1000;
 
         if (widget.listaCesta[0].distanciaGratisKm >= distKm) {
@@ -1944,9 +1946,10 @@ class barCestaState extends State<barCesta>   {
     var coef = widget.listaCesta[0].coefKm;
     var distKm=0.0;
 
+    if(widget.listaCesta!=null)
     for (int i = 0; i < widget.listaCesta.length;i++) {
       if (widget.listaDistancia_ != null) {
-        if (widget.listaCesta[i].idloja == widget.listaDistancia_.idloja) {
+        if (widget.listaCesta[i].idloja == widget.listaDistancia_.idloja && widget.listaDistancia_.distancia!=null) {
             distKm = double.parse(widget.listaDistancia_.distancia) / 1000;
             if (widget.listaCesta[0].distanciaGratisKm >= distKm) {
               return "R\$ " + total.toStringAsFixed(2).replaceAll(".", ",");

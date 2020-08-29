@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 
-typedef changeRefLista = String Function(String,String);
+typedef changeRefLista = String Function(String,String,String);
 
 class listaTagsBusca extends StatefulWidget {
 
@@ -19,7 +19,13 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
   TextEditingController control_busca = TextEditingController();
 
   var buscaSelecionada = "tudo";
+  var buscaMarcaFiltro = "-";
+  var buscaMarcaFiltrotam = "-";
   var itemselect = "";
+  var streamMarcas=   Firestore.instance
+      .collection("marcas_on").snapshots();
+  var streamMarcasTamanho=  Firestore.instance
+      .collection("tamanho_embalagens_on").snapshots();
   var itemTipo_;
   var listatipo;
   Color c_busca = Colors.grey[400];
@@ -106,11 +112,14 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
               GestureDetector(
                   onTap: (){
                     setState(() {
+                      buscaMarcaFiltrotam='-';
+                      buscaMarcaFiltro='-';
+
                       if (buscaSelecionada!="busca")
                       buscaSelecionada="busca";
                       else{
                         buscaSelecionada="tudo";
-                        widget.buscaFiltro("tudo","preco");
+                        widget.buscaFiltro("tudo","preco","-");
                       }
                     });
                   },
@@ -128,8 +137,10 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
             GestureDetector(
               onTap: (){
                 setState(() {
+                  buscaMarcaFiltrotam='-';
+                  buscaMarcaFiltro='-';
                   buscaSelecionada="tudo";
-                  widget.buscaFiltro(buscaSelecionada,"preco");
+                  widget.buscaFiltro(buscaSelecionada,"preco",'-');
 
                 });
               },
@@ -150,7 +161,8 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
             GestureDetector(
               onTap: (){
                       setState(() {
-                        buscaSelecionada = "marca";
+                        buscaMarcaFiltrotam='-';
+                        buscaMarcaFiltro='-';      buscaSelecionada = "marca";
                         itemselect="";
                       });
               },
@@ -170,7 +182,8 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
           GestureDetector(
           onTap: (){
           setState(() {
-          buscaSelecionada="tipo";
+            buscaMarcaFiltrotam='-';
+            buscaMarcaFiltro='-'; buscaSelecionada="tipo";
           itemselect="";
           });
           }, child:
@@ -190,7 +203,8 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
           onTap: (){
           setState(() {
           buscaSelecionada="loja";});
-          itemselect="";
+          buscaMarcaFiltrotam='-';
+          buscaMarcaFiltro='-';  itemselect="";
           },
           child:
           Container(
@@ -208,6 +222,8 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
           GestureDetector(
           onTap: (){
           setState(() {
+            buscaMarcaFiltrotam='-';
+            buscaMarcaFiltro='-';
           buscaSelecionada="tamanho";});
           itemselect="";
           }, child:
@@ -230,16 +246,22 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
         visible: buscaSelecionada=="marca",
         child:
     Container(
-      margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+      margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
           width: MediaQuery.of(context).size.width,
-          height: 50,
           child:
         StreamBuilder(
-        stream:   Firestore.instance
-            .collection("marcas_on").snapshots(),
+        stream:streamMarcas,
         builder: (context, snapshot) {
          if (snapshot.connectionState == ConnectionState.active) {
-          return ListView.builder(
+          return
+            Column(children: [
+
+              Container(
+                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  child:
+              ListView.builder(
             padding: EdgeInsets.all(0),
             scrollDirection: Axis.horizontal,
             itemCount: snapshot.data.documents.length,
@@ -250,7 +272,10 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
                    return
                    GestureDetector(
                        onTap: (){
-                         widget.buscaFiltro(buscaSelecionada,nome);
+                         setState((){
+                         buscaMarcaFiltrotam='-';
+                         buscaMarcaFiltro=nome;});
+                         widget.buscaFiltro(buscaSelecionada,buscaMarcaFiltro,'-');
                        },
                        child:
                      Container(
@@ -261,7 +286,51 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
                          child:
                      Image.network(snapshot.data.documents[index]['url_icon'],
               width: 40,height: 40,)));
-            });
+            })),
+             Visibility(
+                 visible:buscaMarcaFiltro!="-",
+                 child: Container(
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  child:
+                  StreamBuilder(
+                      stream: streamMarcasTamanho,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.active) {
+                          return ListView.builder(
+                              padding: EdgeInsets.all(0),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: snapshot.data.documents.length,
+                              itemBuilder: (context, index) {
+
+                                var nomevol = snapshot.data.documents[index]['nome'];
+                                var cor=Colors.grey;
+                                if (buscaMarcaFiltrotam==nomevol)
+                                  cor=Colors.orange;
+                                else
+                                  cor=Colors.grey;
+
+                                return
+                                  GestureDetector(
+                                      onTap: (){
+                                        setState((){});
+                                        buscaMarcaFiltrotam=nomevol;
+                                        widget.buscaFiltro(buscaSelecionada,buscaMarcaFiltro,nomevol);
+                                      },
+                                      child:
+                                      Container(
+                                          margin: EdgeInsets.all(5),
+                                          alignment: Alignment.center,
+                                          child:
+                                          Text(snapshot.data.documents[index]['nome'],style:
+                                          TextStyle(color:cor,fontFamily: 'RobotoBold'),
+                                          )));
+                              });
+                        }else
+                          return Container();
+                      })))
+            ],);
       }else
         return Container();
     }))),
@@ -320,7 +389,7 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
                             return
                               GestureDetector(
                                   onTap: (){
-                                    widget.buscaFiltro(buscaSelecionada,nome);
+                                    widget.buscaFiltro(buscaSelecionada,nome,'-');
                                   },
                                   child:
                                   Container(
@@ -370,7 +439,7 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
 
   buscaManual(var texto){
     if (texto.length>2)
-    widget.buscaFiltro("tags",texto);
+    widget.buscaFiltro("tags",texto,'-');
   }
 
 
@@ -402,7 +471,7 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
                            return
                              GestureDetector(
                                  onTap: (){
-                                   widget.buscaFiltro(buscaSelecionada,nome);
+                                   widget.buscaFiltro(buscaSelecionada,nome,'-');
                                    setState(() {
                                      itemselect=nome;
                                    });
@@ -432,7 +501,7 @@ class listaTagsBuscaState extends State<listaTagsBusca> {
     return
       GestureDetector(
         onTap: (){
-          widget.buscaFiltro(buscaSelecionada,nome);
+          widget.buscaFiltro(buscaSelecionada,nome,'-');
         },
         child:
         Container(

@@ -188,6 +188,8 @@ class _itemListProdstate extends State<itemListProd>  {
 
   _item_(var ativo){
 
+    var litros = "";
+
     if (ativo){
       textBtnadd="NA CESTA";
       total = widget.produto.quantidade;
@@ -204,6 +206,33 @@ class _itemListProdstate extends State<itemListProd>  {
       }
       colorBtnAdd=Colors.green;
     }
+        var vol = widget.produto.vol;
+        if (vol.contains("ml")){
+            vol = vol.replaceAll("ml","");
+            var voldb = double.parse(vol);
+
+            var v =  total * (voldb/1000);
+            if ( v <1)
+              litros = (v*1000).toStringAsFixed(0)+"ml";
+            else
+              litros = (v).toStringAsFixed(2)+"L";
+
+
+        }
+        if (vol.contains("L")) {
+          vol = vol.replaceAll("L", "");
+          var voldb = double.parse(vol);
+          var v =  total * (voldb*1000);
+          if ( v <=1000)
+            litros = (v/1000).toStringAsFixed(0)+"ml";
+          else
+            litros = (v).toStringAsFixed(2)+"L";
+
+        }
+
+    litros = litros.replaceAll(".",",");
+
+
 
     return
 
@@ -393,7 +422,6 @@ class _itemListProdstate extends State<itemListProd>  {
                                               splashColor: Colors.orange,
                                               color: Colors.yellow[300],
                                               onPressed: () {
-                                                widget.listaCesta.add(widget.produto);
                                                 print("click3");
                                                 _addLista();
                                               },
@@ -499,7 +527,7 @@ class _itemListProdstate extends State<itemListProd>  {
                             children:[
 
                           Container(
-                              width:MediaQuery.of(context).size.width*.25,
+                              width:MediaQuery.of(context).size.width*.4,
                               child:
                               Row(
                                   mainAxisAlignment: MainAxisAlignment.end ,
@@ -517,6 +545,11 @@ class _itemListProdstate extends State<itemListProd>  {
                                         child:   Text("uni",style:
                                         TextStyle(fontSize: 18,color: colorBtnAdd,
                                             fontFamily: 'BreeSerif'),)),
+                                    Container(margin: EdgeInsets.fromLTRB(5, 5, 0, 5),
+                                        alignment: Alignment.center,
+                                        child:   Text(""+litros,style:
+                                        TextStyle(fontSize: 14,color: Colors.grey,
+                                            fontFamily: 'RobotoLight'),)),
                             ])),
 
                             Row(
@@ -725,7 +758,7 @@ class _itemListProdstate extends State<itemListProd>  {
       setState(() {
         if (incremental==1)incremental=0;
         incremental = valor;
-        totalPreco = widget.produto.preco*incremental;
+        totalPreco = double.parse(widget.produto.preco.toString())*incremental;
         totalPrecotxt = totalPreco;
         if (total==1)total=0;
         total=valor;
@@ -773,6 +806,7 @@ class _itemListProdstate extends State<itemListProd>  {
 
     var check = await checkLogado() ;
     if(widget.local_user!=null){
+      widget.listaCesta.add(widget.produto);
 
       if (itemOn==false)
         if (check==true){
@@ -784,6 +818,7 @@ class _itemListProdstate extends State<itemListProd>  {
         }
     }else
     {
+
       print ("addlista null");
       widget.callback_login();
     }
@@ -792,6 +827,7 @@ class _itemListProdstate extends State<itemListProd>  {
 
   _removeItemCesta() async{
 
+    print("delete cesta item");
     await Firestore.instance.collection("Usuarios")
         .document(uid).collection("cesta").document(widget.produto.idloja+""+widget.produto.id).delete();
 

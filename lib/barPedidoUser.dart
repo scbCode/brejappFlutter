@@ -137,7 +137,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
   var pedidoOpenView;
   var v_popajudafinal=false;
   var btnPedidonaochegoufinal=false;
-  var btnPedidonaochegoufinalextorno=false;
+  var btnPedidonaochegoufinalestorno=false;
 
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // CLASS MEMBER, MAP OF MARKS
 
@@ -216,11 +216,15 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
       status_nao_aceito=true;
     }
 
+
     if (widget.pedido.status=="cancelado_loja") {
         pedido_nao_aceito=false;
         status_nao_aceito=true;
     }
-
+    if (widget.pedido.status=="cancelado_loja_analise") {
+      pedido_nao_aceito=false;
+      status_nao_aceito=true;
+    }
     if (widget.pedido.status=="cancelado_loja_visto") {
       pedido_nao_aceito=false;
       status_nao_aceito=true;
@@ -232,9 +236,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
         DateTime data_pedido_confirma_ =widget.pedido.timeConfirmado.toDate();
         txt_time_confirmacao =  "" +data_pedido_confirma_.hour.toString()+" "+data_pedido_confirma_.minute.toString();
 
-//        DateTime data_pedido_entrega =widget.pedido.timeEntrega.toDate();
-//        txt_time_entrega =  "" +data_pedido_entrega.hour.toString();
-//
+
         scaleentrega=12;
         statustext = "Seu pedido saiu para entrega";
         status_confirmacao=true;
@@ -483,7 +485,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                        children: [
                      Container(padding: EdgeInsets.all(5),
                          width: MediaQuery.of(context).size.width,
-                         margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                         alignment:Alignment.center,
+                         margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                          child:
                          Text("Pedido recusado pela loja",
                            style: TextStyle(fontFamily: 'BreeSerif',fontSize: 18,color: Colors.red),)),
@@ -529,7 +532,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                            Container(
                                margin: EdgeInsets.fromLTRB(0,0,0,0),
                                padding: EdgeInsets.fromLTRB(10,10,10,10),
-                               decoration:   BoxDecoration(color:Colors.red,
+                               decoration:   BoxDecoration(color:Colors.grey,
                                    borderRadius:BorderRadius.all(Radius.circular(50))),
                                child:Icon(Icons.clear,color:Colors.white ,size:30)),
                          ),
@@ -600,7 +603,8 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                                onTap:(){
                                      if (widget.pedido.status=="cancelado_loja_reembolso") {
                                     widget.call_show_pop_final();
-                                  }
+                                    setFecharPedido_cancelado_reembolso(widget.user.uid,widget. pedido.idPedido);
+                                     }else
                                  setFecharPedido_cancelado(widget.user.uid,widget. pedido.idPedido);
                                },
 
@@ -715,7 +719,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
                   Container(
 
-                    decoration:BoxDecoration(color:Colors.orange[200]),
+
                       padding: EdgeInsets.fromLTRB(10, 0,10,0),
                   width: MediaQuery.of(context).size.width,
                   height: 60,
@@ -1274,24 +1278,23 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                         style:TextStyle(color:Colors.green,fontFamily: 'RobotoBold')))),
         ])),
 
-      Visibility(visible:  diff_hora>=1 ,child:
-      GestureDetector(
-        onTap:(){
-
-          setState((){
-            if(!pop_pedido_view
-            ) {
-              bg_pop_pedido = true;
-              view_statusbar_pedido=false;
-              pop_pedido_view=true;
-            }else {
-              bg_pop_pedido = false;
-              view_statusbar_pedido=true;
-              pop_pedido_view=false;
-            }
-          });
-        },
-        child:
+      Visibility(visible:  true ,child:
+        GestureDetector(
+          onTap:(){
+            setState((){
+              if(!pop_pedido_view
+              ) {
+                bg_pop_pedido = true;
+                view_statusbar_pedido=false;
+                pop_pedido_view=true;
+              }else {
+                bg_pop_pedido = false;
+                view_statusbar_pedido=true;
+                pop_pedido_view=false;
+              }
+            });
+          },
+          child:
         Container(
             alignment: Alignment.center ,
             margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
@@ -2017,15 +2020,14 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
   itemProd(var index){
 
-   print("total itens "+ widget.pedido.lista_produtos[index]['img'].toString());
-   var text = widget.pedido.lista_produtos[index]['quantidade'].toString()
+   var text = " "+ widget.pedido.lista_produtos[index]['quantidade'].toString()
        +"x\n "+widget.pedido.lista_produtos[index]['nome'].toString()
     +"\n "+widget.pedido.lista_produtos[index]['vol'].toString();
 
     return   Row(children: [
       Image.network(widget.pedido.lista_produtos[index]['img'].toString(),height: 50,),
       Text(text,textAlign: TextAlign.left,
-      style: TextStyle(color:Colors.black,fontSize: 14,
+      style: TextStyle(color:Colors.black,fontSize: 16,
           fontFamily: 'RobotoLight'),),
     ],);
   }
@@ -2113,7 +2115,11 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
     var b = await bloc.cancelPedido_nao_aceito(uid, pedido);
 
   }
+  setFecharPedido_cancelado_reembolso (var uid,var pedido)async{
 
+    var b = await bloc.cancelPedido_nao_aceito_reembolso(uid, pedido);
+
+  }
 
   setCancelPedido  (var uid,var pedido)async{
     setState(() {
@@ -2268,7 +2274,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                     child:
                     GestureDetector(onTap:(){
                       setState(() {
-                        btnPedidonaochegoufinalextorno=!btnPedidonaochegoufinalextorno;
+                        btnPedidonaochegoufinalestorno=!btnPedidonaochegoufinalestorno;
                       });
                     },child:Container(
                     alignment: Alignment.center ,
@@ -2280,7 +2286,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                         style: TextStyle(color:Colors.grey,fontSize: 16,
                             fontFamily: 'RobotoLight'))))),
 
-          Visibility(visible: btnPedidonaochegoufinalextorno,
+          Visibility(visible: btnPedidonaochegoufinalestorno,
                       child:
                       GestureDetector(onTap:(){
                         setState(() {
@@ -2294,7 +2300,7 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
                       padding: EdgeInsets.fromLTRB(10, 15,10,15),
                       decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(30)),
                           border:Border.all(color:Colors.red[200])),
-                      child: Text("Solicitar extorno",
+                      child: Text("Solicitar estorno",
                           style: TextStyle(color:Colors.red,fontSize: 16,
                               fontFamily: 'BreeSerif'))))),
 

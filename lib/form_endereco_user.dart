@@ -237,12 +237,13 @@ class form_endereco_userState extends State<form_endereco_user>  with SingleTick
                                   decoration: BoxDecoration(color: Colors.grey),
                                   alignment: Alignment.center)),
 
-                              Visibility(visible: cor_map_load, child:
+                           Visibility(visible: cor_map_load, child:
                               Container(
                                 height: 300,
                                 decoration: BoxDecoration(color:Colors.black54),
                                 alignment: Alignment.center,)),
-                             Visibility(visible: true, child:
+
+                              Visibility(visible: true, child:
                               Container(
                                   height: 300,
                                   alignment: Alignment.center,
@@ -378,7 +379,7 @@ Container(
     show_googlemaps=false;
 
     if (mapController!=null && _center!=null)
-        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center,14));
+        mapController.moveCamera(CameraUpdate.newLatLngZoom(_center,16));
 
    _center=new LatLng(widget.enderecoExist.localizacao.latitude,
        widget.enderecoExist.localizacao.longitude);

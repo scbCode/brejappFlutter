@@ -216,6 +216,7 @@ class _itemListProdstate extends State<item_cesta> with SingleTickerProviderStat
   }
 
   _removeItemCesta() async{
+    print("DELETE CESTA");
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     if (user!=null)
       await Firestore.instance.collection("Usuarios")

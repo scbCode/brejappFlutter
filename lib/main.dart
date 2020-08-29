@@ -167,6 +167,10 @@ var view_perfilloja_;
   var listalojasview ;
   var listaFiltros;
   var listaProdutos;
+  var limitBuscaProds=30;
+  var limitBuscaProdsAll=0;
+  var textVermais="Ver mais";
+  var vermais_=true;
   var refListaProd = Firestore.instance
       .collection("Produtos_On").orderBy("preco",descending: false)
       .snapshots();
@@ -203,10 +207,7 @@ var view_perfilloja_;
       statusBarColor: Colors.transparent
     ));
 
-    if (v_bg_==true){
-        v_bg_=false;
-        v_bg=false;
-    }
+
 
    return
       Scaffold(
@@ -299,6 +300,7 @@ var view_perfilloja_;
             Visibility( visible: v_bg_load , child:
               blur_background_load()
           ),
+
 
             Visibility(
                 visible:v_popadditem,
@@ -396,7 +398,7 @@ var view_perfilloja_;
           }
           ),
 
-       Visibility(visible:widget. v_poplogin, child:
+        Visibility(visible:widget. v_poplogin, child:
        Positioned(
         child:
           Container(
@@ -437,7 +439,8 @@ var view_perfilloja_;
 
               })),
 
-            Positioned(
+
+        Positioned(
                 width: MediaQuery.of(context).size.width,
                 bottom:bottomBarPedido,
                 child:
@@ -446,18 +449,17 @@ var view_perfilloja_;
                     builder: (context,value) {
                       if (value.connectionState==ConnectionState.active) {
                           if (value.data.length>0){
-                            print("STREM PEDIDO 0 "+value.data.toString());
-
                             return
-                             Column(children: <Widget>[
-
-                               Container( decoration:
-                               BoxDecoration(color: Colors.transparent),height: 45,
-                                margin: EdgeInsets.fromLTRB(0, 0, 0,0),
-                                child:
-                                Container(decoration:
-                                BoxDecoration(color: Colors.transparent),height: 45,child:
-                                barraView()
+                             Column(
+                                 mainAxisAlignment: MainAxisAlignment.end,
+                                 children: <Widget>[
+                                   Container( decoration:
+                                   BoxDecoration(color: Colors.transparent),height: 45,
+                                    margin: EdgeInsets.fromLTRB(0, 0, 0,0),
+                                    child:
+                                    Container(decoration:
+                                    BoxDecoration(color: Colors.transparent),height: 45,child:
+                                    barraView()
                                 )
                             ),
                             Visibility(visible: view_listaPedidos,child:
@@ -483,6 +485,8 @@ var view_perfilloja_;
                                       if ( value.data[index].status != "cancelado_user" &&
                                            value.data[index].status != "cancelado_user_reembolso" &&
                                            value.data[index].status != "cancelado_loja_visto" &&
+                                           value.data[index].status != "cancelado_loja_desativado" &&
+                                           value.data[index].status != "cancelado_loja_desativado" &&
                                            value.data[index].status != "cancelado_loja_reembolso_desativado" &&
                                            value.data[index].status != "cancelado_user_visto" &&
                                            value.data[index].status != "finalizado_desativado") {
@@ -566,7 +570,6 @@ var view_perfilloja_;
                     stream: bloc.check,
                     builder: (context,value) {
                       listaCesta.clear();
-                      print("NOVA CESTA");
                       if (value.connectionState==ConnectionState.active) {
                         if (value.data.length>0){
                           distanciaLoja d;
@@ -696,7 +699,6 @@ var view_perfilloja_;
         )),
 
 
-
         Visibility( visible:view_pop_cadastrodados , child:
             view_pop_completaCad()),
 
@@ -705,11 +707,11 @@ var view_perfilloja_;
                 child:
                 chat()),
 
-
   ])));
 
 
  }
+
 
  closeChat(){
     setState((){
@@ -717,9 +719,11 @@ var view_perfilloja_;
     });
  }
  chat(){
-    if (Usuario==null)
+    print('Usuario');
+    print(Usuario);
+    if (Usuario==null) {
       return Container();
-    else
+    } else
       return
         chatloja(Usuario.uid,Usuario.nome,Usuario.email,idloja,idPedido,(){return closeChat();});
  }
@@ -978,12 +982,21 @@ var view_perfilloja_;
  }
 
 
- changeRefListProd(var tag, var busca){
-    print(tag+" "+busca);
-    nome_busca_lista_prod=busca;
-    tag_lista_prod=tag;
-    listaProdutos = listaprod();
-    bloc.getListaProdutos(tag,busca);
+ changeRefListProd(var tag, var busca,var filtro){
+    print(tag+" "+busca+" "+filtro);
+
+    if(filtro=='-') {
+      nome_busca_lista_prod = busca;
+      tag_lista_prod = tag;
+      listaProdutos = listaprod();
+      bloc.getListaProdutos(tag, busca,"-",limitBuscaProds);
+    }else
+      {
+        nome_busca_lista_prod = busca;
+        tag_lista_prod = tag;
+        listaProdutos = listaprod();
+        bloc.getListaProdutos(tag, busca,filtro,limitBuscaProds);
+      }
  }
 
 
@@ -997,10 +1010,12 @@ var view_perfilloja_;
           if (view_listaPedidos) {
               btnfloat=true;
               view_listaPedidos = false;
-            } else {
+              v_bg_=false;
+          } else {
               view_listaPedidos=true;
               selecPedido="";
               btnfloat=false;
+              v_bg_=true;
           }
 
 
@@ -1084,9 +1099,8 @@ void initState() {
   view_perfilloja_ =  stremPerfilLoja();
   bloc.initBloc();
   listalojasview = listaLojas((value){openperfilloja(value);});
-  bloc.getListaProdutos("tudo", "preco");
   getLojasOn();
-  listaFiltros=listaTagsBusca((tag,value){changeRefListProd(tag,value);});
+  listaFiltros=listaTagsBusca((tag,value,filtro){changeRefListProd(tag,value,filtro);});
   listaProdutos = Container();
   checkPermission();
 
@@ -1226,7 +1240,8 @@ void initState() {
  }
   _load_view(){
     return
-      Container( alignment: Alignment.center, child:Loading(indicator: BallBeatIndicator() , size: 50.0,color: Colors.red),)
+      Container( alignment: Alignment.center,
+        child:Loading(indicator: BallBeatIndicator() , size: 50.0,color: Colors.red),)
     ;
   }
 
@@ -1491,10 +1506,17 @@ void getEnderecoUser() async {
           local_user = currentLocation;
           local_ = local_user;
           view_dialogGps=false;
+          bloc.getListaProdutos("tudo","preco",'-',limitBuscaProds);
           listaProdutos = listaprod();
-
           viewLoad_local=false;
-        });}
+        });}else{
+          setState(() {
+            local_user_cancel=false;
+            view_dialogGps=true;
+            v_bg_load=true;
+            _getLocation();
+          });
+        }
     }else{
       setState(() {
         local_user_cancel=false;
@@ -1538,7 +1560,8 @@ void getEnderecoUser() async {
 
   listaprod()  {
 
-    bloc.getListaProdutos("tudo","preco");
+    if (limitBuscaProdsAll==0)
+    bloc.getListaProdutos("tudo","preco",'-',limitBuscaProds);
 
     return Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 0),child:
     StreamBuilder <QuerySnapshot>(
@@ -1597,15 +1620,17 @@ void getEnderecoUser() async {
             if(snaphist!=null) {
               listViewProdutos = listaviewProd(snaphist);
             }
+
             setState((){});
 
             if (tag_lista_prod=="")
-              bloc.getListaProdutos("tudo","preco");
+              bloc.getListaProdutos("tudo","preco",'-',limitBuscaProds);
             else
-              bloc.getListaProdutos(tag_lista_prod,nome_busca_lista_prod);
+              bloc.getListaProdutos(tag_lista_prod,nome_busca_lista_prod,'-',limitBuscaProds);
 
           });
         });
+        listaProdutos = listaprod();
 
       }
       else {
@@ -1614,9 +1639,9 @@ void getEnderecoUser() async {
         listViewProdutos = listaviewProd(snaphist);
         });
         if (tag_lista_prod=="")
-          bloc.getListaProdutos("tudo","preco");
+          bloc.getListaProdutos("tudo","preco",'-',limitBuscaProds);
         else
-          bloc.getListaProdutos(tag_lista_prod,nome_busca_lista_prod);
+          bloc.getListaProdutos(tag_lista_prod,nome_busca_lista_prod,'-',limitBuscaProds);
 
       }
     }else {
@@ -1638,18 +1663,68 @@ void getEnderecoUser() async {
         primary: false,
         shrinkWrap: true,
         scrollDirection: Axis.vertical,
-        itemCount: snapshot.data.documents.length,
+        itemCount: snapshot.data.documents.length+1,
         itemBuilder: (context, index) {
-          if (index == snapshot.data.documents.length-1)
+
+          limitBuscaProdsAll=snapshot.data.documents.length;
+          if (limitBuscaProdsAll<30) {
+              textVermais="";
+
+          }else
+          if ( limitBuscaProdsAll != limitBuscaProds )
+             {
+
+               limitBuscaProds = limitBuscaProds;
+               textVermais="Ver menos";
+
+               if (limitBuscaProdsAll < 30)
+                    textVermais="";
+               vermais_=false;
+             }else
+               {
+                 textVermais="Ver mais";
+                 vermais_=true;
+                 limitBuscaProds=limitBuscaProdsAll;
+               }
+
+          if (index == snapshot.data.documents.length-1){
               v_bg=false;
-          var ctrl=false;
-          double di = 0.0;
-//        return  StreamBuilder(
-//            stream:    Firestore.instance.collection('Lojas_ON')
-//                .orderBy('idloja',descending: false).snapshots(),
-//            builder: (context,value_loja)
-//            {
-            if (snapshot.connectionState == ConnectionState.active) {
+          }
+          if (index >= snapshot.data.documents.length) {
+
+            return
+              GestureDetector(
+                  onTap:(){
+                    if (!vermais_){
+                      if (snapshot.data.documents.length>29)
+                          limitBuscaProds=30;
+                        else {
+                          limitBuscaProds = snapshot.data.documents.length;
+                      }
+
+                      }else
+                      if (snapshot.data.documents.length>29) {
+                            limitBuscaProds += 30;
+                      }
+                    if (tag_lista_prod == "")
+                            bloc.getListaProdutos(
+                                "tudo", "preco", '-', limitBuscaProds);
+                          else
+                            bloc.getListaProdutos(
+                                tag_lista_prod, nome_busca_lista_prod, '-',
+                                limitBuscaProds);
+
+                  },
+                  child:
+                      Container(
+                        padding:EdgeInsets.fromLTRB(10,20,10,10),
+                        alignment: Alignment.center,
+                        width: MediaQuery.of(context).size.width,
+                          child:
+              Text(textVermais,style:TextStyle(fontFamily: 'BreeSerif',fontSize:20 ))));
+          } else
+          if (index < snapshot.data.documents.length)
+          if (snapshot.connectionState == ConnectionState.active) {
                 Produto_cesta produto =  new Produto_cesta(snapshot.data.documents[index]);
                 if (produto.status==true){
                    itemp  =  itemProdutoAll(snapshot,index);
@@ -1932,7 +2007,6 @@ void getEnderecoUser() async {
       });
     }
 
-    listaProdutos = listaprod();
 
   }
 

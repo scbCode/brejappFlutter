@@ -13,10 +13,11 @@
     <uses-feature android:name="android.hardware.location.gps" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application
         android:name=".Application"
         android:label="Brejapp"
-        android:icon="@mipmap/beerapp">
+        android:icon="@mipmap/i_app_new">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

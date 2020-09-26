@@ -53,7 +53,7 @@ class Perfil_user extends StatefulWidget {
   perfil_userState createState() => perfil_userState();
 }
 
-class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStateMixin {
+class perfil_userState extends State<Perfil_user>   {
   var bloc = new BlocAll();
   var tellBrejapp="";
 
@@ -82,6 +82,9 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
   var view_card_form=false;
   var idcardExlui="";
 
+  var streamEndereco;
+  var streamCards;
+  var streamPedidos;
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
@@ -89,17 +92,27 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
   getUseruid() async {
     var userx = await FirebaseAuth.instance.currentUser();
     uid=userx.uid;
+    streamCards = Firestore.instance.collection('Usuarios').document(uid)
+        .collection("cartoes").snapshots();
+    streamPedidos = Firestore.instance.collection('Usuarios').document(uid)
+        .collection("Pedidos").snapshots();
+    streamEndereco = Firestore.instance.collection('Usuarios').document(uid)
+        .collection("endereco").where("temp",isEqualTo: false).snapshots();
   }
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ));
+
+//    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+//    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+//      statusBarColor: Colors.transparent,
+//    ));
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body:
+          Center(child:
+      Container(
+          child:
         Stack(
         children: <Widget>[
 
@@ -108,7 +121,7 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
          height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(color: Colors.white),
             child:
-        SingleChildScrollView ( child:
+         SingleChildScrollView ( child:
         Column(
           mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
@@ -175,7 +188,7 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                           ],)
                          )),
             Visibility(
-                visible: true, child:
+                visible: streamEndereco!=null, child:
             enderecoView_()),
                         Container(
                           padding: EdgeInsets.fromLTRB(10, 10, 0,15) ,
@@ -186,11 +199,12 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                              Text("Informações de pagamento",
                             style:TextStyle(color:Colors.black,fontFamily:'BreeSerif')),
                          ],)),
+                  Visibility(
+                      visible: streamCards!=null, child:
                   Container(
                       child:
                       StreamBuilder(
-                          stream: Firestore.instance.collection('Usuarios').document(uid)
-                              .collection("cartoes").snapshots(),
+                          stream: streamCards,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState== ConnectionState.active){
                               print("get cartoes");
@@ -207,7 +221,7 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                                   style:TextStyle()));
 
                           })
-                  ),
+                  )),
                   pagamentoCartaoVazio(),
                   Visibility(
                             visible: widget.enablePag, child:
@@ -234,14 +248,17 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                 Container(
                     child:
                 StreamBuilder(
-                    stream: Firestore.instance.collection('Usuarios').document(uid)
-
-                    .collection("Pedidos").snapshots(),
+                    stream: streamPedidos,
                     builder: (context, snapshot) {
+
                       if (snapshot.connectionState!=ConnectionState.active )
                         return Container();
-                        if (snapshot.connectionState==ConnectionState.active )
-                      return new ListView.builder(
+                      if (snapshot.connectionState==ConnectionState.active )
+                          if (snapshot.data==null)
+                            return Container();
+                          if (snapshot.data!=null)
+                        return
+                          ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
                           scrollDirection: Axis.vertical,
@@ -368,6 +385,7 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
                               ]));
                           }
                       );
+
                     }
                 ))),
               ]))),
@@ -386,17 +404,14 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
             Column(children: <Widget>[
                 Visibility(visible:show_pop_final_pedido,child: pop_excluirCard()),
 
-              Positioned(
-                child:
                 Visibility( child:
-                formularioCartao(),visible: view_card_form,)),
-
+                formularioCartao(),visible: view_card_form,),
 
           ],)),
 
 
-      ]),
-    );
+      ])),
+    ));
   }
 
 
@@ -726,9 +741,9 @@ class perfil_userState extends State<Perfil_user>  with SingleTickerProviderStat
   }
 
   enderecoView_(){
+
     return StreamBuilder(
-        stream: Firestore.instance.collection('Usuarios').document(uid)
-            .collection("endereco").where("temp",isEqualTo: false).snapshots(),
+        stream: streamEndereco,
         builder: (context, snapshot) {
           if (snapshot.connectionState==ConnectionState.active){
             if (snapshot.data.documents.length > 0) {

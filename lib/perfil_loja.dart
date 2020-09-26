@@ -35,6 +35,7 @@ class perfil_loja extends StatefulWidget {
 
 }
 
+
 class perfil_lojaState extends State<perfil_loja> {
 
   var t="x";
@@ -54,8 +55,7 @@ class perfil_lojaState extends State<perfil_loja> {
     return
       Scaffold(
         body:
-
-            LimitedBox(maxHeight: MediaQuery.of(context).size.height,child:
+         LimitedBox(maxHeight: MediaQuery.of(context).size.height,child:
             SingleChildScrollView(child:
                 Container(decoration: BoxDecoration(color: Colors.white), child:
             Stack(children: <Widget>[
@@ -65,57 +65,69 @@ class perfil_lojaState extends State<perfil_loja> {
                   children: <Widget>[
                    _barTop(),
 
-              Row(
-
-                children: <Widget>[
-              GestureDetector(
+            Row(
+              children: <Widget>[
+                GestureDetector(
                   onTap: (){
                     widget.closePerfil_();
                   },
                   child:
-                Container(margin: EdgeInsets.fromLTRB(10,30,0,0),
+                Container(margin: EdgeInsets.fromLTRB(10,20,0,0),
                   alignment: Alignment.centerLeft,
                   child:
                   Icon(Icons.arrow_back,size:35,color:Colors.grey),)),
 
-                Container(margin: EdgeInsets.fromLTRB(10,30,0,0),
-                  child:
-                  Text(widget.loja['nome'],
-                    style: TextStyle(color:Colors.orange,
-                        fontSize: 18,fontFamily: 'BreeSerif'),),),
-              ],),
+            ],),
 
-                Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                    child:Image.network(widget.loja['url'],width: 50,)),
-
-                Row (mainAxisAlignment: MainAxisAlignment.center,
+                Container(
+                      width: 100,
+                      height: 100,
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      decoration: new BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: new DecorationImage(
+                          image:  NetworkImage(widget.loja['url']),
+                          fit: BoxFit.fill,
+                      ))),
+                Container(margin: EdgeInsets.fromLTRB(0,10,0,0),
+                      child:
+                      Text(widget.loja['nome'],
+                       style: TextStyle(color:Colors.orange,
+                       fontSize: 18,
+                       fontFamily: 'BreeSerif'),),),
+                Row (
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text("Distância: "+distanciaKM,style: TextStyle(color: Colors.grey[500],fontSize: 13,fontFamily: 'RobotoLight'),)),
+
+                    Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:
+                    Text("Distância: "+distanciaKM,style:
+                    TextStyle(color: Colors.grey[500],fontSize: 14,fontFamily: 'BreeSerif'),)),
+
                     Container(margin: EdgeInsets.fromLTRB(3, 5, 5, 0), decoration: BoxDecoration(color:Colors.orange,borderRadius: BorderRadius.all(Radius.circular(20))),width: 5,height: 5,),
-                    Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:  Text("Frete: "+getfrete(),style: TextStyle(color: Colors.grey[500],fontSize: 13,fontFamily: 'RobotoLight'),)),
-                  ],),
 
+                    Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0), child:
+                    Text("Frete: "+getfrete(),style: TextStyle(color: Colors.grey[500],
+                        fontSize: 14,fontFamily: 'BreeSerif'),)),
 
-                Row ( mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Visibility(
-                          visible: widget.loja['vendaPeloApp'],
-                          child:
-                      Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                          child: Image.asset("card-app.png",width: 20))),
-                      Visibility(
-                        visible: widget.loja['vendaComMaquina'],
-                        child:
-                        Container(margin: EdgeInsets.fromLTRB(5, 5, 0, 0),
-                            child: Image.asset("card_machine.png",width: 20))),
-                  ],),
-//              Container ( alignment: Alignment.centerLeft, margin: EdgeInsets.fromLTRB(10, 10, 0, 0), child:  Text(widget.loja['endereco']['rua'] ,style: TextStyle(color: Colors.grey[500],fontSize: 13,fontFamily: 'RobotoLight'),)),
-                Container (
-                    margin: EdgeInsets.fromLTRB(10, 10, 0, 10),alignment: Alignment.centerLeft,
-                  child: Text("Produtos",style: TextStyle(color:Colors.orange,fontSize: 18,
-                      fontWeight: FontWeight.w800 ,fontFamily: 'BreeSerif'),
-                    textAlign: TextAlign.start),),
-                listaprod
+                    Row ( mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Visibility(
+                            visible: widget.loja['vendaPeloApp'],
+                            child:
+                            Container(margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                                child: Image.asset("card-app.png",width: 20))),
+
+                        Visibility(
+                            visible: widget.loja['vendaComMaquina'],
+                            child:
+                            Container(margin: EdgeInsets.fromLTRB(5, 5, 0, 0),
+                                child: Image.asset("card_machine.png",width: 20))),
+                      ],),
+
+                ]),
+
+                  listaprod
+
               ]),
 
               Visibility(
@@ -184,10 +196,7 @@ class perfil_lojaState extends State<perfil_loja> {
                               ])
                       )
                   ))
-
-
             ]))),)
-
     );
   }
 

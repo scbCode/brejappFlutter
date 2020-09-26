@@ -38,6 +38,13 @@ class cardsstate  extends State<itemCards> with SingleTickerProviderStateMixin {
       widget.iconSelect=new Icon(Icons.star_border,color: Colors.grey);
     });
 
+    var imgCard = "credit-card.png";
+    if (widget.card.bandeira.contains("visa"))
+      imgCard="visa.png";
+
+    if (widget.card.bandeira.contains("master"))
+      imgCard="master.png";
+
     return   Container(
       decoration: BoxDecoration(color:Colors.white, boxShadow: [
       BoxShadow(
@@ -74,7 +81,7 @@ class cardsstate  extends State<itemCards> with SingleTickerProviderStateMixin {
             child:
             Column(mainAxisSize: MainAxisSize.max,crossAxisAlignment: CrossAxisAlignment.center,children: <Widget>[
               Container(  width: 70, height: 40,
-                child: Image.asset(widget.card.bandeira+".png"),),
+                child: Image.asset(imgCard),),
               Container(
                 margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                 child:   Text("Final *** " +widget.card.digitos,style:widget.styleTxt3),),

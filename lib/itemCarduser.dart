@@ -42,6 +42,7 @@ class itemCardState extends State<itemCarduser>  {
   }
 
   item (var data, var index){
+
     var icon;
     if (widget.tipo=="compra") {
        icon = Icons.radio_button_unchecked;
@@ -50,7 +51,11 @@ class itemCardState extends State<itemCarduser>  {
     }else
       icon = Icons.delete_forever;
 
-
+    var imgCard = "credit-card.png";
+    if (data['bandeira'].contains("visa"))
+      imgCard="visa.png";
+    if (data['bandeira'].contains("Master"))
+      imgCard="master.png";
 
     return
     GestureDetector(
@@ -85,7 +90,7 @@ class itemCardState extends State<itemCarduser>  {
                           padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                           margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                           child:
-                          Image.asset("visa.png",width: 40,height: 60,)),
+                          Image.asset(imgCard,width: 40,height: 60,)),
                       Container(
                           margin: EdgeInsets.fromLTRB(25, 10,0, 10),
                           alignment: Alignment.center, child:

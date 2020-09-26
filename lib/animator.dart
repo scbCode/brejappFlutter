@@ -16,7 +16,7 @@ class _animatorState extends State<animator>
   void initState() {
     super.initState();
     animationController =
-        AnimationController(duration: Duration(milliseconds: 290), vsync: this);
+        AnimationController(duration: Duration(milliseconds: 590), vsync: this);
     animation =
         CurvedAnimation(parent: animationController, curve: Curves.easeInOut);
     timer = Timer(widget.time, animationController.forward);
@@ -34,9 +34,10 @@ class _animatorState extends State<animator>
       child: widget.child,
       builder: (BuildContext context, Widget child) {
         return Opacity(
-          opacity: animation.value,
+          opacity: 1,
           child: Transform.translate(
-            offset: Offset(0.0, (1 - animation.value) * 20),
+            offset: Offset( (1 - animation.value) * -300,0.0),
+//            offset: Offset(0.0, (1 - animation.value) * 20),
             child: child,
           ),
         );
@@ -48,11 +49,11 @@ Timer timer;
 Duration duration = Duration();
 wait() {
   if (timer == null || !timer.isActive) {
-    timer = Timer(Duration(microseconds: 120), () {
+    timer = Timer(Duration(microseconds: 320), () {
       duration = Duration();
     });
   }
-  duration += Duration(milliseconds: 100);
+  duration += Duration(milliseconds: 200);
   return duration;
 }
 class WidgetANimator extends StatelessWidget {

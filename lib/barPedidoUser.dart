@@ -212,11 +212,9 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
 
 
     if (widget.pedido.status=="cancelado_loja_reembolso") {
-      pedido_nao_aceito=false;
-      status_nao_aceito=true;
+        pedido_nao_aceito=false;
+        status_nao_aceito=true;
     }
-
-
     if (widget.pedido.status=="cancelado_loja") {
         pedido_nao_aceito=false;
         status_nao_aceito=true;
@@ -230,13 +228,12 @@ class barPedidoUserState extends State<barPedidoUser>   with TickerProviderState
       status_nao_aceito=true;
     }
 
+
     if (widget.pedido.status=="entrega") {
       setState(() {
         scale=12;
         DateTime data_pedido_confirma_ =widget.pedido.timeConfirmado.toDate();
         txt_time_confirmacao =  "" +data_pedido_confirma_.hour.toString()+" "+data_pedido_confirma_.minute.toString();
-
-
         scaleentrega=12;
         statustext = "Seu pedido saiu para entrega";
         status_confirmacao=true;

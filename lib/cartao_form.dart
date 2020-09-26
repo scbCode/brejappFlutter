@@ -408,10 +408,6 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
       var resp = resulToken['resp'];
 
       if (resp!=null && resp == 'Sucesso'){
-        var token =body['CardToken'];
-        if (token!=null) {
-          var returnSendCard = await bloc_finance.saveTokenCartaoUser(widget.uid, token,nome);
-          if (returnSendCard==true) {
               setState(() {
                 view_pop_finish =true;
                 card_sucesso=true;
@@ -419,14 +415,7 @@ class cartao_formState extends State<cartao_form>  with TickerProviderStateMixin
                 iconPop = Icon(Icons.check_circle,color: Colors.green[500],size: 100,);
                 _controller_finish.forward();
               });
-          } else {
-            view_pop_finish =true;
-            card_sucesso=false;
-            textPopFinish = "Erro ao salvar :(\nTente novamente";
-            iconPop = Icon(Icons.error,color: Colors.red[500],size: 100,);
-            _controller_finish.forward();
-           }
-        }
+
     }else//RESP == ERRO
       {
         var msgText='Erro desonhecido';

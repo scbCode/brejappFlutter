@@ -776,10 +776,12 @@ class barCestaState extends State<barCesta>   {
 
 
   getBandeira(var b){
-    if (b == "Visa")
+
+    print(b);
+    if (b.toString().contains("visa"))
     return  Image.asset("visa.png",width: 40,height: 60,);
-    if (b == "Master")
-      return  Image.asset("visa.png",width: 40,height: 60,);
+    if (b.toString().contains( "Master"))
+      return  Image.asset("master.png",width: 40,height: 60,);
     else
       return  Image.asset("cardcredit.png",width: 40,height: 60,);
 

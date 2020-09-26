@@ -22,19 +22,21 @@ class Bloc_financeiro {
 
 
   enviarMsgChat(var msg,var  emailUsuario,var uidUsuario,var remetente,var idloja,var idPedido,var time,var nome) async {
+
     DateTime timeAguard = DateTime.now();
     var refData = Firestore.instance;
     var ctrol=false;
     await refData.collection("Usuarios")
-        .document(uidUsuario).collection('Pedidos').document(idPedido).collection('chat')
+        .document(uidUsuario).collection('Pedidos')
+        .document(idPedido).collection('chat')
         .add({
-      'emailUsuario': emailUsuario,
-      'msg': msg,
-      'remetente': remetente,
-      'time': timeAguard,
-      'idloja': idloja,
-      'idPedido':idPedido,
-      'nome': nome
+            'emailUsuario': emailUsuario,
+            'msg': msg,
+            'remetente': remetente,
+            'time': timeAguard,
+            'idloja': idloja,
+            'idPedido':idPedido,
+            'nome': nome
     }).then((v){
       print("SAVE MSG");
     }).catchError((erro){
@@ -63,6 +65,7 @@ class Bloc_financeiro {
     final HttpsCallable callable = await CloudFunctions.instance.getHttpsCallable(
       functionName: 'pagamentoCredito',
     );
+
     dynamic resp = await callable.call(<String, dynamic>{
       'nomeComprador': CustomerName,
       'idPedido': idPedido,
@@ -70,8 +73,10 @@ class Bloc_financeiro {
       'idLoja':idLoja,
       'time':""
     });
+
     print("pagamentoCatao data");
     print(resp.data);
+
     if (resp.data!=null){
       print("pagamentoCatao data 1");
 

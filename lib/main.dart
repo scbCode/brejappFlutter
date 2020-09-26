@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var prodadd=null;
   bool v_bg=false;
   bool v_bg_=false;
-  bool v_bg_load=true;
+  bool v_bg_load=false;
   var view_listavazia=false;
   var modo="app";
   var view_listaPedidos=false;
@@ -116,10 +116,10 @@ class _MyHomePageState extends State<MyHomePage> {
   var pedidoAtivo=false;
   var bottomBarPedido=45.0;
   var bottomBarcesta=105.0;
-var show_cesta=false;
-var idlojaperfil="";
-var view_perfilloja=false;
-var view_perfilloja_;
+  var show_cesta=false;
+  var idlojaperfil="";
+  var view_perfilloja=false;
+  var view_perfilloja_;
   static var listaCesta=[];
   TextEditingController control_chattext = new TextEditingController();
   ScrollController _scrollController_pop = new ScrollController();
@@ -206,6 +206,7 @@ var view_perfilloja_;
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent
     ));
+
 
 
 
@@ -423,7 +424,6 @@ var view_perfilloja_;
               stream: bloc.stream_Prepedido,
               builder: (context,value) {
               if (value.connectionState==ConnectionState.active) {
-                print("STREM PRE PEDIDO "+value.data.status );
                 if (value.data.status == "prepedido") {
                   view_listaPedidos=true;
 
@@ -938,7 +938,7 @@ var view_perfilloja_;
   }
 
  sendItemCestaPerfil(var Produto_cesta) async {
-   addItemCesta(Produto_cesta);
+    addItemCesta(Produto_cesta);
  }
 
  openperfilloja(var id){
@@ -1246,22 +1246,20 @@ void initState() {
   }
 
 checkStateUser() async {
-  print("checkstateuser  0");
 
    var user = null;
    user = await FirebaseAuth.instance.currentUser();
    setState(()  {
      if (user!=null) {
-          print("checkstateuser user 0");
+
           user_logado = true;
           Usuario = new User(null,null,null,null,null);
           Usuario.uid=user.uid;
           Usuario.email=user.email;
           getDadosUser(user.uid);
 
-
      }else{
-       completeLoad=true;
+          completeLoad=true;
        if (local_user_cancel==true){
            viewListProd=true;
            listaProdutos = listaprod();
@@ -1847,21 +1845,6 @@ void getEnderecoUser() async {
   }
 
 
-  additem()async{
-
-    var refData = Firestore.instance;
-      await refData.collection("Produtos_On")
-          .add({"gelada":true,'descricao':'LongNeck',"nome": "Heineken", "preco": 2.5, "vol": "330ml", "loja": "loja brejapp",
-        "img":"https://firebasestorage.googleapis.com/v0/b/brejapp-flutter.appspot.com/o/heineken_1.png?alt=media&token=820319cf-51a3-45ce-8d92-934d3bd31f91",
-        "quantidade": 0, "id": "007", "cesta": null, "tags": ["cerveja", "skol","pilsen", "lata"],
-        "marca": "Heineken", "gelada": true, "coefKm": 1.2, "idloja": "001", "distanciaMaxKm": 20, "distanciaGratisKm": 15,
-        "localizacao":new GeoPoint(-1.433361, -48.472075),
-        "cartaoApp": true,"maquinaCartao": true})
-          .then((v){
-      print("adtime");
-      });
-
-  }
 
 
   _showpop_gps(){
@@ -1991,7 +1974,7 @@ void getEnderecoUser() async {
   }
   _getCurrentLocation() {
     print("_getCurrentLocation");
-     // getCurrentPosition(allowInterop((pos) => success(pos)));
+   //  getCurrentPosition(allowInterop((pos) => success(pos)));
     }
 
   getDistanciaLoja() async{

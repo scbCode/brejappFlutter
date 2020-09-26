@@ -227,7 +227,6 @@ class BlocAll {
 
 
  savePrePedido(var uid, var pedido,var nomeUser,var idcard, var idLoja) async {
-
       var refData = Firestore.instance;
       var ctrol=false;
       await refData.collection("Usuarios")
